@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import hashlib
-import logging
 import re
 import secrets
 import uuid
@@ -14,10 +13,12 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import Principal, require_superadmin
+from app.core.logging import get_logger
+
+logger = get_logger("kynara.admin")
 from app.db.session import SessionLocal
 from app.models import OrgInvite, OrgMembership, Organization, RefreshSession, Subscription, User
 
-logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/admin", tags=["superadmin"])
 
@@ -391,6 +392,7 @@ class AdminInviteOut(BaseModel):
     expires_at: str
     seat_role: str
     email: str | None
+    email_error: str | None = None
 
 
 ALL_INVITE_ROLES = {"admin", "developer", "auditor", "member"}
@@ -432,12 +434,22 @@ async def admin_create_invite(
     await session.commit()
 
     # Attempt to send invite email if address provided
+    email_error: str | None = None
     if body.email:
         from app.core.config import get_settings
         from app.core.email import send_email, invite_email_content
         try:
             s = get_settings()
             invite_url = f"{s.app_url}/invite?token={raw_token}"
+            logger.info(
+                "admin.invite_email.attempt",
+                to=body.email,
+                invite_url=invite_url,
+                from_address=s.email_from_address,
+                resend_key_set=bool(s.resend_api_key),
+                smtp_host_set=bool(s.smtp_host),
+                mailchannels_enabled=s.mailchannels_enabled,
+            )
             html, plain = invite_email_content(
                 invite_url=invite_url,
                 org_name=org.name,
@@ -450,8 +462,15 @@ async def admin_create_invite(
                 html_body=html,
                 text_body=plain,
             )
-        except Exception:
-            logger.exception("Failed to send admin invite email to %s", body.email)
+            logger.info("admin.invite_email.sent", to=body.email)
+        except Exception as exc:
+            email_error = str(exc)
+            logger.error(
+                "admin.invite_email.failed",
+                to=body.email,
+                error=email_error,
+                exc_info=True,
+            )
 
     return AdminInviteOut(
         invite_id=str(invite.id),
@@ -459,6 +478,7 @@ async def admin_create_invite(
         expires_at=expires_at.isoformat(),
         seat_role=body.seat_role,
         email=body.email,
+        email_error=email_error,
     )
 
 
