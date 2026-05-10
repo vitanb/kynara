@@ -6,7 +6,7 @@ from app.api.v1 import (
     sso, sso_connections, tools, webhooks,
 )
 
-v1 = APIRouter(prefix="/api/v1")
+v1 = APIRouter(prefix="/api/v1", redirect_slashes=False)
 v1.include_router(health.router)
 v1.include_router(auth.router)
 v1.include_router(admin.router)
