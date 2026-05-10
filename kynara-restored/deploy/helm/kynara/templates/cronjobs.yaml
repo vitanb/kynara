@@ -1,0 +1,72 @@
+{{- if .Values.anomalyDetector.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "kynara.fullname" . }}-anomaly-detector
+  labels:
+    {{- include "kynara.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.anomalyDetector.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ .Values.serviceAccount.name }}
+          restartPolicy: OnFailure
+          containers:
+            - name: detector
+              image: {{ include "kynara.backend.image" . }}
+              command: ["python", "-m", "app.scripts.run_anomaly_detector"]
+              envFrom:
+                - secretRef: { name: {{ .Values.backend.envFromSecret }} }
+              resources: {{- toYaml .Values.anomalyDetector.resources | nindent 16 }}
+              securityContext:
+                {{- toYaml .Values.containerSecurityContext | nindent 16 }}
+{{- end }}
+{{- if .Values.jitExpirer.enabled }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "kynara.fullname" . }}-jit-expirer
+spec:
+  schedule: {{ .Values.jitExpirer.schedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ .Values.serviceAccount.name }}
+          restartPolicy: OnFailure
+          containers:
+            - name: expirer
+              image: {{ include "kynara.backend.image" . }}
+              command: ["python", "-m", "app.scripts.expire_jit_grants"]
+              envFrom:
+                - secretRef: { name: {{ .Values.backend.envFromSecret }} }
+              securityContext:
+                {{- toYaml .Values.containerSecurityContext | nindent 16 }}
+{{- end }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "kynara.fullname" . }}-chain-verifier
+spec:
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ .Values.serviceAccount.name }}
+          restartPolicy: OnFailure
+          containers:
+            - name: verify
+              image: {{ include "kynara.backend.image" . }}
+              command: ["python", "-m", "app.scripts.verify_audit_chain"]
+              envFrom:
+                - secretRef: { name: {{ .Values.backend.envFromSecret }} }

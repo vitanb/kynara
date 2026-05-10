@@ -1,0 +1,54 @@
+=== 01_intro ===
+Welcome to Kynara — the AI agent permission system. In this demo we walk through how Kynara gives your team complete control over what AI agents can and cannot do, in real time.
+
+=== 02_problem ===
+AI agents are powerful — but without a control plane they can call any API, modify any database, and take irreversible actions. Kynara puts a policy layer between your agents and everything they can touch.
+
+=== 03_signup ===
+Getting started takes under two minutes. Enter your work email, choose a password, and Kynara creates your organization. Enterprise teams can sign in via SSO with Okta or any SAML-compatible IdP.
+
+=== 04_dashboard ===
+The dashboard gives a real-time view of your entire agent fleet: decisions made today, how many were denied, and any anomalies flagged automatically. Here we see data-pipeline has a z-score of 3.8 — that's an active alert.
+
+=== 05_register_agent ===
+Let's register our first agent — a CRM assistant. We give it a slug, set its mode to human-supervised, and Kynara immediately computes an initial risk score of 34 out of 100: low risk.
+
+=== 06_create_policy ===
+Now let's create a permission policy. Kynara uses a hybrid RBAC plus ABAC model. We'll create crm-write-approval: the effect is require_approval, meaning any CRM write operation must be approved by a human admin.
+
+=== 07_policy_editor ===
+The policy editor lets us build conditions visually. We're saying: allow crm.write only if the request comes from the US, Canada, or UK, and only between 9 AM and 6 PM UTC. We can test it instantly with the built-in simulator.
+
+=== 08_decision_allow ===
+Let's simulate a decision. The CRM agent calls the SDK before reading a customer record. The request is from the US, during business hours — all conditions pass. The engine returns allow in under 2 milliseconds.
+
+=== 09_decision_deny ===
+Now a deny scenario. It's 2 AM UTC — outside business hours. The same agent tries to read customer data. The time_between condition fails, the engine returns deny immediately. The event is recorded in the audit log with its hash.
+
+=== 10_approval_workflow ===
+What about write operations? The CRM agent wants to update a customer record — a crm.write action. Our policy says require_approval. The SDK returns effect: require_approval with an approval ID. The agent pauses and waits.
+
+=== 11_approval_queue ===
+On the Approvals page the pending request appears in real time. The admin sees exactly what the agent wants to do, the full resource context, and the originating policy. They click Approve — the agent is notified via webhook and resumes. Every decision is recorded with the approver's identity.
+
+=== 12_audit_log ===
+Every event — allow, deny, approval, login, policy change — is recorded in a tamper-evident audit log. Each entry is SHA-256 hash-chained to the previous one. If anyone edits or deletes a row, the chain verifier catches it and fires an alert.
+
+=== 13_anomaly_detection ===
+Kynara watches for behavioral anomalies automatically. If an agent's deny rate spikes, the detector computes a z-score against that agent's 30-day baseline. A score of 3.8 triggers an alert, a webhook to PagerDuty, and a risk score update.
+
+=== 14_jit_grants ===
+For break-glass scenarios, Kynara supports just-in-time privilege grants. An engineer needs crm.write for two hours to debug a production issue. An admin issues the grant with a justification and ticket URL. It auto-expires after two hours — nothing to clean up manually.
+
+=== 15_sdk ===
+Integrating Kynara takes three lines of code. Import the SDK, call decision.check with the action and resource, and enforce the result. SDKs are available for Python, TypeScript, and Go. Decisions are Redis-cached for 5 seconds — latency stays under 2 milliseconds.
+
+=== 16_outro ===
+Kynara gives you the control plane your AI agents need: real-time policy enforcement, human approval workflows, behavioral anomaly detection, and a tamper-evident audit trail. Start your free trial at scope zero dot dev.
+
+=== 17_guardrail_setup ===
+New in Kynara: Guardrail Integrations. Connect Arize AI, Langfuse, WhyLabs, Fiddler, or any custom platform. Paste your inbound webhook URL into your provider dashboard — Kynara verifies HMAC signatures and normalises every event automatically.
+
+=== 18_guardrail_autorevoke ===
+When a guardrail fires, Kynara responds in under 50 milliseconds. Here Arize detects a hallucination rate spike on the CRM agent. Kynara immediately suspends the agent, revokes all active JIT grants, injects a deny-all policy, and notifies PagerDuty — all without human intervention. Every action is hash-chained into the tamper-evident audit log.
+

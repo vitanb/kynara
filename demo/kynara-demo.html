@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Kynara — AI Agent Permission System (Interactive Demo)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        ink: {
+          50: "#f1f3fa", 100: "#dee3f3", 200: "#b7c0dd", 300: "#8893b8",
+          400: "#6a7698", 500: "#4e5876", 600: "#343c55", 700: "#242a3e",
+          800: "#161b2c", 900: "#0e1328", 950: "#070b1c",
+        },
+        accent: { 400: "#6f97ff", 500: "#4f7dff", 600: "#3a65e6" },
+        ok:     { 500: "#21c27a" },
+        warn:   { 500: "#e8a53c" },
+        danger: { 500: "#e8514c", 700: "#9f2c28" },
+      },
+      boxShadow: {
+        card: "0 1px 0 0 rgba(255,255,255,0.03) inset, 0 6px 20px -12px rgba(0,0,0,0.5)",
+      },
+    }
+  }
+};
+</script>
+<style>
+  html, body { background: #070b1c; color: #dee3f3; font-family: "Inter", system-ui, sans-serif; }
+  .card { background: #0e1328; border: 1px solid #161b2c; border-radius: 0.75rem; box-shadow: 0 1px 0 0 rgba(255,255,255,0.03) inset, 0 6px 20px -12px rgba(0,0,0,0.5); }
+  .pill { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 10.5px; font-weight: 500; }
+  .pill-ok     { background: rgba(33,194,122,0.12);  color: #7ee3b1; border: 1px solid rgba(33,194,122,0.28); }
+  .pill-warn   { background: rgba(232,165,60,0.12);  color: #f2c37a; border: 1px solid rgba(232,165,60,0.28); }
+  .pill-danger { background: rgba(232,81,76,0.12);   color: #f49f9c; border: 1px solid rgba(232,81,76,0.28); }
+  .pill-info   { background: rgba(79,125,255,0.12);  color: #a5bdff; border: 1px solid rgba(79,125,255,0.28); }
+  .pill-neutral{ background: #161b2c; color: #8893b8; border: 1px solid #242a3e; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.9rem; border-radius: 0.5rem; background: #4f7dff; color: white; font-size: 13px; font-weight: 500; }
+  .btn-primary:hover { background: #3a65e6; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-ghost { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.9rem; border-radius: 0.5rem; background: transparent; border: 1px solid #242a3e; color: #dee3f3; font-size: 13px; }
+  .btn-ghost:hover { background: #161b2c; }
+  .btn-danger { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.9rem; border-radius: 0.5rem; background: #e8514c; color: white; font-size: 13px; }
+  .input { background: #0e1328; border: 1px solid #242a3e; color: #dee3f3; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 13px; width: 100%; }
+  .input:focus { outline: none; border-color: #4f7dff; box-shadow: 0 0 0 2px rgba(79,125,255,0.2); }
+  .label { display: block; font-size: 11px; color: #8893b8; margin-bottom: 0.35rem; }
+  .nav-btn { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0.75rem; border-radius: 0.5rem; color: #8893b8; font-size: 13.5px; }
+  .nav-btn:hover { background: #161b2c; color: #dee3f3; }
+  .nav-btn.active { background: #161b2c; color: #dee3f3; box-shadow: inset 2px 0 0 #4f7dff; }
+  .table th { text-align: left; padding: 0.5rem 0.75rem; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: #6a7698; border-bottom: 1px solid #161b2c; font-weight: 500; }
+  .table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #161b2c; font-size: 13px; }
+  .table tr:last-child td { border-bottom: 0; }
+  .font-mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  .shadow-card { box-shadow: 0 1px 0 0 rgba(255,255,255,0.03) inset, 0 6px 20px -12px rgba(0,0,0,0.5); }
+  .chain-ring { box-shadow: inset 0 0 0 1px rgba(79,125,255,0.3); }
+  .glow-ok { box-shadow: 0 0 0 3px rgba(33,194,122,0.25); }
+  .glow-danger { box-shadow: 0 0 0 3px rgba(232,81,76,0.25); }
+  .glow-warn { box-shadow: 0 0 0 3px rgba(232,165,60,0.25); }
+  @keyframes pulse-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .anim-in { animation: pulse-in 200ms ease-out; }
+  pre { white-space: pre-wrap; word-break: break-word; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #242a3e; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="module">
+// ---------- Icons (inline SVG) ----------
+const Icon = (d, size = 16) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const I = {
+  shield:    Icon(`<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>`),
+  bot:       Icon(`<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 2v4"/><circle cx="8" cy="14" r="1"/><circle cx="16" cy="14" r="1"/>`),
+  wrench:    Icon(`<path d="M14.7 6.3a4 4 0 0 0-5.6 5.6l-6.4 6.4a2 2 0 1 0 2.8 2.8l6.4-6.4a4 4 0 0 0 5.6-5.6l-2.9 2.9-2-2 2.9-2.9z"/>`),
+  policy:    Icon(`<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>`),
+  audit:     Icon(`<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/>`),
+  billing:   Icon(`<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>`),
+  settings:  Icon(`<circle cx="12" cy="12" r="3"/><path d="M19.4 15a7.97 7.97 0 0 0 0-6l2-1.2-2-3.4-2.3.7a8 8 0 0 0-5.1-3L11.5 0h-4l-.5 2.1a8 8 0 0 0-5.1 3L-.4 4.4l-2 3.4 2 1.2a8 8 0 0 0 0 6l-2 1.2 2 3.4 2.3-.7a8 8 0 0 0 5.1 3l.5 2.1h4l.5-2.1a8 8 0 0 0 5.1-3l2.3.7 2-3.4-2-1.2z"/>`),
+  check:     Icon(`<path d="M20 6 9 17l-5-5"/>`),
+  x:         Icon(`<path d="m18 6-12 12M6 6l12 12"/>`),
+  warning:   Icon(`<path d="M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/>`),
+  play:      Icon(`<polygon points="5 3 19 12 5 21 5 3"/>`),
+  zap:       Icon(`<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>`),
+  lock:      Icon(`<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>`),
+  db:        Icon(`<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/>`),
+  link:      Icon(`<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>`),
+  copy:      Icon(`<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>`),
+  plus:      Icon(`<path d="M12 5v14M5 12h14"/>`),
+  users:     Icon(`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>`),
+  chart:     Icon(`<path d="M3 3v18h18"/><path d="M7 12l3-3 4 4 5-5"/>`),
+  arrow:     Icon(`<path d="M5 12h14M12 5l7 7-7 7"/>`),
+};
+
+// ---------- Seed data ----------
+const uid = () => Math.random().toString(36).slice(2, 10);
+const now = () => new Date().toISOString();
+
+let state = {
+  view: "dashboard",
+  org: { name: "Acme Corp", plan: "team", seats: 25, decisions_included: 500000, decisions_used: 142387 },
+  me:  { email: "vitan@acme.com", name: "Vitan Reddy", role: "admin" },
+  agents: [
+    { id: "ag_crm", slug: "crm-assistant", display_name: "CRM Assistant",
+      mode: "human_supervised", risk: "medium", owner: "vitan@acme.com", enabled: true,
+      desc: "Drafts CRM updates, qualifies leads, summarizes accounts." },
+    { id: "ag_sup", slug: "support-triage", display_name: "Support Triage",
+      mode: "autonomous", risk: "low", owner: "priya@acme.com", enabled: true,
+      desc: "Auto-categorizes tickets and routes to the right queue." },
+    { id: "ag_fin", slug: "finance-ops", display_name: "Finance Ops",
+      mode: "human_supervised", risk: "critical", owner: "alex@acme.com", enabled: true,
+      desc: "Processes refunds and invoice adjustments (requires approval)." },
+    { id: "ag_rec", slug: "recruiting-aide", display_name: "Recruiting Aide",
+      mode: "read_only", risk: "low", owner: "kai@acme.com", enabled: false,
+      desc: "Reads resume pipeline and drafts outreach messages." },
+  ],
+  tools: [
+    { id: "t1", ns: "crm", name: "crm.contacts.read",  risk: "low",      scopes: ["crm:read"], enabled: true, desc: "Read CRM contacts" },
+    { id: "t2", ns: "crm", name: "crm.contacts.update",risk: "medium",   scopes: ["crm:write"], enabled: true, desc: "Update CRM contacts" },
+    { id: "t3", ns: "email", name: "email.send",       risk: "high",     scopes: ["email:send"], enabled: true, desc: "Send email to external" },
+    { id: "t4", ns: "support", name: "support.tickets.read", risk: "low", scopes: ["support:read"], enabled: true, desc: "Read Zendesk tickets" },
+    { id: "t5", ns: "support", name: "support.tickets.route", risk: "low", scopes: ["support:write"], enabled: true, desc: "Route ticket queue" },
+    { id: "t6", ns: "payments", name: "payments.refund.issue", risk: "critical", scopes: ["payments:refund"], enabled: true, desc: "Issue customer refund" },
+    { id: "t7", ns: "payments", name: "payments.invoice.adjust", risk: "critical", scopes: ["payments:adjust"], enabled: true, desc: "Adjust invoice" },
+  ],
+  policies: [
+    { id: "p1", slug: "deny-offhours-refunds", name: "Deny offhours refunds",
+      effect: "deny", priority: 10, enabled: true,
+      actions: ["payments.refund.issue"], resources: ["payment.refund"],
+      description: "Block refund issuance outside business hours (09:00–18:00 US/Eastern).",
+      condition: { op: "not", args: [{ op: "time_between", args: ["ctx.time", "09:00", "18:00"] }] } },
+    { id: "p2", slug: "require-approval-large-refunds", name: "Require approval for refunds > $500",
+      effect: "require_approval", priority: 20, enabled: true,
+      actions: ["payments.refund.issue"], resources: ["payment.refund"],
+      description: "Large refunds need a finance manager approval.",
+      condition: { op: "gt", args: ["resource.amount_cents", 50000] } },
+    { id: "p3", slug: "deny-autonomous-critical", name: "Autonomous agents cannot touch critical tools",
+      effect: "deny", priority: 5, enabled: true,
+      actions: ["*"], resources: ["*"],
+      description: "If agent.mode=autonomous AND tool.risk=critical → deny.",
+      condition: { op: "and", args: [
+        { op: "eq", args: ["subject.mode", "autonomous"] },
+        { op: "eq", args: ["tool.risk", "critical"] },
+      ]} },
+    { id: "p4", slug: "allow-crm-reads-eu", name: "Allow CRM reads for EU users",
+      effect: "allow", priority: 100, enabled: true,
+      actions: ["crm.contacts.read"], resources: ["crm.contact"],
+      description: "EU-region CRM reads are permitted during business hours.",
+      condition: { op: "in", args: ["ctx.ip_country", ["US", "CA", "GB", "DE", "FR", "NL"]] } },
+    { id: "p5", slug: "deny-pii-without-redaction", name: "Block PII reads without redaction",
+      effect: "deny", priority: 15, enabled: false,
+      actions: ["crm.contacts.read"], resources: ["crm.contact"],
+      description: "Draft policy — disabled.",
+      condition: { op: "eq", args: ["resource.classification", "pii_raw"] } },
+  ],
+  // audit events — seed with a small chain
+  audit: [],
+  decisionTrace: [],
+};
+
+// Seed some realistic historical audit events
+(function seedAudit() {
+  const samples = [
+    { actor: "agent:crm-assistant", action: "crm.contacts.read",       outcome: "allow",           resource: "crm.contact:c_1842", reason: "allow-crm-reads-eu matched" },
+    { actor: "agent:crm-assistant", action: "crm.contacts.update",     outcome: "allow",           resource: "crm.contact:c_1842", reason: "default role grant" },
+    { actor: "agent:finance-ops",   action: "payments.refund.issue",   outcome: "require_approval",resource: "payment.refund:r_77", reason: "require-approval-large-refunds matched ($1,240.00)" },
+    { actor: "agent:support-triage",action: "payments.refund.issue",   outcome: "deny",            resource: "payment.refund:r_81", reason: "deny-autonomous-critical matched" },
+    { actor: "agent:finance-ops",   action: "payments.refund.issue",   outcome: "allow",           resource: "payment.refund:r_77", reason: "approval granted by alex@acme.com" },
+    { actor: "agent:crm-assistant", action: "email.send",              outcome: "allow",           resource: "email:e_4102", reason: "default role grant" },
+    { actor: "user:vitan@acme.com", action: "policy.update",           outcome: "info",            resource: "policy:p2", reason: "priority 10→20" },
+    { actor: "agent:support-triage",action: "support.tickets.route",   outcome: "allow",           resource: "ticket:z_9041", reason: "default role grant" },
+    { actor: "agent:finance-ops",   action: "payments.refund.issue",   outcome: "deny",            resource: "payment.refund:r_88", reason: "deny-offhours-refunds matched (22:14)" },
+    { actor: "user:alex@acme.com",  action: "auth.login",              outcome: "info",            resource: "session:sess_f8", reason: "sso/okta" },
+  ];
+  let prev = "0000000000000000000000000000000000000000000000000000000000000000";
+  samples.forEach((s, i) => {
+    const ts = new Date(Date.now() - (samples.length - i) * 12 * 60 * 1000).toISOString();
+    const entry = { id: uid(), sequence: i + 1, ts, ...s, prev_hash: prev, entry_hash: hash64(prev + (i+1) + ts + s.actor + s.action + s.outcome) };
+    prev = entry.entry_hash;
+    state.audit.push(entry);
+  });
+})();
+
+function hash64(s) {
+  // small non-cryptographic but deterministic — good enough to visualise chaining in-demo
+  let h = 0n;
+  for (let i = 0; i < s.length; i++) h = (h * 1099511628211n + BigInt(s.charCodeAt(i))) & ((1n << 256n) - 1n);
+  return h.toString(16).padStart(64, "0").slice(0, 64);
+}
+
+// ---------- Decision engine (simplified but faithful) ----------
+function evalCond(cond, ctx) {
+  if (!cond) return true;
+  const get = (path) => {
+    if (path === undefined) return undefined;
+    if (typeof path !== "string") return path;
+    const parts = path.split(".");
+    let v = ctx;
+    for (const p of parts) v = v?.[p];
+    return v;
+  };
+  const L = cond.args?.[0];
+  const R = cond.args?.[1];
+  const Z = cond.args?.[2];
+  switch (cond.op) {
+    case "and": return cond.args.every(c => evalCond(c, ctx));
+    case "or":  return cond.args.some(c => evalCond(c, ctx));
+    case "not": return !evalCond(cond.args[0], ctx);
+    case "eq":  return get(L) === (typeof R === "object" ? R : R);
+    case "neq": return get(L) !== R;
+    case "gt":  return Number(get(L)) >  Number(R);
+    case "gte": return Number(get(L)) >= Number(R);
+    case "lt":  return Number(get(L)) <  Number(R);
+    case "lte": return Number(get(L)) <= Number(R);
+    case "in":  return Array.isArray(R) && R.includes(get(L));
+    case "contains": {
+      const v = get(L); return Array.isArray(v) ? v.includes(R) : String(v || "").includes(R);
+    }
+    case "time_between": {
+      const t = get(L) || ctx.ctx.time || ctx.time;
+      const [hh, mm] = String(t || "").slice(11, 16).split(":").map(Number);
+      const [sh, sm] = String(R).split(":").map(Number);
+      const [eh, em] = String(Z).split(":").map(Number);
+      const cur = hh * 60 + mm, start = sh * 60 + sm, end = eh * 60 + em;
+      return cur >= start && cur <= end;
+    }
+    default: return false;
+  }
+}
+
+function decide(req) {
+  const subject = state.agents.find(a => a.id === req.subject_id || a.slug === req.subject_id);
+  const tool    = state.tools.find(t => t.name === req.action);
+  const ctx = {
+    subject: subject || {},
+    tool: tool || {},
+    resource: req.resource || {},
+    ctx: req.context || {},
+  };
+
+  const trace = [];
+  // hard gates
+  if (subject && !subject.enabled) {
+    trace.push({ gate: "agent_disabled", effect: "deny" });
+    return { effect: "deny", reason: "agent disabled (hard gate)", matched: null, trace };
+  }
+
+  const policies = state.policies
+    .filter(p => p.enabled)
+    .filter(p => (p.actions.includes("*") || p.actions.includes(req.action)))
+    .sort((a, b) => a.priority - b.priority);
+
+  for (const p of policies) {
+    const ok = evalCond(p.condition, ctx);
+    trace.push({ policy: p.slug, priority: p.priority, effect: p.effect, matched: ok });
+    if (ok) return { effect: p.effect, reason: `${p.slug} matched`, matched: p.id, trace };
+  }
+  return { effect: "allow", reason: "no deny policy matched; RBAC default role grants", matched: null, trace };
+}
+
+// ---------- Renderers ----------
+function render() {
+  const root = document.getElementById("app");
+  root.innerHTML = `
+    <div class="flex min-h-screen">
+      ${renderSidebar()}
+      <main class="flex-1">
+        ${renderHeader()}
+        <div class="p-8">
+          ${ renderView() }
+        </div>
+      </main>
+    </div>
+  `;
+  wire();
+}
+
+function renderSidebar() {
+  const items = [
+    ["dashboard", I.chart,    "Dashboard"],
+    ["agents",    I.bot,      "Agents"],
+    ["tools",     I.wrench,   "Tools"],
+    ["policies",  I.policy,   "Policies"],
+    ["simulator", I.play,     "Simulator"],
+    ["audit",     I.audit,    "Audit log"],
+    ["billing",   I.billing,  "Billing"],
+    ["settings",  I.settings, "Settings"],
+  ];
+  return `
+    <aside class="w-60 shrink-0 bg-ink-900 border-r border-ink-800 min-h-screen flex flex-col">
+      <div class="px-4 pt-5 pb-4 flex items-center gap-2">
+        <div class="size-8 rounded-lg bg-accent-500 grid place-items-center">${I.shield}</div>
+        <div>
+          <div class="font-semibold text-ink-50 leading-none">Kynara</div>
+          <div class="text-[10px] text-ink-400 mt-1">AI Agent Permission System</div>
+        </div>
+      </div>
+      <nav class="px-2 py-4 space-y-0.5 flex-1">
+        ${items.map(([k, ico, label]) =>
+          `<button data-go="${k}" class="nav-btn w-full text-left ${state.view === k ? "active" : ""}">
+             <span class="size-4 shrink-0">${ico}</span>${label}
+           </button>`).join("")}
+      </nav>
+      <div class="p-4 border-t border-ink-800">
+        <div class="flex items-center gap-2">
+          <div class="size-8 rounded-full bg-accent-600 grid place-items-center text-xs font-semibold">VR</div>
+          <div class="min-w-0">
+            <div class="text-xs truncate">${state.me.email}</div>
+            <div class="text-[10px] text-ink-400">${state.me.role}</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  `;
+}
+
+function renderHeader() {
+  const titles = {
+    dashboard: ["Dashboard", "Agents, decisions, and governance at a glance"],
+    agents: ["Agents", "Register and govern every AI agent in your organization"],
+    tools: ["Tools", "Capabilities your agents can invoke — each declares required scopes"],
+    policies: ["Policies", "ABAC rules evaluated in priority order — first match wins"],
+    simulator: ["Decision simulator", "Run hypothetical requests against the live policy set"],
+    audit: ["Audit log", "Every decision, hash-chained for tamper evidence"],
+    billing: ["Billing", "Plan, usage, and overage"],
+    settings: ["Settings", "Organization, members, API keys, and SSO"],
+  };
+  const [title, sub] = titles[state.view] || ["Kynara", ""];
+  return `
+    <header class="bg-ink-900 border-b border-ink-800 px-8 py-5 flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold">${title}</h1>
+        <p class="text-xs text-ink-400 mt-0.5">${sub}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="hidden md:flex items-center gap-2 text-xs text-ink-400">
+          <span class="size-1.5 rounded-full bg-ok-500"></span>
+          <span>Engine online</span>
+          <span class="text-ink-600">·</span>
+          <span>p99 ${Math.round(8 + Math.random() * 4)}ms</span>
+        </div>
+      </div>
+    </header>
+  `;
+}
+
+function renderView() {
+  switch (state.view) {
+    case "dashboard": return renderDashboard();
+    case "agents":    return renderAgents();
+    case "tools":     return renderTools();
+    case "policies":  return renderPolicies();
+    case "simulator": return renderSimulator();
+    case "audit":     return renderAudit();
+    case "billing":   return renderBilling();
+    case "settings":  return renderSettings();
+    default:          return "";
+  }
+}
+
+// ---------- Dashboard ----------
+function renderDashboard() {
+  const today = state.audit.length;
+  const allows = state.audit.filter(a => a.outcome === "allow").length;
+  const denies = state.audit.filter(a => a.outcome === "deny").length;
+  const approvals = state.audit.filter(a => a.outcome === "require_approval").length;
+
+  return `
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      ${stat("Active agents",   state.agents.filter(a=>a.enabled).length, "+2 this week", "ok")}
+      ${stat("Decisions today", today.toLocaleString(), allows + " allowed", "info")}
+      ${stat("Deny rate",       ((denies/Math.max(today,1))*100).toFixed(1) + "%", denies + " denials", "warn")}
+      ${stat("Approvals waiting", approvals, approvals ? "needs review" : "all clear", approvals ? "warn" : "ok")}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+      <div class="card p-5 lg:col-span-2">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-sm font-medium">Decisions over 24 hours</div>
+          <div class="flex items-center gap-3 text-[11px]">
+            <span class="flex items-center gap-1"><span class="size-2 rounded-sm bg-ok-500"></span>allow</span>
+            <span class="flex items-center gap-1"><span class="size-2 rounded-sm bg-warn-500"></span>approval</span>
+            <span class="flex items-center gap-1"><span class="size-2 rounded-sm bg-danger-500"></span>deny</span>
+          </div>
+        </div>
+        ${renderChart()}
+      </div>
+
+      <div class="card p-5">
+        <div class="text-sm font-medium mb-3">Audit chain</div>
+        <div class="flex items-center gap-3">
+          <div class="size-12 rounded-full bg-ok-500/10 grid place-items-center text-ok-500 glow-ok">
+            ${I.shield}
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-ok-500">Verified</div>
+            <div class="text-[11px] text-ink-400">${state.audit.length} events, tip ${state.audit.at(-1)?.entry_hash.slice(0, 10)}…</div>
+          </div>
+        </div>
+        <button data-go="audit" class="btn-ghost mt-4 w-full justify-center text-xs">Open audit log ${I.arrow}</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="card p-5">
+        <div class="text-sm font-medium mb-3">Agents by risk class</div>
+        <div class="space-y-2">
+          ${state.agents.map(a => `
+            <div class="flex items-center justify-between text-sm">
+              <div class="flex items-center gap-2">
+                <span class="size-6 rounded bg-accent-500/10 text-accent-500 grid place-items-center">${I.bot}</span>
+                <span>${a.display_name}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                ${pill(a.risk, a.risk === "critical" ? "danger" : a.risk === "high" ? "warn" : a.risk === "medium" ? "info" : "ok")}
+                ${pill(a.mode.replace("_", " "), "neutral")}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="text-sm font-medium mb-3">Recent activity</div>
+        <div class="space-y-3">
+          ${state.audit.slice(-6).reverse().map(e => `
+            <div class="flex items-start gap-2 text-xs">
+              <span class="size-5 rounded grid place-items-center mt-0.5
+                ${e.outcome === "allow" ? "bg-ok-500/20 text-ok-500" :
+                  e.outcome === "deny" ? "bg-danger-500/20 text-danger-500" :
+                  e.outcome === "require_approval" ? "bg-warn-500/20 text-warn-500" :
+                  "bg-accent-500/20 text-accent-500"}">
+                ${e.outcome === "allow" ? I.check : e.outcome === "deny" ? I.x : e.outcome === "require_approval" ? I.warning : I.audit}
+              </span>
+              <div class="flex-1 min-w-0">
+                <div class="font-mono text-ink-200 truncate">${e.action}</div>
+                <div class="text-ink-400 truncate">${e.actor} · ${e.reason}</div>
+              </div>
+              <div class="text-ink-500 text-[10px] shrink-0">${relTime(e.ts)}</div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function stat(label, value, sub, tone) {
+  const color = tone === "ok" ? "text-ok-500" : tone === "warn" ? "text-warn-500" : tone === "info" ? "text-accent-500" : "text-ink-400";
+  return `
+    <div class="card p-5">
+      <div class="text-[11px] text-ink-400 uppercase tracking-wide">${label}</div>
+      <div class="text-3xl font-semibold mt-2">${value}</div>
+      <div class="text-xs mt-1 ${color}">${sub}</div>
+    </div>
+  `;
+}
+
+function renderChart() {
+  // inline SVG chart for 24 buckets
+  const W = 640, H = 180, P = 20;
+  const data = Array.from({length: 24}).map((_, i) => ({
+    allow: Math.round(90 + Math.sin(i / 3) * 30 + Math.random() * 30),
+    deny:  Math.round(5 + Math.random() * 8),
+    appr:  Math.round(3 + Math.random() * 5),
+  }));
+  const maxY = Math.max(...data.map(d => d.allow + d.deny + d.appr));
+  const bw = (W - P*2) / 24 - 2;
+  const y = v => H - P - (v / maxY) * (H - P*2);
+  let bars = "";
+  data.forEach((d, i) => {
+    const x = P + i * ((W - P*2) / 24) + 1;
+    let yb = H - P;
+    const segs = [
+      { v: d.allow, c: "#21c27a" },
+      { v: d.appr,  c: "#e8a53c" },
+      { v: d.deny,  c: "#e8514c" },
+    ];
+    for (const s of segs) {
+      const h = (s.v / maxY) * (H - P*2);
+      bars += `<rect x="${x}" y="${yb - h}" width="${bw}" height="${h}" fill="${s.c}" rx="2" />`;
+      yb -= h;
+    }
+  });
+  return `
+    <svg viewBox="0 0 ${W} ${H}" class="w-full h-44">
+      <g stroke="#1c223a" stroke-dasharray="3 3">
+        ${[0.25, 0.5, 0.75].map(f => `<line x1="${P}" y1="${P + (H-P*2)*f}" x2="${W-P}" y2="${P + (H-P*2)*f}" />`).join("")}
+      </g>
+      ${bars}
+      <g fill="#77839a" font-size="10">
+        ${["00:00","06:00","12:00","18:00","23:59"].map((t, i) => `<text x="${P + i*(W-P*2)/4}" y="${H - 4}">${t}</text>`).join("")}
+      </g>
+    </svg>
+  `;
+}
+
+// ---------- Agents ----------
+function renderAgents() {
+  return `
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      ${state.agents.map(a => `
+        <div class="card p-5">
+          <div class="flex items-start gap-3">
+            <span class="size-10 rounded-lg bg-accent-500/10 text-accent-500 grid place-items-center shrink-0">${I.bot}</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <div class="font-medium truncate">${a.display_name}</div>
+                ${a.enabled ? pill("active", "ok") : pill("disabled", "danger")}
+              </div>
+              <div class="text-[11px] font-mono text-ink-400">agent:${a.slug}</div>
+            </div>
+          </div>
+          <p class="text-xs text-ink-300 mt-3">${a.desc}</p>
+          <div class="flex flex-wrap gap-1 mt-4">
+            ${pill(a.mode.replace("_", " "), "neutral")}
+            ${pill(a.risk, a.risk === "critical" ? "danger" : a.risk === "high" ? "warn" : a.risk === "medium" ? "info" : "ok")}
+            ${pill("owner: " + a.owner.split("@")[0], "neutral")}
+          </div>
+          <div class="flex gap-2 mt-4">
+            <button data-test-agent="${a.id}" class="btn-ghost text-xs flex-1 justify-center">${I.play} Simulate</button>
+            <button data-kill-agent="${a.id}" class="btn-danger text-xs ${!a.enabled ? "opacity-50 cursor-not-allowed" : ""}" ${!a.enabled ? "disabled" : ""}>${I.x} Kill</button>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+// ---------- Tools ----------
+function renderTools() {
+  const groups = {};
+  state.tools.forEach(t => (groups[t.ns] ||= []).push(t));
+  return Object.entries(groups).map(([ns, tools]) => `
+    <div class="mb-6">
+      <div class="text-[10px] uppercase tracking-wider text-ink-400 mb-2">${ns}</div>
+      <div class="card overflow-hidden">
+        <table class="table w-full">
+          <thead>
+            <tr><th>Tool</th><th>Risk</th><th>Scopes</th><th>Enabled</th></tr>
+          </thead>
+          <tbody>
+            ${tools.map(t => `
+              <tr>
+                <td>
+                  <div class="flex items-center gap-2">
+                    <span class="size-5 text-ink-400">${I.wrench}</span>
+                    <div>
+                      <div class="text-sm font-medium font-mono">${t.name}</div>
+                      <div class="text-[11px] text-ink-400">${t.desc}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>${pill(t.risk, t.risk === "critical" ? "danger" : t.risk === "high" ? "warn" : t.risk === "medium" ? "info" : "ok")}</td>
+                <td><div class="flex gap-1 flex-wrap">${t.scopes.map(s => `<span class="pill pill-neutral font-mono">${s}</span>`).join("")}</div></td>
+                <td>${t.enabled ? pill("enabled", "ok") : pill("disabled", "danger")}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `).join("");
+}
+
+// ---------- Policies ----------
+function renderPolicies() {
+  return `
+    <div class="card overflow-hidden">
+      <table class="table w-full">
+        <thead>
+          <tr><th class="w-10">Pri</th><th>Policy</th><th>Actions</th><th>Effect</th><th>Enabled</th></tr>
+        </thead>
+        <tbody>
+          ${state.policies.sort((a,b) => a.priority - b.priority).map(p => `
+            <tr>
+              <td class="font-mono text-ink-400 text-xs">${p.priority}</td>
+              <td>
+                <div class="text-sm font-medium">${p.name}</div>
+                <div class="text-[11px] text-ink-400">${p.description}</div>
+              </td>
+              <td class="text-[11px] font-mono">${p.actions.join(", ")}</td>
+              <td>${pill(p.effect, p.effect === "allow" ? "ok" : p.effect === "deny" ? "danger" : "warn")}</td>
+              <td>
+                <button data-toggle-policy="${p.id}" class="text-left">
+                  ${p.enabled ? pill("on", "ok") : pill("off", "danger")}
+                </button>
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-6 card p-5">
+      <div class="text-sm font-medium mb-3">Condition grammar</div>
+      <p class="text-xs text-ink-400 mb-3">
+        Conditions are JSON ASTs. Supported operators: <code class="font-mono">and, or, not, eq, neq, gt, gte, lt, lte, in, contains, starts_with, time_between</code>.
+        Allowed paths: <code class="font-mono">subject.*, tool.*, resource.*, ctx.*</code>.
+        Conditions are parsed into an AST — no expression is ever <code>eval</code>'d.
+      </p>
+      <pre class="bg-ink-950 rounded border border-ink-800 p-3 text-[11px] font-mono overflow-x-auto">{
+  "op": "and",
+  "args": [
+    { "op": "eq",  "args": ["subject.mode", "autonomous"] },
+    { "op": "gt",  "args": ["resource.amount_cents", 50000] },
+    { "op": "not", "args": [
+      { "op": "time_between", "args": ["ctx.time", "09:00", "18:00"] }
+    ]}
+  ]
+}</pre>
+    </div>
+  `;
+}
+
+// ---------- Simulator ----------
+let simState = {
+  subject: "ag_crm",
+  action: "crm.contacts.read",
+  ipCountry: "US",
+  amount: 12000,
+  hour: 14,
+  result: null,
+};
+function renderSimulator() {
+  const agentOpts = state.agents.map(a =>
+    `<option value="${a.id}" ${a.id === simState.subject ? "selected" : ""}>${a.display_name} (${a.mode})</option>`).join("");
+  const toolOpts = state.tools.map(t =>
+    `<option value="${t.name}" ${t.name === simState.action ? "selected" : ""}>${t.name}</option>`).join("");
+
+  return `
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="card p-5 space-y-4">
+        <div class="text-sm font-medium flex items-center gap-2">${I.play} Build a request</div>
+        <div>
+          <label class="label">Agent</label>
+          <select id="sim-subject" class="input">${agentOpts}</select>
+        </div>
+        <div>
+          <label class="label">Action</label>
+          <select id="sim-action" class="input font-mono">${toolOpts}</select>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="label">Country</label>
+            <select id="sim-country" class="input">
+              ${["US","CA","GB","DE","FR","NL","IN","BR","CN"].map(c => `<option ${c===simState.ipCountry?"selected":""}>${c}</option>`).join("")}
+            </select>
+          </div>
+          <div>
+            <label class="label">Amount ($)</label>
+            <input id="sim-amount" type="number" class="input font-mono" value="${(simState.amount/100).toFixed(2)}" step="0.01"/>
+          </div>
+          <div>
+            <label class="label">Hour (0–23)</label>
+            <input id="sim-hour" type="number" min="0" max="23" class="input font-mono" value="${simState.hour}"/>
+          </div>
+        </div>
+        <button id="sim-run" class="btn-primary">${I.zap} Evaluate</button>
+        <div class="text-[11px] text-ink-500">Decisions are logged to the audit chain exactly as in production.</div>
+      </div>
+
+      <div class="card p-5">
+        <div class="text-sm font-medium flex items-center gap-2 mb-3">${I.shield} Result</div>
+        ${ simState.result ? renderResult(simState.result) : `<div class="text-xs text-ink-400">Run a simulation to see the decision, matched policy, and evaluation trace.</div>` }
+      </div>
+    </div>
+  `;
+}
+
+function renderResult(r) {
+  const tone = r.effect === "allow" ? "ok" : r.effect === "deny" ? "danger" : "warn";
+  const glow = r.effect === "allow" ? "glow-ok" : r.effect === "deny" ? "glow-danger" : "glow-warn";
+  return `
+    <div class="flex items-center gap-3 mb-4 anim-in">
+      <div class="size-12 rounded-full grid place-items-center
+        ${r.effect === "allow" ? "bg-ok-500/10 text-ok-500" :
+          r.effect === "deny" ? "bg-danger-500/10 text-danger-500" :
+          "bg-warn-500/10 text-warn-500"} ${glow}">
+        ${r.effect === "allow" ? I.check : r.effect === "deny" ? I.x : I.warning}
+      </div>
+      <div>
+        <div class="text-lg font-semibold capitalize">${r.effect.replace("_", " ")}</div>
+        <div class="text-xs text-ink-400">${r.reason}</div>
+      </div>
+    </div>
+    <div class="mb-3 text-[11px] uppercase tracking-wider text-ink-400">Evaluation trace</div>
+    <div class="space-y-1 mb-4">
+      ${r.trace.map((t, i) => `
+        <div class="flex items-center gap-2 text-xs font-mono ${t.matched ? "text-ink-100" : "text-ink-500"}">
+          <span class="size-5 shrink-0 grid place-items-center rounded ${t.matched ? "bg-accent-500/20 text-accent-500" : "bg-ink-800"}">${i+1}</span>
+          <span class="truncate">${t.policy || t.gate}</span>
+          <span class="text-ink-500">priority ${t.priority ?? "-"}</span>
+          <span class="ml-auto">${pill(t.effect, t.effect === "allow" ? "ok" : t.effect === "deny" ? "danger" : "warn")}</span>
+          <span class="text-[10px]">${t.matched ? "MATCH" : "skip"}</span>
+        </div>
+      `).join("")}
+    </div>
+    <div class="text-[11px] uppercase tracking-wider text-ink-400 mb-2">Payload</div>
+    <pre class="bg-ink-950 border border-ink-800 rounded p-3 text-[11px] font-mono overflow-x-auto">${escapeHtml(JSON.stringify(r.req, null, 2))}</pre>
+  `;
+}
+
+// ---------- Audit ----------
+let auditFilter = { actor: "", outcome: "" };
+let verifyResult = null;
+function renderAudit() {
+  const filtered = state.audit.filter(e =>
+    (!auditFilter.actor || e.actor.includes(auditFilter.actor)) &&
+    (!auditFilter.outcome || e.outcome === auditFilter.outcome));
+  return `
+    <div class="flex gap-3 mb-4">
+      <button id="verify-chain" class="btn-primary">${I.shield} Verify chain</button>
+      <div class="flex-1"></div>
+      <input id="flt-actor" placeholder="filter by actor (e.g. agent:crm)" class="input w-64 font-mono" value="${auditFilter.actor}"/>
+      <select id="flt-outcome" class="input w-40">
+        <option value="">any outcome</option>
+        <option value="allow" ${auditFilter.outcome === "allow" ? "selected":""}>allow</option>
+        <option value="deny" ${auditFilter.outcome === "deny" ? "selected":""}>deny</option>
+        <option value="require_approval" ${auditFilter.outcome === "require_approval" ? "selected":""}>approval</option>
+        <option value="info" ${auditFilter.outcome === "info" ? "selected":""}>info</option>
+      </select>
+    </div>
+
+    ${verifyResult ? `
+      <div class="card p-4 mb-4 flex items-start gap-3 ${verifyResult.ok ? "" : "border-danger-700"}">
+        <span class="size-5 ${verifyResult.ok ? "text-ok-500" : "text-danger-500"}">${verifyResult.ok ? I.check : I.warning}</span>
+        <div>
+          <div class="font-medium">${verifyResult.ok ? "Chain verified" : `Chain broken at #${verifyResult.broken_at}`}</div>
+          <div class="text-[11px] font-mono text-ink-400 mt-1">tip: ${verifyResult.tip.slice(0, 40)}… · verified ${verifyResult.count} events</div>
+        </div>
+      </div>
+    ` : ""}
+
+    <div class="card overflow-hidden">
+      <table class="table w-full">
+        <thead><tr>
+          <th>#</th><th>When</th><th>Event</th><th>Actor</th><th>Resource</th><th>Outcome</th><th>Reason</th><th>Hash</th>
+        </tr></thead>
+        <tbody>
+          ${filtered.slice().reverse().map(e => `
+            <tr>
+              <td class="font-mono text-xs text-ink-500">#${e.sequence}</td>
+              <td class="text-xs text-ink-300">${new Date(e.ts).toLocaleString()}</td>
+              <td class="text-xs font-mono">${e.action}</td>
+              <td class="text-xs font-mono">${e.actor}</td>
+              <td class="text-xs font-mono text-ink-300">${e.resource || "—"}</td>
+              <td>${pill(e.outcome, e.outcome === "allow" ? "ok" : e.outcome === "deny" ? "danger" : e.outcome === "require_approval" ? "warn" : "info")}</td>
+              <td class="text-xs text-ink-400 max-w-[320px] truncate" title="${escapeHtml(e.reason || "")}">${e.reason || "—"}</td>
+              <td class="font-mono text-[10px] text-ink-500">${e.entry_hash.slice(0, 10)}…</td>
+            </tr>
+          `).join("")}
+          ${filtered.length === 0 ? `<tr><td colspan="8" class="text-center text-ink-500 py-8 text-xs">No events match these filters.</td></tr>` : ""}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ---------- Billing ----------
+function renderBilling() {
+  const o = state.org;
+  const pct = Math.min(100, Math.round(o.decisions_used / o.decisions_included * 100));
+  const pctBar = pct >= 90 ? "bg-danger-500" : pct >= 70 ? "bg-warn-500" : "bg-ok-500";
+  return `
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+      <div class="card p-5">
+        <div class="text-sm font-medium mb-3 flex items-center gap-2">${I.billing} Plan</div>
+        <div class="text-3xl font-semibold capitalize">${o.plan}</div>
+        <div class="text-xs text-ink-400 mt-1">status · active</div>
+        <div class="mt-4 text-xs space-y-1 text-ink-300">
+          <div>Seats included: <span class="font-mono">${o.seats}</span></div>
+          <div>Decisions included: <span class="font-mono">${o.decisions_included.toLocaleString()}</span></div>
+          <div>Current period ends: <span class="font-mono">${new Date(Date.now() + 12*86400000).toLocaleDateString()}</span></div>
+        </div>
+        <button class="btn-primary mt-5 w-full justify-center">Upgrade plan</button>
+      </div>
+      <div class="card p-5 lg:col-span-2">
+        <div class="text-sm font-medium mb-3 flex items-center gap-2">${I.chart} Usage this period</div>
+        <div class="text-3xl font-semibold">${o.decisions_used.toLocaleString()}
+          <span class="text-sm text-ink-400 font-normal ml-2">/ ${o.decisions_included.toLocaleString()} decisions</span>
+        </div>
+        <div class="mt-3 h-2 rounded-full bg-ink-800 overflow-hidden">
+          <div class="h-full ${pctBar}" style="width: ${pct}%"></div>
+        </div>
+        <div class="text-xs text-ink-400 mt-2">${pct}% of included decisions used.</div>
+        <div class="h-48 mt-4">${renderBillingChart()}</div>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <div class="text-sm font-medium mb-3">Recent invoices</div>
+      <table class="table w-full">
+        <thead><tr><th>Month</th><th>Amount</th><th>Status</th><th>PDF</th></tr></thead>
+        <tbody>
+          ${["2026-03","2026-02","2026-01","2025-12"].map((m, i) => `
+            <tr>
+              <td class="text-sm">${m}</td>
+              <td class="text-sm font-mono">$${(1499 + i * 120).toFixed(2)}</td>
+              <td>${pill("paid", "ok")}</td>
+              <td class="text-accent-500 text-xs">Download</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderBillingChart() {
+  const data = Array.from({length: 30}).map(() => 3500 + Math.random() * 4200);
+  const W = 640, H = 160, P = 18;
+  const max = Math.max(...data);
+  const bw = (W - P*2) / 30 - 3;
+  let bars = "";
+  data.forEach((v, i) => {
+    const x = P + i * ((W - P*2) / 30) + 1.5;
+    const h = (v / max) * (H - P*2);
+    bars += `<rect x="${x}" y="${H - P - h}" width="${bw}" height="${h}" fill="#4f7dff" rx="2" />`;
+  });
+  return `
+    <svg viewBox="0 0 ${W} ${H}" class="w-full h-44">
+      ${bars}
+      <g fill="#77839a" font-size="10">
+        <text x="${P}" y="${H-2}">Day 1</text>
+        <text x="${W/2 - 20}" y="${H-2}">Day 15</text>
+        <text x="${W - P - 30}" y="${H-2}">Day 30</text>
+      </g>
+    </svg>
+  `;
+}
+
+// ---------- Settings ----------
+function renderSettings() {
+  return `
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="card p-5">
+        <div class="text-sm font-medium mb-3 flex items-center gap-2">${I.users} Members</div>
+        <table class="table w-full">
+          <thead><tr><th>Name</th><th>Role</th><th>SSO</th></tr></thead>
+          <tbody>
+            ${[
+              ["Vitan Reddy","admin","okta"],
+              ["Priya Patel","auditor","okta"],
+              ["Alex Chen","developer","okta"],
+              ["Kai Müller","developer","password"],
+            ].map(([n,r,s]) => `
+              <tr>
+                <td class="text-sm">${n}</td>
+                <td>${pill(r, r === "admin" ? "info" : "neutral")}</td>
+                <td>${s === "okta" ? pill("okta", "ok") : pill("password", "neutral")}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+      <div class="card p-5">
+        <div class="text-sm font-medium mb-3 flex items-center gap-2">${I.link} SSO providers</div>
+        <div class="space-y-3 text-sm">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="size-6 rounded bg-accent-500/10 text-accent-500 grid place-items-center">${I.lock}</span>
+              <div>
+                <div class="font-medium">Okta (OIDC)</div>
+                <div class="text-[11px] text-ink-400 font-mono">acme.okta.com</div>
+              </div>
+            </div>
+            ${pill("active", "ok")}
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="size-6 rounded bg-accent-500/10 text-accent-500 grid place-items-center">${I.lock}</span>
+              <div>
+                <div class="font-medium">Azure AD (SAML)</div>
+                <div class="text-[11px] text-ink-400 font-mono">acme.onmicrosoft.com</div>
+              </div>
+            </div>
+            ${pill("active", "ok")}
+          </div>
+        </div>
+      </div>
+      <div class="card p-5 lg:col-span-2">
+        <div class="text-sm font-medium mb-3 flex items-center gap-2">${I.lock} API keys</div>
+        <table class="table w-full">
+          <thead><tr><th>Name</th><th>Prefix</th><th>Scopes</th><th>Last used</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="text-sm">production-enforcer</td>
+              <td class="font-mono text-xs text-ink-400">sk_live_a3f…</td>
+              <td class="text-xs"><span class="pill pill-neutral font-mono">decisions.check</span> <span class="pill pill-neutral font-mono">audit.read</span></td>
+              <td class="text-xs text-ink-400">2 minutes ago</td>
+            </tr>
+            <tr>
+              <td class="text-sm">staging-sdk</td>
+              <td class="font-mono text-xs text-ink-400">sk_test_118…</td>
+              <td class="text-xs"><span class="pill pill-neutral font-mono">decisions.check</span></td>
+              <td class="text-xs text-ink-400">3 hours ago</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+// ---------- Helpers ----------
+function pill(label, tone) {
+  const cls = tone === "ok" ? "pill-ok" :
+              tone === "warn" ? "pill-warn" :
+              tone === "danger" ? "pill-danger" :
+              tone === "info" ? "pill-info" : "pill-neutral";
+  return `<span class="pill ${cls}">${label}</span>`;
+}
+function relTime(ts) {
+  const s = Math.floor((Date.now() - new Date(ts).getTime()) / 1000);
+  if (s < 60) return s + "s ago";
+  if (s < 3600) return Math.floor(s/60) + "m ago";
+  if (s < 86400) return Math.floor(s/3600) + "h ago";
+  return Math.floor(s/86400) + "d ago";
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+// ---------- Actions ----------
+function appendAudit(evt) {
+  const prev = state.audit.at(-1)?.entry_hash || "0".repeat(64);
+  const seq = (state.audit.at(-1)?.sequence || 0) + 1;
+  const ts = now();
+  const entry = { id: uid(), sequence: seq, ts, prev_hash: prev,
+    entry_hash: hash64(prev + seq + ts + evt.actor + evt.action + evt.outcome), ...evt };
+  state.audit.push(entry);
+}
+
+function runSim() {
+  const agent = state.agents.find(a => a.id === simState.subject);
+  const tool = state.tools.find(t => t.name === simState.action);
+  const h = String(simState.hour).padStart(2, "0");
+  const timeStr = `2026-04-21T${h}:30:00Z`;
+  const req = {
+    subject_type: "agent", subject_id: simState.subject,
+    action: simState.action,
+    resource: {
+      type: (tool?.name || "").split(".").slice(0, 2).join("."),
+      id: "demo_" + uid().slice(0, 6),
+      amount_cents: simState.amount,
+      classification: "public",
+    },
+    context: { ip_country: simState.ipCountry, time: timeStr },
+  };
+  const r = decide(req);
+  r.req = req;
+  simState.result = r;
+
+  appendAudit({
+    actor: `agent:${agent?.slug || "unknown"}`,
+    action: simState.action,
+    outcome: r.effect,
+    resource: `${req.resource.type}:${req.resource.id}`,
+    reason: r.reason,
+  });
+  state.org.decisions_used += 1;
+}
+
+function wire() {
+  document.querySelectorAll("[data-go]").forEach(b => {
+    b.onclick = () => { state.view = b.dataset.go; render(); };
+  });
+  document.querySelectorAll("[data-kill-agent]").forEach(b => {
+    b.onclick = () => {
+      const id = b.dataset.killAgent;
+      const a = state.agents.find(x => x.id === id);
+      if (!a?.enabled) return;
+      if (!confirm(`Kill agent "${a.display_name}"? All active sessions will be revoked.`)) return;
+      a.enabled = false;
+      appendAudit({ actor: `user:${state.me.email}`, action: "agent.kill", outcome: "info", resource: `agent:${a.slug}`, reason: "manual killswitch" });
+      render();
+    };
+  });
+  document.querySelectorAll("[data-test-agent]").forEach(b => {
+    b.onclick = () => {
+      simState.subject = b.dataset.testAgent;
+      state.view = "simulator";
+      render();
+    };
+  });
+  document.querySelectorAll("[data-toggle-policy]").forEach(b => {
+    b.onclick = () => {
+      const p = state.policies.find(x => x.id === b.dataset.togglePolicy);
+      p.enabled = !p.enabled;
+      appendAudit({ actor: `user:${state.me.email}`, action: "policy.toggle", outcome: "info", resource: `policy:${p.slug}`, reason: `enabled=${p.enabled}` });
+      render();
+    };
+  });
+  const run = document.getElementById("sim-run");
+  if (run) run.onclick = () => {
+    simState.subject = document.getElementById("sim-subject").value;
+    simState.action = document.getElementById("sim-action").value;
+    simState.ipCountry = document.getElementById("sim-country").value;
+    simState.amount = Math.round(Number(document.getElementById("sim-amount").value) * 100);
+    simState.hour = Number(document.getElementById("sim-hour").value);
+    runSim();
+    render();
+  };
+  const v = document.getElementById("verify-chain");
+  if (v) v.onclick = () => {
+    let prev = "0".repeat(64);
+    let broken = null;
+    for (const e of state.audit) {
+      const expected = hash64(prev + e.sequence + e.ts + e.actor + e.action + e.outcome);
+      if (expected !== e.entry_hash) { broken = e.sequence; break; }
+      prev = e.entry_hash;
+    }
+    verifyResult = { ok: broken === null, count: state.audit.length, tip: state.audit.at(-1)?.entry_hash || "", broken_at: broken };
+    render();
+  };
+  const fa = document.getElementById("flt-actor");
+  if (fa) fa.oninput = () => { auditFilter.actor = fa.value; render(); };
+  const fo = document.getElementById("flt-outcome");
+  if (fo) fo.onchange = () => { auditFilter.outcome = fo.value; render(); };
+}
+
+render();
+</script>
+</body>
+</html>

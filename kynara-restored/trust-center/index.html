@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Trust Center · Kynara</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { background: #060912; color: #dee3f3; font-family: "Inter", system-ui, sans-serif; }
+  .card { background: #0e1328; border: 1px solid #161b2c; border-radius: 0.75rem; }
+  .pill-ok { background: rgba(33,194,122,0.12); color: #7ee3b1; border: 1px solid rgba(33,194,122,0.28); padding: 2px 8px; border-radius: 9999px; font-size: 11px; }
+  .pill-warn { background: rgba(232,165,60,0.12); color: #f2c37a; border: 1px solid rgba(232,165,60,0.28); padding: 2px 8px; border-radius: 9999px; font-size: 11px; }
+  a { color: #6f97ff; }
+</style>
+</head>
+<body>
+
+<div class="max-w-5xl mx-auto px-6 py-10">
+  <header class="flex items-center justify-between mb-10">
+    <a href="/" class="flex items-center gap-2">
+      <div class="size-8 rounded-lg bg-blue-600 grid place-items-center text-white font-bold">S0</div>
+      <span class="font-semibold">Kynara</span>
+    </a>
+    <nav class="text-sm text-slate-400 flex gap-5">
+      <a href="https://status.kynara.example.com">Status</a>
+      <a href="/docs">Docs</a>
+      <a href="mailto:security@kynara.example.com">Security</a>
+    </nav>
+  </header>
+
+  <h1 class="text-4xl font-semibold mb-3">Trust Center</h1>
+  <p class="text-slate-300 mb-8 max-w-3xl">
+    Customer-shareable evidence of how Kynara is built, operated, and audited. All
+    artefacts below are available under NDA via your account team or
+    <a href="mailto:trust@kynara.example.com">trust@kynara.example.com</a>.
+  </p>
+
+  <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+    <div class="card p-5">
+      <div class="text-xs uppercase tracking-wide text-slate-400">Service status</div>
+      <div class="text-2xl font-semibold text-emerald-400 mt-2">All systems operational</div>
+      <a href="https://status.kynara.example.com" class="text-xs mt-2 inline-block">View status page →</a>
+    </div>
+    <div class="card p-5">
+      <div class="text-xs uppercase tracking-wide text-slate-400">Audit chain</div>
+      <div class="text-2xl font-semibold text-emerald-400 mt-2">Verified · 2026-04-28</div>
+      <div class="text-xs text-slate-400 mt-2">128.4M events recomputed; chain intact</div>
+    </div>
+    <div class="card p-5">
+      <div class="text-xs uppercase tracking-wide text-slate-400">Last pen test</div>
+      <div class="text-2xl font-semibold mt-2">2026-06-01 (planned)</div>
+      <div class="text-xs text-slate-400 mt-2">2025: Bishop Fox · all findings remediated</div>
+    </div>
+  </section>
+
+  <section class="card p-6 mb-8">
+    <h2 class="text-xl font-semibold mb-4">Certifications &amp; attestations</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+      <Row label="SOC 2 Type II" status="In renewal · current report 2025-Q4" />
+      <Row label="ISO/IEC 27001:2022" status="Certified · expires 2027-03-15" />
+      <Row label="HIPAA-eligible" status="Yes — BAA available on request" />
+      <Row label="GDPR / UK GDPR" status="DPA + SCCs + UK IDTA on request" />
+      <Row label="PCI DSS" status="Out of scope (we do not handle card data)" warning />
+      <Row label="CSA STAR" status="Level 1 self-assessed" />
+    </div>
+  </section>
+
+  <section class="card p-6 mb-8">
+    <h2 class="text-xl font-semibold mb-3">Security architecture, in one paragraph</h2>
+    <p class="text-slate-300 leading-relaxed">
+      Kynara is built fail-closed: when the policy engine cannot reach the database,
+      decisions return <code>deny</code>. Tenants are isolated with PostgreSQL
+      Row-Level Security (per-request <code>app.org_id</code> session GUC) and
+      per-tenant data keys via KMS — Enterprise plans support BYOK with customer-managed
+      keys. Audit logs are SHA-256 hash-chained with append-only triggers and a
+      customer-runnable offline verifier. AuthN is Argon2id passwords + MFA, or
+      Okta/Azure-AD via SAML 2.0 / OIDC with PKCE. Decisions are logged with the
+      matched policy and a human-readable reason to satisfy GDPR Article 22.
+    </p>
+  </section>
+
+  <section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+    <Doc title="SOC 2 Type II report (under NDA)"     desc="2025-Q4 report and bridge letters." />
+    <Doc title="ISO 27001 SoA"                        desc="All 93 Annex A controls + implementation evidence." />
+    <Doc title="GDPR DPA (Processor)"                 desc="DPA, SCCs, UK IDTA, transfer impact assessment." />
+    <Doc title="HIPAA BAA template"                   desc="Standard BAA for healthcare deployments." />
+    <Doc title="DPIA"                                 desc="Article 35 impact assessment." />
+    <Doc title="STRIDE threat model"                  desc="Asset list, trust boundaries, mitigations." />
+    <Doc title="Pen test executive summary"           desc="Annual third-party engagement." />
+    <Doc title="Vulnerability disclosure policy"      desc="Safe-harbor terms; bug bounty link." />
+  </section>
+
+  <section class="card p-6 mb-8">
+    <h2 class="text-xl font-semibold mb-4">Sub-processors</h2>
+    <table class="w-full text-sm">
+      <thead class="text-left text-xs uppercase text-slate-400">
+        <tr><th class="pb-2">Provider</th><th>Function</th><th>Region</th><th>Last review</th></tr>
+      </thead>
+      <tbody class="divide-y divide-slate-800/60">
+        <tr><td class="py-2">Amazon Web Services</td><td>Hosting</td><td>us-east-1, eu-west-1</td><td>2026-Q1</td></tr>
+        <tr><td class="py-2">Stripe</td><td>Billing</td><td>US, EU</td><td>2026-Q1</td></tr>
+        <tr><td class="py-2">Okta</td><td>IdP (optional)</td><td>US</td><td>2026-Q1</td></tr>
+        <tr><td class="py-2">Datadog</td><td>Observability</td><td>US, EU</td><td>2026-Q1</td></tr>
+      </tbody>
+    </table>
+    <p class="text-xs text-slate-400 mt-3">
+      We notify customers of new sub-processors at least 30 days in advance.
+      <a href="#">Subscribe to changes →</a>
+    </p>
+  </section>
+
+  <footer class="text-xs text-slate-500 mt-10">
+    Questions? <a href="mailto:trust@kynara.example.com">trust@kynara.example.com</a> ·
+    Vulnerabilities? <a href="mailto:security@kynara.example.com">security@kynara.example.com</a>
+    (PGP key in <a href="/.well-known/security.txt">security.txt</a>)
+  </footer>
+</div>
+
+<script>
+  // Replace the React-style helpers with plain DOM. Loaded after Tailwind is parsed.
+  function Row({ label, status, warning }) {
+    return `<div class="flex justify-between border-b border-slate-800/60 pb-2">
+              <span class="text-slate-400">${label}</span>
+              <span class="${warning ? 'pill-warn' : 'pill-ok'}">${status}</span>
+            </div>`;
+  }
+  function Doc({ title, desc }) {
+    return `<div class="card p-4">
+              <div class="font-medium">${title}</div>
+              <div class="text-xs text-slate-400 mt-1">${desc}</div>
+              <div class="text-xs text-blue-400 mt-2">Available on request →</div>
+            </div>`;
+  }
+  // Hydrate the placeholders the tags above turned into HTML comments.
+  document.querySelectorAll("section").forEach((sec) => {
+    sec.innerHTML = sec.innerHTML.replace(
+      /<Row label="([^"]+)" status="([^"]+)"( warning)? \/>/g,
+      (_, l, s, w) => Row({label: l, status: s, warning: !!w}),
+    );
+    sec.innerHTML = sec.innerHTML.replace(
+      /<Doc title="([^"]+)" +desc="([^"]+)" \/>/g,
+      (_, t, d) => Doc({title: t, desc: d}),
+    );
+  });
+</script>
+
+</body>
+</html>

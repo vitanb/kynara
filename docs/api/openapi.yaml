@@ -1,0 +1,514 @@
+openapi: 3.1.0
+info:
+  title: Kynara — AI Agent Permission System
+  version: 1.0.0
+  summary: Authorization, auditing, and governance for AI agents and the humans they work for.
+  description: |
+    Kynara is an enterprise permission system for AI agents. Every tool call,
+    data access, and state-changing operation your agents make can be checked
+    against a central policy engine that combines RBAC, ABAC, and runtime
+    context. All decisions are recorded in a tamper-evident, hash-chained audit
+    log.
+
+    ## Authentication
+    - **JWT Bearer** — short-lived (15 min) access tokens issued after login or SSO.
+    - **API Keys** — long-lived machine credentials, prefixed `sk_live_`, for
+      agent runtimes and CI.
+    - **SSO (OIDC / SAML 2.0)** — Okta, Azure AD, Google Workspace.
+
+    ## Rate limits
+    - `/api/v1/decisions/check`: 1,000 RPS per org, burst 2,000.
+    - Other endpoints: 100 RPS per principal.
+
+    ## Fail-closed
+    When the policy engine cannot reach Postgres, decisions default to `deny`
+    unless the client explicitly requests degraded mode.
+  contact: { name: Kynara Platform, email: platform@kynara.example.com }
+  license: { name: Proprietary }
+
+servers:
+  - url: https://kynara.example.com
+    description: Production
+  - url: https://sandbox.kynara.example.com
+    description: Sandbox
+
+tags:
+  - name: auth
+  - name: sso
+  - name: agents
+  - name: tools
+  - name: policies
+  - name: decisions
+  - name: audit
+  - name: billing
+  - name: admin
+
+security:
+  - bearerAuth: []
+  - apiKey: []
+
+paths:
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: Password login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Tokens issued. Refresh token is set as httpOnly cookie.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenBundle" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /api/v1/auth/refresh:
+    post:
+      tags: [auth]
+      summary: Rotate refresh token
+      security: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenBundle" }
+  /api/v1/auth/logout:
+    post:
+      tags: [auth]
+      summary: Invalidate current session
+      responses: { "204": { description: Logged out } }
+  /api/v1/auth/me:
+    get:
+      tags: [auth]
+      summary: Current principal
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Principal" }
+
+  /api/v1/sso/okta/start:
+    post:
+      tags: [sso]
+      summary: Begin Okta OIDC flow (PKCE)
+      security: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SsoStart" }
+  /api/v1/sso/okta/callback:
+    get:
+      tags: [sso]
+      summary: Okta OIDC callback
+      security: []
+      parameters:
+        - in: query
+          name: code
+          required: true
+          schema: { type: string }
+        - in: query
+          name: state
+          required: true
+          schema: { type: string }
+      responses: { "302": { description: Redirect to app } }
+  /api/v1/sso/saml/metadata:
+    get:
+      tags: [sso]
+      summary: Service provider SAML metadata XML
+      security: []
+      responses:
+        "200":
+          content:
+            application/samlmetadata+xml: {}
+  /api/v1/sso/saml/acs:
+    post:
+      tags: [sso]
+      summary: SAML Assertion Consumer Service
+      security: []
+      responses: { "302": { description: Redirect to app } }
+
+  /api/v1/agents:
+    get:
+      tags: [agents]
+      summary: List agents
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Agent" } }
+    post:
+      tags: [agents]
+      summary: Register a new agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AgentCreate" }
+      responses:
+        "201":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Agent" }
+  /api/v1/agents/{id}:
+    parameters:
+      - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [agents]
+      summary: Get agent
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Agent" }
+    put:
+      tags: [agents]
+      summary: Update agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AgentUpdate" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Agent" }
+  /api/v1/agents/{id}/kill:
+    parameters:
+      - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [agents]
+      summary: Emergency kill (revokes all sessions and disables agent immediately)
+      responses: { "204": { description: Killed } }
+
+  /api/v1/tools:
+    get:
+      tags: [tools]
+      summary: List tools
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Tool" } }
+
+  /api/v1/policies:
+    get:
+      tags: [policies]
+      summary: List policies
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Policy" } }
+    post:
+      tags: [policies]
+      summary: Create policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PolicyCreate" }
+      responses:
+        "201":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Policy" }
+  /api/v1/policies/{id}:
+    parameters:
+      - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+    put:
+      tags: [policies]
+      summary: Update policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PolicyCreate" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Policy" }
+    delete:
+      tags: [policies]
+      summary: Soft-delete policy
+      responses: { "204": { description: Deleted } }
+
+  /api/v1/decisions/check:
+    post:
+      tags: [decisions]
+      summary: Evaluate a decision request
+      description: |
+        The core enforcement endpoint. Callers (agents, runtime SDKs, or edge
+        gateways) submit a subject, action, resource, and context. The server
+        returns an `allow` | `deny` | `require_approval` decision and, for
+        `require_approval`, a URL where a human reviewer can approve.
+
+        All decisions are recorded in the audit log with hash chaining.
+        High-frequency callers should cache decisions client-side within the
+        TTL returned on each response.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DecisionRequest" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Decision" }
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /api/v1/audit/events:
+    get:
+      tags: [audit]
+      summary: Query audit events
+      parameters:
+        - { in: query, name: actor, schema: { type: string } }
+        - { in: query, name: event_type, schema: { type: string } }
+        - { in: query, name: outcome, schema: { type: string, enum: [allow, deny, require_approval, info] } }
+        - { in: query, name: since, schema: { type: string, format: date-time } }
+        - { in: query, name: until, schema: { type: string, format: date-time } }
+        - { in: query, name: limit, schema: { type: integer, default: 100, maximum: 1000 } }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/AuditEvent" } }
+  /api/v1/audit/verify:
+    post:
+      tags: [audit]
+      summary: Verify integrity of the hash-chained audit log
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChainVerifyResult" }
+
+  /api/v1/billing/subscription:
+    get:
+      tags: [billing]
+      summary: Current subscription
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Subscription" }
+  /api/v1/billing/usage:
+    get:
+      tags: [billing]
+      summary: Usage in current period
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Usage" }
+  /api/v1/billing/checkout:
+    post:
+      tags: [billing]
+      summary: Start Stripe Checkout session
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { url: { type: string, format: uri } }
+  /api/v1/billing/webhook:
+    post:
+      tags: [billing]
+      security: []
+      summary: Stripe webhook receiver (HMAC-signed)
+      responses: { "200": { description: Acknowledged } }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-Kynara-Key
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid credentials
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    RateLimited:
+      description: Per-org or per-key rate limit exceeded
+      headers:
+        Retry-After: { schema: { type: integer } }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        request_id: { type: string }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+        mfa_code: { type: string }
+    TokenBundle:
+      type: object
+      properties:
+        access_token: { type: string }
+        token_type: { type: string, enum: [bearer] }
+        expires_in: { type: integer }
+    Principal:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        org_id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        display_name: { type: string }
+        role: { type: string }
+        scopes: { type: array, items: { type: string } }
+    SsoStart:
+      type: object
+      properties:
+        authorize_url: { type: string, format: uri }
+        state: { type: string }
+
+    Agent:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        org_id: { type: string, format: uuid }
+        slug: { type: string }
+        display_name: { type: string }
+        mode: { type: string, enum: [human_supervised, autonomous, read_only] }
+        risk_class: { type: string, enum: [low, medium, high, critical] }
+        owner_user_id: { type: string, format: uuid }
+        is_enabled: { type: boolean }
+        created_at: { type: string, format: date-time }
+    AgentCreate:
+      type: object
+      required: [slug, display_name, mode]
+      properties:
+        slug: { type: string }
+        display_name: { type: string }
+        mode: { type: string, enum: [human_supervised, autonomous, read_only] }
+        risk_class: { type: string, enum: [low, medium, high, critical] }
+        owner_user_id: { type: string, format: uuid }
+    AgentUpdate:
+      allOf:
+        - $ref: "#/components/schemas/AgentCreate"
+        - type: object
+          properties:
+            is_enabled: { type: boolean }
+
+    Tool:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        namespace: { type: string }
+        name: { type: string }
+        description: { type: string }
+        risk_class: { type: string, enum: [low, medium, high, critical] }
+        scopes: { type: array, items: { type: string } }
+        is_enabled: { type: boolean }
+
+    Policy:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        display_name: { type: string }
+        description: { type: string }
+        effect: { type: string, enum: [allow, deny, require_approval] }
+        priority: { type: integer, minimum: 0, maximum: 1000 }
+        actions: { type: array, items: { type: string } }
+        resource_types: { type: array, items: { type: string } }
+        condition:
+          description: JSON AST representing the boolean condition
+          type: object
+        is_enabled: { type: boolean }
+    PolicyCreate:
+      allOf: [{ $ref: "#/components/schemas/Policy" }]
+
+    DecisionRequest:
+      type: object
+      required: [subject_type, subject_id, action, resource]
+      properties:
+        subject_type: { type: string, enum: [agent, user, api_key] }
+        subject_id: { type: string }
+        action: { type: string, example: "crm.contacts.read" }
+        resource:
+          type: object
+          required: [type]
+          properties:
+            type: { type: string }
+            id: { type: string }
+            attrs: { type: object, additionalProperties: true }
+        context:
+          type: object
+          additionalProperties: true
+          example: { ip_country: US, time: "2026-04-21T14:30:00Z" }
+    Decision:
+      type: object
+      properties:
+        effect: { type: string, enum: [allow, deny, require_approval] }
+        matched_policy_id: { type: string, nullable: true }
+        reason: { type: string }
+        obligations:
+          type: array
+          items: { type: object }
+        approval_url: { type: string, nullable: true }
+        decision_id: { type: string, format: uuid }
+        ttl_seconds: { type: integer }
+
+    AuditEvent:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        sequence: { type: integer }
+        ts: { type: string, format: date-time }
+        event_type: { type: string }
+        actor: { type: string }
+        resource_type: { type: string, nullable: true }
+        resource_id: { type: string, nullable: true }
+        outcome: { type: string, enum: [allow, deny, require_approval, info] }
+        payload: { type: object }
+        prev_hash: { type: string }
+        entry_hash: { type: string }
+    ChainVerifyResult:
+      type: object
+      properties:
+        ok: { type: boolean }
+        count: { type: integer }
+        tip: { type: string }
+        broken_at: { type: integer, nullable: true }
+
+    Subscription:
+      type: object
+      properties:
+        plan: { type: string }
+        status: { type: string }
+        seats_included: { type: integer }
+        decisions_included: { type: integer }
+        current_period_end: { type: string, format: date-time }
+    Usage:
+      type: object
+      properties:
+        decisions_used: { type: integer }
+        decisions_included: { type: integer }
+        overage_decisions: { type: integer }
+        overage_amount_cents: { type: integer }
