@@ -29,7 +29,8 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     configure_logging(settings.log_level)
     init_telemetry(app)
-    log.info("kynara.startup", env=settings.env, redirect_slashes=False)
+    log.info("kynara.startup", env=settings.env, redirect_slashes=False,
+             cors_origins=settings.cors_origins)
     yield
     log.info("kynara.shutdown")
 
