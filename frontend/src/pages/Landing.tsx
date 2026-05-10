@@ -2,58 +2,47 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import {
-  Hexagon,
-  ShieldCheck,
-  GitBranch,
-  Eye,
-  Zap,
-  ArrowRight,
-  Check,
-  X,
-  Send,
+  Hexagon, ShieldCheck, GitBranch, Eye, Zap, ArrowRight, Check, X, Send,
+  Lock, AlertTriangle, LineChart, KeyRound, ChevronRight, Building2, FileText, Bell,
 } from "lucide-react";
 
 const features = [
-  {
-    icon: ShieldCheck,
-    color: "#6366F1",
-    bg: "rgba(99,102,241,0.12)",
-    title: "Policy-first access control",
-    desc: "Define exactly what each AI agent can and cannot do — per tool, per org, per role. Decisions are enforced in real time, not reviewed after the fact.",
-  },
-  {
-    icon: GitBranch,
-    color: "#10B981",
-    bg: "rgba(16,185,129,0.12)",
-    title: "Fine-grained permissions",
-    desc: "Grant agents the minimum privilege they need. Kynara evaluates every tool call against your policy tree and returns allow, deny, or require-approval.",
-  },
-  {
-    icon: Eye,
-    color: "#F59E0B",
-    bg: "rgba(245,158,11,0.12)",
-    title: "Full audit trail",
-    desc: "Every decision is logged with actor, context, and outcome. Replay events, investigate incidents, and stay compliant — all from one place.",
-  },
-  {
-    icon: Zap,
-    color: "#EC4899",
-    bg: "rgba(236,72,153,0.12)",
-    title: "Zero-latency decisions",
-    desc: "Sub-5ms cached policy evaluation so your agents never slow down waiting for permission checks.",
-  },
+  { icon: ShieldCheck, color: "#818CF8", bg: "rgba(99,102,241,0.1)", title: "Real-time policy enforcement", desc: "Every tool call, every API action — evaluated against your policy tree in under 5 ms before the agent executes. Allow, deny, or escalate to a human reviewer." },
+  { icon: GitBranch, color: "#34D399", bg: "rgba(16,185,129,0.1)", title: "Fine-grained RBAC", desc: "Grant agents the minimum privilege they need. Permissions scoped by org, role, environment, and time window — with JIT grants for elevated access." },
+  { icon: Eye, color: "#FBBF24", bg: "rgba(245,158,11,0.1)", title: "Immutable audit trail", desc: "Cryptographically chained log of every decision, actor, context, and outcome. Replay events, investigate incidents, prove compliance to auditors." },
+  { icon: Zap, color: "#F472B6", bg: "rgba(236,72,153,0.1)", title: "Guardrails & anomaly detection", desc: "Set spend limits, rate caps, and behavioral thresholds. Kynara auto-revokes agents that exceed them and fires webhook alerts to your SIEM." },
+  { icon: Lock, color: "#60A5FA", bg: "rgba(59,130,246,0.1)", title: "SSO & enterprise identity", desc: "SAML 2.0 and OIDC out of the box. Plug into Okta, Azure AD, or any IdP. Role mappings flow automatically from your directory." },
+  { icon: LineChart, color: "#A78BFA", bg: "rgba(139,92,246,0.1)", title: "Live observability", desc: "Decision dashboards, risk scores, and cost attribution per agent. Know exactly which agent is doing what — and flag the risky ones before they cause damage." },
+];
+
+const steps = [
+  { num: "01", title: "Register your agents", desc: "Call the Kynara API or use our MCP server to register every AI agent with a unique identity and capability scope.", icon: KeyRound },
+  { num: "02", title: "Define policies", desc: "Write allow/deny rules in our policy editor. Attach conditions — IP, time, user context, spend threshold — to any tool or API endpoint.", icon: FileText },
+  { num: "03", title: "Enforce & audit", desc: "Every agent action is checked in real time. Violations are blocked, logged, and surfaced in dashboards your security team already monitors.", icon: Bell },
+];
+
+const trustSignals = [
+  "Sub-5ms decision latency", "Cryptographic audit chain", "SAML 2.0 & OIDC SSO",
+  "Role-based access control", "JIT elevated grants", "Webhook & SIEM integration",
+  "Anomaly detection & auto-revoke", "SOC 2-ready audit exports",
 ];
 
 const stats = [
-  { value: "<5ms", label: "Median decision latency" },
-  { value: "99.99%", label: "Uptime SLA (Enterprise)" },
-  { value: "10k+", label: "Policy decisions / month free" },
+  { value: "<5ms", label: "Median policy decision" },
+  { value: "99.99%", label: "Uptime SLA" },
+  { value: "10M+", label: "Decisions / month capacity" },
 ];
 
 export default function LandingPage() {
   const [contactOpen, setContactOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
   const [contactState, setContactState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  function openContact() {
+    setContactOpen(true);
+    setContactState("idle");
+    setForm({ name: "", email: "", company: "", message: "" });
+  }
 
   async function submitContact(e: React.FormEvent) {
     e.preventDefault();
@@ -62,279 +51,361 @@ export default function LandingPage() {
       await api.post("/api/v1/contact", {
         name: form.name.trim(),
         email: form.email.trim(),
-        message: form.message.trim(),
+        message: `Company: ${form.company.trim()}\n\n${form.message.trim()}`,
       });
       setContactState("sent");
-    } catch (err) {
-      console.error("Contact form failed:", err);
+    } catch {
       setContactState("error");
     }
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "#05080F", color: "#CBD5E1" }}>
-      {/* ── Nav ── */}
-      <nav className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: "#4F46E5", boxShadow: "0 0 16px rgba(99,102,241,0.4)" }}
-          >
-            <Hexagon className="w-4 h-4 text-white" strokeWidth={2} />
-          </div>
-          <span className="font-semibold text-white text-base tracking-tight">Kynara</span>
-        </div>
-        <div className="hidden md:flex items-center gap-6 text-sm text-slate-400">
-          <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
-          <Link to="/docs" className="hover:text-white transition-colors">Docs</Link>
-          <button onClick={() => { setContactOpen(true); setContactState("idle"); setForm({ name: "", email: "", message: "" }); }}
-            className="hover:text-white transition-colors">Contact</button>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="text-sm text-slate-400 hover:text-white transition-colors">
-            Sign in
-          </Link>
-          <Link
-            to="/signup"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-white px-4 py-2 rounded-lg transition-all"
-            style={{ background: "#4F46E5", boxShadow: "0 0 0 1px rgba(99,102,241,0.5)" }}
-          >
-            Get started free
-          </Link>
-        </div>
-      </nav>
+    <div className="min-h-screen overflow-x-hidden" style={{ background: "#05080F", color: "#CBD5E1" }}>
 
-      {/* ── Hero ── */}
-      <section className="text-center pt-20 pb-24 px-6">
-        <div
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-6"
-          style={{
-            background: "rgba(99,102,241,0.1)",
-            border: "1px solid rgba(99,102,241,0.25)",
-            color: "#A5B4FC",
-          }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-          Now in early access — free to start
-        </div>
-
-        <h1
-          className="text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight leading-tight max-w-3xl mx-auto"
-        >
-          The permission layer for{" "}
-          <span style={{ color: "#818CF8" }}>AI agents</span>
-        </h1>
-
-        <p className="text-slate-400 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
-          Kynara is an open control plane that lets your team define, enforce, and audit
-          exactly what AI agents can do — before they do it.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            to="/signup"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold text-white transition-all"
-            style={{
-              background: "#4F46E5",
-              boxShadow: "0 0 0 1px rgba(99,102,241,0.5), 0 4px 20px rgba(79,70,229,0.35)",
-            }}
-          >
-            Start for free <ArrowRight className="w-4 h-4" />
-          </Link>
-          <Link
-            to="/pricing"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium text-slate-300 hover:text-white transition-colors"
-            style={{
-              background: "rgba(148,163,184,0.06)",
-              border: "1px solid rgba(148,163,184,0.12)",
-            }}
-          >
-            View pricing
-          </Link>
-        </div>
-      </section>
-
-      {/* ── Stats bar ── */}
-      <div
-        className="max-w-4xl mx-auto px-6 py-10 mb-16 rounded-2xl grid grid-cols-3 gap-8 text-center"
-        style={{
-          background: "rgba(13,20,33,0.8)",
-          border: "1px solid rgba(148,163,184,0.08)",
-        }}
-      >
-        {stats.map((s) => (
-          <div key={s.label}>
-            <div className="text-3xl font-bold text-white mb-1">{s.value}</div>
-            <div className="text-xs text-slate-500">{s.label}</div>
-          </div>
-        ))}
+      {/* Ambient glow */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+        <div style={{ position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)", width: "900px", height: "700px", background: "radial-gradient(ellipse, rgba(79,70,229,0.12) 0%, transparent 70%)" }} />
+        <div style={{ position: "absolute", top: "45%", left: "-10%", width: "500px", height: "500px", background: "radial-gradient(ellipse, rgba(99,102,241,0.05) 0%, transparent 70%)" }} />
+        <div style={{ position: "absolute", top: "65%", right: "-10%", width: "500px", height: "500px", background: "radial-gradient(ellipse, rgba(139,92,246,0.05) 0%, transparent 70%)" }} />
       </div>
 
-      {/* ── Features ── */}
-      <section className="max-w-6xl mx-auto px-6 pb-24">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl font-bold text-white mb-3">
-            Everything you need to govern AI agents
-          </h2>
-          <p className="text-slate-400 max-w-lg mx-auto text-sm">
-            From developer-facing API keys to org-wide audit logs — Kynara covers the full
-            lifecycle of AI agent authorization.
-          </p>
-        </div>
+      <div style={{ position: "relative", zIndex: 1 }}>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {features.map((f) => {
-            const Icon = f.icon;
-            return (
-              <div
-                key={f.title}
-                className="rounded-2xl p-7"
-                style={{
-                  background: "#080C14",
-                  border: "1px solid rgba(148,163,184,0.08)",
-                }}
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                  style={{ background: f.bg }}
-                >
-                  <Icon className="w-5 h-5" style={{ color: f.color }} />
-                </div>
-                <h3 className="text-white font-semibold mb-2">{f.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{f.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+        {/* Nav */}
+        <nav className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)", boxShadow: "0 0 20px rgba(99,102,241,0.4)" }}>
+              <Hexagon className="w-4 h-4 text-white" strokeWidth={2} />
+            </div>
+            <span className="font-bold text-white text-base tracking-tight">Kynara</span>
+          </div>
+          <div className="hidden md:flex items-center gap-7 text-sm text-slate-400">
+            <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
+            <a href="#features" className="hover:text-white transition-colors">Features</a>
+            <Link to="/docs" className="hover:text-white transition-colors">Docs</Link>
+            <button onClick={openContact} className="hover:text-white transition-colors">Contact</button>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link to="/login" className="text-sm text-slate-400 hover:text-white transition-colors hidden sm:block">Sign in</Link>
+            <button onClick={openContact} className="inline-flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-2 rounded-lg transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #4F46E5, #6D28D9)", boxShadow: "0 0 0 1px rgba(99,102,241,0.4), 0 4px 16px rgba(79,70,229,0.3)" }}>
+              Book a demo
+            </button>
+          </div>
+        </nav>
 
-      {/* ── CTA banner ── */}
-      <section className="max-w-4xl mx-auto px-6 pb-28">
-        <div
-          className="rounded-2xl p-12 text-center"
-          style={{
-            background:
-              "radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.18) 0%, rgba(13,20,33,0.9) 70%)",
-            border: "1px solid rgba(99,102,241,0.2)",
-          }}
-        >
-          <h2 className="text-3xl font-bold text-white mb-3">
-            Ready to take control of your agents?
-          </h2>
-          <p className="text-slate-400 mb-8 max-w-md mx-auto text-sm">
-            Get started in minutes. No credit card required.
+        {/* Hero */}
+        <section className="text-center pt-20 pb-20 px-6 max-w-5xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs mb-8" style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", color: "#A5B4FC" }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+            AI agent governance infrastructure
+          </div>
+
+          <h1 className="text-5xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.08]">
+            The enterprise permission
+            <br />
+            <span style={{ background: "linear-gradient(135deg, #818CF8 0%, #A78BFA 50%, #60A5FA 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              layer for AI agents
+            </span>
+          </h1>
+
+          <p className="text-slate-400 text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+            Kynara is the control plane that lets enterprises define, enforce, and audit exactly
+            what AI agents can do — in real time, before they act.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
-            <Link
-              to="/signup"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold text-white"
-              style={{ background: "#4F46E5", boxShadow: "0 4px 20px rgba(79,70,229,0.4)" }}
-            >
-              Create free account <ArrowRight className="w-4 h-4" />
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #4F46E5, #6D28D9)", boxShadow: "0 0 0 1px rgba(99,102,241,0.4), 0 8px 32px rgba(79,70,229,0.4)" }}>
+              Book a demo <ArrowRight className="w-4 h-4" />
+            </button>
+            <Link to="/signup" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white transition-all" style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}>
+              Start free <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="flex items-center justify-center gap-6 text-xs text-slate-500">
-            {["Free forever plan", "3 seats included", "No credit card"].map((t) => (
-              <span key={t} className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-500" /> {t}
-              </span>
+
+          <div className="grid grid-cols-3 gap-px rounded-2xl overflow-hidden max-w-2xl mx-auto" style={{ background: "rgba(148,163,184,0.08)", border: "1px solid rgba(148,163,184,0.08)" }}>
+            {stats.map((s, i) => (
+              <div key={i} className="py-6 px-4 text-center" style={{ background: "#07090F" }}>
+                <div className="text-3xl font-bold text-white mb-1">{s.value}</div>
+                <div className="text-xs text-slate-500">{s.label}</div>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── Footer ── */}
-      <footer
-        className="border-t px-8 py-8 max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600"
-        style={{ borderColor: "rgba(148,163,184,0.08)" }}
-      >
-        <div className="flex items-center gap-2">
-          <Hexagon className="w-3.5 h-3.5" style={{ color: "#4F46E5" }} />
-          <span>© {new Date().getFullYear()} Kynara. All rights reserved.</span>
-        </div>
-        <div className="flex items-center gap-5">
-          <Link to="/pricing" className="hover:text-slate-400 transition-colors">Pricing</Link>
-          <Link to="/docs" className="hover:text-slate-400 transition-colors">Docs</Link>
-          <Link to="/login" className="hover:text-slate-400 transition-colors">Sign in</Link>
-          <button onClick={() => { setContactOpen(true); setContactState("idle"); setForm({ name: "", email: "", message: "" }); }}
-            className="hover:text-slate-400 transition-colors">Contact</button>
-        </div>
-      </footer>
+        {/* Problem */}
+        <section className="max-w-6xl mx-auto px-6 pb-24">
+          <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.05), rgba(99,102,241,0.1))" }}>
+            <div className="rounded-[22px] p-12 lg:p-16" style={{ background: "#07090F" }}>
+              <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-6" style={{ background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.15)", color: "#FCD34D" }}>
+                    <AlertTriangle className="w-3 h-3" /> The problem
+                  </div>
+                  <h2 className="text-3xl lg:text-4xl font-bold text-white mb-5 leading-tight">
+                    AI agents are operating without guardrails
+                  </h2>
+                  <p className="text-slate-400 leading-relaxed mb-5">
+                    Enterprises are deploying AI agents that call APIs, read databases, send emails,
+                    and execute code — but have no centralized system to control what they're allowed to do.
+                  </p>
+                  <p className="text-slate-400 leading-relaxed">
+                    When an agent exceeds its scope or gets compromised, companies lack the visibility
+                    to detect it and the infrastructure to stop it. That's a compliance failure waiting to happen.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { color: "#F87171", label: "No audit trail", desc: "Can't prove what agents did during an incident or compliance review" },
+                    { color: "#FBBF24", label: "Overprivileged agents", desc: "Agents granted broad access 'just in case' — violating least-privilege" },
+                    { color: "#F472B6", label: "Zero runtime enforcement", desc: "Permissions set once at deploy time, never checked per-action" },
+                    { color: "#60A5FA", label: "Compliance blind spots", desc: "No SOC 2, ISO 27001, or GDPR controls for AI agent activity" },
+                  ].map((item) => (
+                    <div key={item.label} className="flex gap-4 p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(148,163,184,0.06)" }}>
+                      <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: item.color }} />
+                      <div>
+                        <div className="text-sm font-semibold text-white mb-0.5">{item.label}</div>
+                        <div className="text-xs text-slate-500 leading-relaxed">{item.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      {/* ── Contact modal ── */}
+        {/* How it works */}
+        <section id="how-it-works" className="max-w-6xl mx-auto px-6 pb-24">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-5" style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)", color: "#A5B4FC" }}>
+              How it works
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">Up and running in under an hour</h2>
+            <p className="text-slate-400 max-w-lg mx-auto text-sm leading-relaxed">
+              Kynara sits between your AI agents and the systems they access. No changes to your existing infrastructure required.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {steps.map((step) => {
+              const Icon = step.icon;
+              return (
+                <div key={step.num} className="rounded-2xl p-8" style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.07)" }}>
+                  <div className="text-xs font-mono font-bold mb-5" style={{ color: "rgba(99,102,241,0.5)" }}>{step.num}</div>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.15)" }}>
+                    <Icon className="w-5 h-5" style={{ color: "#818CF8" }} />
+                  </div>
+                  <h3 className="text-white font-semibold mb-3 text-base">{step.title}</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">{step.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Terminal mockup */}
+        <section className="max-w-5xl mx-auto px-6 pb-24">
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(148,163,184,0.08)", boxShadow: "0 0 80px rgba(79,70,229,0.07)" }}>
+            <div className="flex items-center gap-2 px-4 py-3" style={{ background: "#0D1117", borderBottom: "1px solid rgba(148,163,184,0.06)" }}>
+              <div className="w-3 h-3 rounded-full" style={{ background: "#FF5F57" }} />
+              <div className="w-3 h-3 rounded-full" style={{ background: "#FEBC2E" }} />
+              <div className="w-3 h-3 rounded-full" style={{ background: "#28C840" }} />
+              <span className="ml-3 text-xs text-slate-600 font-mono">kynara · policy decision engine</span>
+            </div>
+            <div className="p-7 font-mono text-sm" style={{ background: "#080C14" }}>
+              <div className="space-y-3 text-slate-500">
+                <div><span className="text-slate-600">POST </span><span style={{ color: "#818CF8" }}>/api/v1/decisions/check</span></div>
+                <div className="pl-4 space-y-1">
+                  <div><span style={{ color: "#60A5FA" }}>"agent_id"</span>{': '}<span style={{ color: "#34D399" }}>"agent_billing_processor"</span></div>
+                  <div><span style={{ color: "#60A5FA" }}>"tool"</span>{': '}<span style={{ color: "#34D399" }}>"stripe.charge_customer"</span></div>
+                  <div><span style={{ color: "#60A5FA" }}>"context"</span>{': { '}<span style={{ color: "#60A5FA" }}>"amount_usd"</span>{': '}<span style={{ color: "#FBBF24" }}>4200</span>{' }'}</div>
+                </div>
+                <div className="border-t pt-3" style={{ borderColor: "rgba(148,163,184,0.06)" }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full" style={{ background: "#F87171" }} />
+                    <span className="text-white font-semibold">DENY</span>
+                    <span className="text-slate-700">·</span>
+                    <span>policy: <span style={{ color: "#FBBF24" }}>max_charge_usd = 1000</span></span>
+                    <span className="text-slate-700">·</span>
+                    <span>3.2 ms</span>
+                  </div>
+                </div>
+                <div className="pl-4 space-y-1">
+                  <div><span style={{ color: "#60A5FA" }}>"decision"</span>{': '}<span style={{ color: "#F87171" }}>"deny"</span></div>
+                  <div><span style={{ color: "#60A5FA" }}>"reason"</span>{': '}<span style={{ color: "#34D399" }}>"charge_amount exceeds policy limit"</span></div>
+                  <div><span style={{ color: "#60A5FA" }}>"escalate_to"</span>{': '}<span style={{ color: "#34D399" }}>"finance-approvals@company.com"</span></div>
+                  <div><span style={{ color: "#60A5FA" }}>"audit_id"</span>{': '}<span style={{ color: "#A78BFA" }}>"evt_01HXYZ..."</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section id="features" className="max-w-6xl mx-auto px-6 pb-24">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-5" style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)", color: "#A5B4FC" }}>
+              Full-stack governance
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">Everything security teams need</h2>
+            <p className="text-slate-400 max-w-lg mx-auto text-sm leading-relaxed">
+              From developer-facing API keys to org-wide audit exports — Kynara covers the full lifecycle of AI agent authorization and compliance.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {features.map((f) => {
+              const Icon = f.icon;
+              return (
+                <div key={f.title} className="rounded-2xl p-6" style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.07)" }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: f.bg }}>
+                    <Icon className="w-5 h-5" style={{ color: f.color }} />
+                  </div>
+                  <h3 className="text-white font-semibold mb-2 text-sm">{f.title}</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">{f.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Trust signals */}
+        <section className="max-w-6xl mx-auto px-6 pb-24">
+          <div className="rounded-2xl p-10" style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.07)" }}>
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(99,102,241,0.1)" }}>
+                <Building2 className="w-4 h-4" style={{ color: "#818CF8" }} />
+              </div>
+              <div>
+                <div className="text-white font-semibold text-sm">Built for enterprise compliance</div>
+                <div className="text-slate-500 text-xs mt-0.5">Controls aligned with SOC 2, ISO 27001, and NIST AI RMF</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {trustSignals.map((signal) => (
+                <div key={signal} className="flex items-center gap-2">
+                  <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#34D399" }} />
+                  <span className="text-slate-400 text-xs">{signal}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="max-w-4xl mx-auto px-6 pb-28">
+          <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.35), rgba(139,92,246,0.1), rgba(79,70,229,0.25))" }}>
+            <div className="rounded-[22px] py-16 px-12 text-center" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(79,70,229,0.15) 0%, #07090F 60%)" }}>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-6" style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)", color: "#A5B4FC" }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                Accepting design partners
+              </div>
+              <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight">
+                Ready to govern your AI agents?
+              </h2>
+              <p className="text-slate-400 mb-8 max-w-md mx-auto leading-relaxed">
+                We're working with a select group of enterprises to shape the product.
+                Book a 30-minute call to see Kynara in action.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+                <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition-all" style={{ background: "linear-gradient(135deg, #4F46E5, #6D28D9)", boxShadow: "0 8px 32px rgba(79,70,229,0.4)" }}>
+                  Book a demo <ArrowRight className="w-4 h-4" />
+                </button>
+                <Link to="/signup" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white transition-all" style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}>
+                  Start free
+                </Link>
+              </div>
+              <div className="flex items-center justify-center gap-6 text-xs text-slate-600">
+                {["Free to start", "No credit card", "Dedicated onboarding"].map((t) => (
+                  <span key={t} className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-500" /> {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="border-t px-8 py-8 max-w-6xl mx-auto" style={{ borderColor: "rgba(148,163,184,0.07)" }}>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}>
+                <Hexagon className="w-3 h-3 text-white" strokeWidth={2.5} />
+              </div>
+              <span className="text-slate-500 font-medium">Kynara</span>
+              <span className="text-slate-700">·</span>
+              <span>© {new Date().getFullYear()}. All rights reserved.</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <a href="#features" className="hover:text-slate-400 transition-colors">Features</a>
+              <a href="#how-it-works" className="hover:text-slate-400 transition-colors">How it works</a>
+              <Link to="/docs" className="hover:text-slate-400 transition-colors">Docs</Link>
+              <Link to="/login" className="hover:text-slate-400 transition-colors">Sign in</Link>
+              <button onClick={openContact} className="hover:text-slate-400 transition-colors">Contact</button>
+            </div>
+          </div>
+        </footer>
+
+      </div>
+
+      {/* Contact / Demo modal */}
       {contactOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
           onClick={(e) => { if (e.target === e.currentTarget) setContactOpen(false); }}>
-          <div className="w-full max-w-md rounded-2xl p-7 relative"
-            style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.12)" }}>
-            <button onClick={() => setContactOpen(false)}
-              className="absolute top-4 right-4 text-slate-500 hover:text-slate-300 transition-colors">
+          <div className="w-full max-w-md rounded-2xl p-7 relative" style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.1)", boxShadow: "0 0 80px rgba(79,70,229,0.15)" }}>
+            <button onClick={() => setContactOpen(false)} className="absolute top-4 right-4 text-slate-500 hover:text-slate-300 transition-colors">
               <X className="w-4 h-4" />
             </button>
-
             {contactState === "sent" ? (
-              <div className="text-center py-6">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
-                  style={{ background: "rgba(16,185,129,0.12)", border: "1px solid rgba(4,120,87,0.3)" }}>
-                  <Check className="w-5 h-5" style={{ color: "#34D399" }} />
+              <div className="text-center py-8">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)" }}>
+                  <Check className="w-6 h-6" style={{ color: "#34D399" }} />
                 </div>
-                <div className="text-lg font-bold text-white mb-2">Message sent!</div>
-                <p className="text-sm text-slate-400">We'll get back to you shortly.</p>
-                <button onClick={() => setContactOpen(false)}
-                  className="mt-5 text-sm font-medium px-4 py-2 rounded-lg text-white"
-                  style={{ background: "#4F46E5" }}>Close</button>
+                <div className="text-xl font-bold text-white mb-2">We'll be in touch</div>
+                <p className="text-sm text-slate-400 mb-6">Expect a reply within one business day.</p>
+                <button onClick={() => setContactOpen(false)} className="text-sm font-medium px-5 py-2.5 rounded-lg text-white" style={{ background: "#4F46E5" }}>Close</button>
               </div>
             ) : (
               <>
                 <div className="mb-6">
-                  <h2 className="text-xl font-bold text-white mb-1">Get in touch</h2>
-                  <p className="text-sm text-slate-400">We'll reply within one business day.</p>
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}>
+                      <Hexagon className="w-3.5 h-3.5 text-white" strokeWidth={2} />
+                    </div>
+                    <span className="font-bold text-white text-sm">Kynara</span>
+                  </div>
+                  <h2 className="text-xl font-bold text-white mb-1">Book a demo</h2>
+                  <p className="text-sm text-slate-400">We'll walk you through the product and discuss your use case.</p>
                 </div>
                 <form onSubmit={submitContact} className="space-y-4">
+                  {[
+                    { label: "Full name", key: "name", placeholder: "Jane Smith", type: "text" },
+                    { label: "Work email", key: "email", placeholder: "jane@company.com", type: "email" },
+                    { label: "Company", key: "company", placeholder: "Acme Corp", type: "text" },
+                  ].map(({ label, key, placeholder, type }) => (
+                    <div key={key}>
+                      <label className="block text-xs font-medium text-slate-400 mb-1.5">{label}</label>
+                      <input required type={type} value={form[key as keyof typeof form]}
+                        onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                        placeholder={placeholder}
+                        className="w-full rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 outline-none"
+                        style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}
+                      />
+                    </div>
+                  ))}
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Name</label>
-                    <input
-                      required
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      placeholder="Your name"
-                      className="w-full rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 outline-none"
-                      style={{ background: "rgba(148,163,184,0.06)", border: "1px solid rgba(148,163,184,0.12)" }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Email</label>
-                    <input
-                      required
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      placeholder="you@company.com"
-                      className="w-full rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 outline-none"
-                      style={{ background: "rgba(148,163,184,0.06)", border: "1px solid rgba(148,163,184,0.12)" }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Message</label>
-                    <textarea
-                      required
-                      rows={4}
-                      value={form.message}
-                      onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      placeholder="How can we help?"
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">What are you trying to solve? <span className="text-slate-600">(optional)</span></label>
+                    <textarea rows={3} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })}
+                      placeholder="e.g. We need to audit what our AI assistants are doing in production…"
                       className="w-full rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 outline-none resize-none"
-                      style={{ background: "rgba(148,163,184,0.06)", border: "1px solid rgba(148,163,184,0.12)" }}
+                      style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}
                     />
                   </div>
-                  {contactState === "error" && (
-                    <p className="text-xs text-red-400">Something went wrong. Please try again.</p>
-                  )}
+                  {contactState === "error" && <p className="text-xs text-red-400">Something went wrong. Please try again.</p>}
                   <button type="submit" disabled={contactState === "sending"}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity disabled:opacity-60"
-                    style={{ background: "#4F46E5" }}>
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+                    style={{ background: "linear-gradient(135deg, #4F46E5, #6D28D9)", boxShadow: "0 4px 16px rgba(79,70,229,0.3)" }}>
                     <Send className="w-3.5 h-3.5" />
-                    {contactState === "sending" ? "Sending…" : "Send message"}
+                    {contactState === "sending" ? "Sending…" : "Request demo"}
                   </button>
                 </form>
               </>
