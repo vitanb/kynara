@@ -3,6 +3,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+# VITE_API_BASE is baked into the JS bundle at build time.
+# Set it in Railway frontend service variables to the backend public URL
+# e.g. https://backend-production-4ca40.up.railway.app
+ARG VITE_API_BASE=""
+ENV VITE_API_BASE=$VITE_API_BASE
 RUN npm run build
 
 FROM nginx:alpine
