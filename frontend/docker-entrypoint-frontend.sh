@@ -7,13 +7,20 @@ echo "--- /etc/resolv.conf ---"
 cat /etc/resolv.conf || echo "(not found)"
 echo "---"
 
-# Extract the first nameserver from /etc/resolv.conf so nginx can re-resolve
-# backend.railway.internal on each request (picks up backend redeploys and
-# avoids stale IPv6 addresses). Falls back to 1.1.1.1 if unavailable.
-NAMESERVER=$(grep -m1 '^nameserver' /etc/resolv.conf | awk '{print $2}')
-if [ -z "$NAMESERVER" ]; then
-  NAMESERVER="1.1.1.1"
+# Extract the first nameserver from /etc/resolv.conf.
+# nginx requires IPv6 resolver addresses wrapped in brackets, e.g. [fd12::10].
+RAW_NS=$(grep -m1 '^nameserver' /etc/resolv.conf | awk '{print $2}')
+if [ -z "$RAW_NS" ]; then
+  RAW_NS="1.1.1.1"
 fi
+
+# Wrap in brackets if it looks like an IPv6 address (contains a colon)
+if echo "$RAW_NS" | grep -q ':'; then
+  NAMESERVER="[$RAW_NS]"
+else
+  NAMESERVER="$RAW_NS"
+fi
+
 echo "Using DNS resolver: $NAMESERVER"
 export NAMESERVER
 
