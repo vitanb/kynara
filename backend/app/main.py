@@ -17,6 +17,7 @@ from app.core.logging import configure_logging, get_logger
 from app.core.telemetry import init_telemetry
 from app.middleware.security import (
     BodySizeLimitMiddleware,
+    RedirectDebugMiddleware,
     RequestContextMiddleware,
     SecurityHeadersMiddleware,
 )
@@ -52,6 +53,7 @@ def create_app() -> FastAPI:
     app.state.limiter = limiter
 
     # Middlewares (order matters — outermost last)
+    app.add_middleware(RedirectDebugMiddleware)  # TODO: remove after redirect issue is resolved
     app.add_middleware(BodySizeLimitMiddleware, max_bytes=1_000_000)
     app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(RequestContextMiddleware)

@@ -2,12 +2,30 @@
 from __future__ import annotations
 
 import uuid
+import logging
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
 from app.core.logging import request_id_ctx
+
+_dbg = logging.getLogger("kynara.redirect_debug")
+
+
+class RedirectDebugMiddleware(BaseHTTPMiddleware):
+    """Temporary: log every 3xx so we can find what is issuing the redirect."""
+    async def dispatch(self, request: Request, call_next) -> Response:
+        resp = await call_next(request)
+        if resp.status_code in (301, 302, 307, 308):
+            _dbg.warning(
+                "REDIRECT_DETECTED method=%s path=%s status=%s location=%s",
+                request.method,
+                request.url.path,
+                resp.status_code,
+                resp.headers.get("location", "<none>"),
+            )
+        return resp
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
