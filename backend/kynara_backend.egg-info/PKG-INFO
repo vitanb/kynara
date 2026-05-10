@@ -1,0 +1,36 @@
+Metadata-Version: 2.4
+Name: kynara-backend
+Version: 0.1.0
+Summary: Kynara control plane — AI agent permission system
+Requires-Python: >=3.11
+Requires-Dist: fastapi>=0.110
+Requires-Dist: uvicorn[standard]>=0.29
+Requires-Dist: pydantic>=2.6
+Requires-Dist: pydantic-settings>=2.2
+Requires-Dist: sqlalchemy>=2.0
+Requires-Dist: asyncpg>=0.29
+Requires-Dist: alembic>=1.13
+Requires-Dist: argon2-cffi>=23.1
+Requires-Dist: pyjwt[crypto]>=2.8
+Requires-Dist: python-multipart>=0.0.9
+Requires-Dist: httpx>=0.27
+Requires-Dist: authlib>=1.3
+Requires-Dist: python3-saml>=1.16
+Requires-Dist: redis>=5.0
+Requires-Dist: stripe>=9.0
+Requires-Dist: structlog>=24.1
+Requires-Dist: opentelemetry-api>=1.24
+Requires-Dist: opentelemetry-sdk>=1.24
+Requires-Dist: opentelemetry-instrumentation-fastapi>=0.45b0
+Requires-Dist: opentelemetry-exporter-otlp>=1.24
+Requires-Dist: prometheus-client>=0.20
+Requires-Dist: slowapi>=0.1.9
+Requires-Dist: email-validator>=2.1
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23; extra == "dev"
+Requires-Dist: ruff>=0.3; extra == "dev"
+Requires-Dist: mypy>=1.9; extra == "dev"
+Requires-Dist: httpx>=0.27; extra == "dev"
+Provides-Extra: aws
+Requires-Dist: boto3>=1.34; extra == "aws"
