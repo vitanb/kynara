@@ -4,7 +4,6 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from slowapi import Limiter
@@ -17,6 +16,7 @@ from app.core.logging import configure_logging, get_logger
 from app.core.telemetry import init_telemetry
 from app.middleware.security import (
     BodySizeLimitMiddleware,
+    DebugCORSMiddleware,
     RequestContextMiddleware,
     SecurityHeadersMiddleware,
 )
@@ -29,8 +29,13 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     configure_logging(settings.log_level)
     init_telemetry(app)
-    log.info("kynara.startup", env=settings.env, redirect_slashes=False,
-             cors_origins=settings.cors_origins)
+    log.info(
+        "kynara.startup",
+        env=settings.env,
+        redirect_slashes=False,
+        cors_origins=settings.cors_origins,
+        cors_origins_str_raw=settings.cors_origins_str,
+    )
     yield
     log.info("kynara.shutdown")
 
@@ -56,14 +61,10 @@ def create_app() -> FastAPI:
     app.add_middleware(BodySizeLimitMiddleware, max_bytes=1_000_000)
     app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(RequestContextMiddleware)
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.cors_origins,
-        allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type", "X-Request-ID", "Accept", "Origin", "X-Requested-With"],
-        expose_headers=["X-Request-ID"],
-    )
+    # DebugCORSMiddleware replaces FastAPI's CORSMiddleware.
+    # It logs every CORS decision at INFO level so they always appear in
+    # Railway logs, making origin mismatches immediately visible.
+    app.add_middleware(DebugCORSMiddleware, allow_origins=settings.cors_origins)
 
     app.include_router(v1)
 
