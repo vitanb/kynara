@@ -195,7 +195,7 @@ export default function AgentDetailPage() {
           </div>
           <table className="table">
             <thead><tr>
-              <th>When</th><th>Action</th><th>Resource</th><th>Effect</th><th>Reason</th>
+              <th>When</th><th>Scope</th><th>Resource</th><th>Effect</th><th>Reason</th>
             </tr></thead>
             <tbody>
               {events.map((e) => (
@@ -240,7 +240,7 @@ export default function AgentDetailPage() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Pri</th><th>Policy</th><th>Actions</th>
+                  <th>Pri</th><th>Policy</th><th>Scopes</th>
                   <th>Resources</th><th>Effect</th><th>Bound via</th><th>Enabled</th><th></th>
                 </tr>
               </thead>
@@ -319,16 +319,16 @@ export default function AgentDetailPage() {
           )}
         </div>
 
-        {/* ── Assignments ── */}
+        {/* ── Roles ── */}
         <div className="card p-4 lg:col-span-3">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Users className="size-4 text-accent-500" />
-              <span className="font-medium text-sm">Assignments</span>
+              <span className="font-medium text-sm">Roles</span>
               <span className="text-xs text-ink-500">— users assigned to operate this agent with a specific role</span>
             </div>
             <button className="btn-primary text-xs" onClick={() => setAssignOpen(true)}>
-              <Plus className="size-3" /> Add assignment
+              <Plus className="size-3" /> Add role
             </button>
           </div>
 
@@ -355,7 +355,7 @@ export default function AgentDetailPage() {
                     <td>
                       <button
                         className="text-ink-500 hover:text-danger-400 transition-colors p-1"
-                        title="Remove assignment"
+                        title="Remove role"
                         onClick={() => removeAssignment.mutate(a.id)}
                       >
                         <Trash2 className="size-3.5" />
@@ -368,9 +368,9 @@ export default function AgentDetailPage() {
           ) : (
             <div className="text-center py-8">
               <Users className="size-8 mx-auto mb-3 text-ink-700" />
-              <p className="text-sm text-ink-400 mb-4">No users assigned to this agent yet.</p>
+              <p className="text-sm text-ink-400 mb-4">No roles assigned to this agent yet.</p>
               <button className="btn-primary text-xs" onClick={() => setAssignOpen(true)}>
-                <Plus className="size-3" /> Add first assignment
+                <Plus className="size-3" /> Add first role
               </button>
             </div>
           )}
@@ -378,7 +378,7 @@ export default function AgentDetailPage() {
 
       </div>
 
-      {/* ── Add assignment modal ── */}
+      {/* ── Add role modal ── */}
       {assignOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
@@ -387,7 +387,7 @@ export default function AgentDetailPage() {
             <div className="flex items-center justify-between px-6 py-4"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
               <div>
-                <div className="text-base font-semibold text-white">Add assignment</div>
+                <div className="text-base font-semibold text-white">Add role</div>
                 <div className="text-xs text-ink-400 mt-0.5">
                   Assign a user to operate <strong className="text-ink-200">{agent.display_name}</strong>.
                 </div>

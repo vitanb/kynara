@@ -12,18 +12,18 @@ import { useTheme, THEMES, type ThemeId } from "@/lib/theme";
 
 const allNav = [
   { to: "how-it-works", label: "How it works", icon: BookOpen, roles: ["owner","admin","developer","auditor","member"] },
-  { to: "dashboard",  label: "Dashboard",  icon: LayoutDashboard, roles: ["owner","admin","developer","auditor","member"] },
-  { to: "agents",     label: "Agents",     icon: Bot,             roles: ["owner","admin","developer","auditor","member"] },
-  { to: "tools",      label: "Scope Catalog", icon: Wrench,          roles: ["owner","admin","developer","auditor","member"] },
-  { to: "roles",      label: "Roles",      icon: KeyRound,        roles: ["owner","admin","developer","auditor","member"] },
-  { to: "policies",   label: "Policies",   icon: ShieldCheck,     roles: ["owner","admin","developer","auditor","member"] },
-  { to: "approvals",  label: "Approvals",  icon: CheckCircle2,    roles: ["owner","admin"], badge: true },
-  { to: "webhooks",   label: "Webhooks",   icon: Plug,            roles: ["owner","admin"] },
-  { to: "guardrails", label: "Guardrails", icon: ShieldAlert,     roles: ["owner","admin"] },
-  { to: "audit",      label: "Audit log",  icon: ScrollText,      roles: ["owner","admin","developer","auditor","member"] },
-  { to: "billing",    label: "Billing",    icon: CreditCard,      roles: ["owner","admin"] },
-  { to: "settings",   label: "Settings",   icon: Settings,        roles: ["owner","admin"] },
-  { to: "superadmin", label: "Super Admin", icon: Crown,           roles: ["owner","admin","developer","auditor","member"], superadminOnly: true },
+  { to: "dashboard",  label: "Dashboard",    icon: LayoutDashboard, roles: ["owner","admin","developer","auditor","member"] },
+  { to: "agents",     label: "Agents",       icon: Bot,             roles: ["owner","admin","developer","auditor","member"] },
+  { to: "tools",      label: "Scope Catalog",icon: Wrench,          roles: ["owner","admin","developer","auditor","member"] },
+  { to: "roles",      label: "Roles",        icon: KeyRound,        roles: ["owner","admin","auditor"] },
+  { to: "policies",   label: "Policies",     icon: ShieldCheck,     roles: ["owner","admin","auditor"] },
+  { to: "approvals",  label: "Approvals",    icon: CheckCircle2,    roles: ["owner","admin"], badge: true },
+  { to: "webhooks",   label: "Webhooks",     icon: Plug,            roles: ["owner","admin"] },
+  { to: "guardrails", label: "Guardrails",   icon: ShieldAlert,     roles: ["owner","admin"] },
+  { to: "audit",      label: "Audit log",    icon: ScrollText,      roles: ["owner","admin","auditor"] },
+  { to: "billing",    label: "Billing",      icon: CreditCard,      roles: ["owner","admin"] },
+  { to: "settings",   label: "Settings",     icon: Settings,        roles: ["owner","admin"] },
+  { to: "superadmin", label: "Super Admin",  icon: Crown,           roles: ["owner","admin","developer","auditor","member"], superadminOnly: true },
 ];
 
 export default function AppShell() {

@@ -190,7 +190,7 @@ export default function PolicyEditorPage() {
                      onChange={(e) => updateForm({ priority: +e.target.value })} />
             </Field>
           </div>
-          <Field label="Actions (comma-separated, supports globs)">
+          <Field label="Scopes (comma-separated, supports globs)">
             <input className="input font-mono"
                    value={(form.actions || []).join(",")}
                    onChange={(e) => updateForm({
@@ -301,7 +301,7 @@ export default function PolicyEditorPage() {
                   )}
                 </div>
               </Field>
-              <Field label="Action">
+              <Field label="Scope">
                 <input className="input font-mono" value={simAction}
                        onChange={(e) => { setSimAction(e.target.value); setSimResult(null); }} />
               </Field>

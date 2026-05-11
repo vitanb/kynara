@@ -150,7 +150,7 @@ export default function DecisionsPage() {
               )}
             </div>
             <p className="text-[10px] text-ink-500 mt-1">
-              The entity requesting to perform the action.
+              The agent or user requesting the scope check.
             </p>
           </div>
 
@@ -183,17 +183,17 @@ export default function DecisionsPage() {
             </div>
           )}
 
-          {/* Action */}
+          {/* Scope */}
           <div>
-            <label className="label">Action</label>
+            <label className="label">Scope</label>
             <input
               className="input font-mono"
-              placeholder="e.g. payments.refund.issue"
+              placeholder="e.g. infra:restart"
               value={action}
               onChange={e => setAction(e.target.value)}
             />
             <p className="text-[10px] text-ink-500 mt-1">
-              The action being requested (must match policy action patterns).
+              The scope being requested (must match a scope granted by the agent's role).
             </p>
           </div>
 
@@ -360,7 +360,7 @@ export default function DecisionsPage() {
               </div>
               <table className="table">
                 <thead>
-                  <tr><th>Time</th><th>Subject</th><th>Action</th><th>Effect</th></tr>
+                  <tr><th>Time</th><th>Subject</th><th>Scope</th><th>Effect</th></tr>
                 </thead>
                 <tbody>
                   {history.map((h, i) => (
