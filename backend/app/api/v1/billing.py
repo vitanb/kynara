@@ -17,7 +17,7 @@ from app.auth.dependencies import Principal, require_seat
 from app.billing import stripe_service
 from app.core.config import get_settings
 from app.db.session import SessionLocal
-from app.models import Invoice, Subscription, UsageRecord
+from app.models import Invoice, Organization, Subscription, UsageRecord
 
 router = APIRouter(prefix="/billing", tags=["billing"])
 
@@ -170,7 +170,22 @@ async def stripe_webhook(
         sub = Subscription(organization_id=uuid.UUID(org_id))
         session.add(sub)
 
-    if etype.startswith("customer.subscription."):
+    if etype == "checkout.session.completed":
+        # This is the authoritative moment a customer completes payment.
+        # metadata.plan was set when we created the checkout session.
+        plan_name = data.get("metadata", {}).get("plan")
+        if plan_name:
+            sub.plan = plan_name
+            sub.status = "active"
+            # Also update org.plan so quota enforcement sees the new tier
+            org = await session.scalar(
+                select(Organization).where(Organization.id == uuid.UUID(org_id))
+            )
+            if org:
+                org.plan = plan_name
+            logger.info("checkout.session.completed org=%s plan=%s → active", org_id, plan_name)
+
+    elif etype.startswith("customer.subscription."):
         sub.status = data.get("status", sub.status)
         sub.stripe_subscription_id = data.get("id")
         sub.current_period_start = datetime.fromtimestamp(data["current_period_start"], tz=timezone.utc) \
@@ -178,6 +193,7 @@ async def stripe_webhook(
         sub.current_period_end = datetime.fromtimestamp(data["current_period_end"], tz=timezone.utc) \
             if data.get("current_period_end") else None
         sub.cancel_at_period_end = bool(data.get("cancel_at_period_end"))
+
     elif etype == "invoice.paid":
         # Reset to active on successful payment (recovers from past_due)
         if sub.status == "past_due":
