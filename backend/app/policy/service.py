@@ -61,13 +61,17 @@ async def decide(
     settings = get_settings()
     t0 = time.perf_counter()
 
-    cache = await _r()
     ck = _cache_key(org_id, subject_id, action, resource.get("id", ""))
-    cached = await cache.get(ck)
-    if cached:
-        d = Decision(**json.loads(cached))
-        _record_metrics(org_id, d.effect, time.perf_counter() - t0, cached=True)
-        return d
+    try:
+        cache = await _r()
+        cached = await cache.get(ck)
+        if cached:
+            d = Decision(**json.loads(cached))
+            _record_metrics(org_id, d.effect, time.perf_counter() - t0, cached=True)
+            return d
+    except Exception as _cache_err:
+        log.warning("policy.cache_unavailable", err=str(_cache_err))
+        cache = None
 
     with tracer.start_as_current_span("policy.decide") as span:
         span.set_attribute("kynara.action", action)
@@ -134,8 +138,11 @@ async def decide(
             )
 
     # Cache only *non-approval* decisions — approvals must always re-check.
-    if decision.effect != "require_approval":
-        await cache.setex(ck, settings.decision_cache_ttl_seconds, json.dumps(asdict(decision)))
+    if decision.effect != "require_approval" and cache is not None:
+        try:
+            await cache.setex(ck, settings.decision_cache_ttl_seconds, json.dumps(asdict(decision)))
+        except Exception as _cache_err:
+            log.warning("policy.cache_write_failed", err=str(_cache_err))
 
     return await _emit_decision(
         session, org_id, subject_type, subject_id, on_behalf_of_user_id,
