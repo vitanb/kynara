@@ -8,6 +8,9 @@ from app.db.session import SessionLocal
 
 router = APIRouter(tags=["health"])
 
+# Update this whenever a new migration is added.
+_EXPECTED_MIGRATION_HEAD = "20260505_0012"
+
 
 def _masked_url(url: str) -> str:
     """Hide password in DSN but keep host/dbname visible."""
@@ -16,6 +19,9 @@ def _masked_url(url: str) -> str:
 
 @router.get("/health", include_in_schema=False)
 async def health():
+    """Liveness probe — resolves to /api/v1/health via the v1 router prefix.
+    Used by Railway healthcheckPath = /api/v1/health in railway.toml.
+    """
     try:
         async with SessionLocal() as s:
             await s.execute(text("SELECT 1"))
@@ -26,29 +32,45 @@ async def health():
 
 @router.get("/ready", include_in_schema=False)
 async def ready():
-    return {"status": "ready"}
+    """Readiness probe — checks DB connection AND migration head."""
+    try:
+        async with SessionLocal() as s:
+            row = await s.execute(text("SELECT version_num FROM alembic_version"))
+            versions = [r[0] for r in row]
+        head_ok = any(_EXPECTED_MIGRATION_HEAD in v for v in versions)
+        if not head_ok:
+            return {
+                "status": "not_ready",
+                "reason": "migrations_behind",
+                "current": versions,
+                "expected_head": _EXPECTED_MIGRATION_HEAD,
+            }
+        return {"status": "ready", "migration_head": versions}
+    except Exception as e:
+        return {"status": "not_ready", "reason": str(e)}
 
 
 @router.get("/debug/db", include_in_schema=False)
 async def debug_db():
-    """Temporary diagnostic: shows which DB the backend is connected to
-    and whether migrations + seed data are present.
-    Remove this endpoint before going to production.
+    """Diagnostic: DB connection, migration state, row counts.
+    Disabled in prod environments.
     """
     settings = get_settings()
-    result: dict = {
-        "database_url": _masked_url(settings.database_url),
-    }
+    if settings.env == "prod":
+        from fastapi import HTTPException
+        raise HTTPException(404)
+
+    result: dict = {"database_url": _masked_url(settings.database_url)}
     try:
         async with SessionLocal() as s:
-            # Alembic migration state
             try:
                 rows = await s.execute(text("SELECT version_num FROM alembic_version"))
-                result["alembic_versions"] = [r[0] for r in rows]
+                versions = [r[0] for r in rows]
+                result["alembic_versions"] = versions
+                result["migration_head_ok"] = any(_EXPECTED_MIGRATION_HEAD in v for v in versions)
             except Exception as e:
                 result["alembic_versions"] = f"ERROR: {e}"
 
-            # Row counts for key tables
             for table in ("organizations", "users", "agents", "tools", "policies"):
                 try:
                     count = (await s.execute(text(f"SELECT count(*) FROM {table}"))).scalar()
@@ -56,7 +78,6 @@ async def debug_db():
                 except Exception as e:
                     result[f"count_{table}"] = f"ERROR: {e}"
 
-            # Current Postgres connection info
             row = (await s.execute(text(
                 "SELECT current_database(), inet_server_addr()::text, inet_server_port()"
             ))).one()
