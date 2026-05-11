@@ -76,7 +76,8 @@ export default function BillingPage() {
   const seatsIncluded = sub?.seats_included ?? 3;
   const seatPct = Math.min(100, Math.round((seatsUsed / seatsIncluded) * 100));
 
-  const isOnFree = sub?.plan === "free" || !sub?.plan;
+  const isOnFree = sub?.plan === "free" || sub?.plan === "trial" || !sub?.plan;
+  const isOnPaid = !isOnFree && sub?.plan !== "enterprise";
   const isTrialing = sub?.status === "trialing";
   const trialDaysLeft = sub?.current_period_end
     ? Math.max(0, Math.ceil((new Date(sub.current_period_end).getTime() - Date.now()) / 86_400_000))
@@ -190,6 +191,13 @@ export default function BillingPage() {
             {isOnFree ? (
               <button className="btn-primary w-full justify-center" onClick={() => setUpgradeOpen(true)}>
                 Upgrade plan
+              </button>
+            ) : isOnPaid ? (
+              <button
+                className="w-full justify-center py-2 text-sm text-ink-400 hover:text-white transition-colors"
+                onClick={() => window.open("mailto:support@kynara.ai?subject=Manage subscription", "_blank")}
+              >
+                Manage subscription
               </button>
             ) : (
               <button

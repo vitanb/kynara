@@ -21,6 +21,15 @@ from app.models import Invoice, Organization, Subscription, UsageRecord
 
 router = APIRouter(prefix="/billing", tags=["billing"])
 
+# Quotas applied when a plan activates via Stripe webhook.
+# Seats: 0 = unlimited (no hard cap enforced). Decisions: monthly included allotment.
+_PLAN_QUOTAS: dict[str, dict] = {
+    "free":       {"seats_included": 3,          "decisions_included": 10_000},
+    "trial":      {"seats_included": 5,          "decisions_included": 100_000},
+    "pro":        {"seats_included": 999_999,    "decisions_included": 1_000_000},
+    "enterprise": {"seats_included": 999_999,    "decisions_included": 999_999_999},
+}
+
 
 async def _session():
     async with SessionLocal() as s:
@@ -177,13 +186,22 @@ async def stripe_webhook(
         if plan_name:
             sub.plan = plan_name
             sub.status = "active"
+            # Apply seats + decisions quota for the new plan
+            quotas = _PLAN_QUOTAS.get(plan_name, {})
+            if quotas:
+                sub.seats_included = quotas["seats_included"]
+                sub.decisions_included = quotas["decisions_included"]
             # Also update org.plan so quota enforcement sees the new tier
             org = await session.scalar(
                 select(Organization).where(Organization.id == uuid.UUID(org_id))
             )
             if org:
                 org.plan = plan_name
-            logger.info("checkout.session.completed org=%s plan=%s → active", org_id, plan_name)
+            logger.info(
+                "checkout.session.completed org=%s plan=%s seats=%s decisions=%s → active",
+                org_id, plan_name,
+                quotas.get("seats_included"), quotas.get("decisions_included"),
+            )
 
     elif etype.startswith("customer.subscription."):
         sub.status = data.get("status", sub.status)
