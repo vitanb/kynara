@@ -23,4 +23,4 @@ python -m app.scripts.seed
 
 # ── Start server ──────────────────────────────────────────────────────────────
 echo "[entrypoint] Starting uvicorn..."
-exec uvicorn app.main:app --host "::" --port 8000 --workers 2
+exec uvicorn app.main:app --host "::" --port "${PORT:-8000}" --workers 2
