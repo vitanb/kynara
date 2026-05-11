@@ -149,14 +149,24 @@ export default function PolicyEditorPage() {
         title={isNew ? "New policy" : `Edit · ${form.display_name || id}`}
         subtitle="Policies are matched in priority order; first terminal effect wins. Fail-closed by default."
         actions={
-          <button
-            onClick={() => save.mutate()}
-            className="btn-primary"
-            disabled={save.isPending || !!conditionError}
-          >
-            <Save className="size-4" />
-            {save.isPending ? "Saving…" : isDirty ? "Save changes" : "Save"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => nav("/app/policies")}
+              className="btn-secondary"
+              disabled={save.isPending}
+            >
+              <X className="size-4" />
+              Cancel
+            </button>
+            <button
+              onClick={() => save.mutate()}
+              className="btn-primary"
+              disabled={save.isPending || !!conditionError}
+            >
+              <Save className="size-4" />
+              {save.isPending ? "Saving…" : isDirty ? "Save changes" : "Save"}
+            </button>
+          </div>
         }
       />
       <div className="px-8 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">

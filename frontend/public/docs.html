@@ -206,6 +206,15 @@
     </div>
 
     <div class="nav-section">
+      <div class="nav-section-label">Worked Examples</div>
+      <a href="#example-crm" class="nav-link">CRM Assistant</a>
+      <a href="#example-infra" class="nav-link">Infra Manager</a>
+      <a href="#example-hr" class="nav-link">Employee Profile</a>
+      <a href="#context-reference" class="nav-link">Context JSON fields</a>
+      <a href="#schema-reference" class="nav-link">Input Schema fields</a>
+    </div>
+
+    <div class="nav-section">
       <div class="nav-section-label">Features</div>
       <a href="#dashboard" class="nav-link">Dashboard</a>
       <a href="#agents" class="nav-link">Agents</a>
@@ -253,7 +262,7 @@
 
     <!-- HEADER -->
     <div class="doc-header">
-      <div class="badge"><span class="badge-dot"></span> v2.0 · May 2026</div>
+      <div class="badge"><span class="badge-dot"></span> v2.1 · May 2026</div>
       <h1>Kynara User Guide</h1>
       <p class="lead">
         Everything you need to register agents, define access policies, govern approvals,
@@ -351,10 +360,10 @@ curl -X POST https://kynara.ai/api/v1/decisions/check \
   -H "Authorization: Bearer &lt;your-api-key&gt;" \
   -H "Content-Type: application/json" \
   -d '{
-    "agent_id": "&lt;agent-uuid&gt;",
+    "subject_type": "agent",
+    "subject_id": "&lt;agent-uuid&gt;",
     "action": "file.read",
-    "resource_type": "file",
-    "resource_id": "reports/q4.csv",
+    "resource": { "type": "file", "id": "reports/q4.csv", "attrs": {} },
     "context": { "user_id": "u_123" }
   }'</code></pre>
 
@@ -362,6 +371,875 @@ curl -X POST https://kynara.ai/api/v1/decisions/check \
         <span class="callout-icon">💡</span>
         <div class="callout-body">
           <strong>No policy = deny.</strong> If no policy matches a request, Kynara returns <code>deny</code> by default. Start with broad allow policies and narrow them down — not the other way around.
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         WORKED EXAMPLES
+    ══════════════════════════════════════════════════════════════ -->
+
+    <!-- ── Example 1: CRM Assistant ── -->
+    <section id="example-crm">
+      <h2>Example 1 — CRM Assistant</h2>
+      <p class="lead" style="font-size:15px; margin-bottom:24px;">
+        A CRM assistant agent that reads contacts and deals, creates notes, and requires
+        human approval before writing or modifying contact records outside business hours.
+      </p>
+
+      <div class="callout info">
+        <span class="callout-icon">🗺️</span>
+        <div class="callout-body">
+          <strong>Setup order:</strong> Scope Catalog → Role → Agent → Policy → Bind policy to agent.
+          Always register your scopes first so they appear in the role editor's scope picker.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <h3>Step 1 — Register scopes in the Scope Catalog</h3>
+      <p>Navigate to <strong>Scope Catalog → New Tool</strong> and create four entries:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Namespace</th><th>Name</th><th>Scope string</th><th>Risk</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>crm</code></td><td><code>contacts.read</code></td><td><code>crm:contacts.read</code></td><td><span class="pill pill-ok">low</span></td><td>Read a CRM contact by ID or email.</td></tr>
+            <tr><td><code>crm</code></td><td><code>contacts.write</code></td><td><code>crm:contacts.write</code></td><td><span class="pill pill-warn">medium</span></td><td>Create or update a CRM contact record.</td></tr>
+            <tr><td><code>crm</code></td><td><code>deals.read</code></td><td><code>crm:deals.read</code></td><td><span class="pill pill-ok">low</span></td><td>Read deal pipeline data.</td></tr>
+            <tr><td><code>crm</code></td><td><code>notes.create</code></td><td><code>crm:notes.create</code></td><td><span class="pill pill-ok">low</span></td><td>Append a note to a contact or deal.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>For each entry, the <strong>Input Schema</strong> describes what parameters the agent passes at decision time. Example for <code>crm:contacts.write</code>:</p>
+
+      <pre><code>{
+  "type": "object",
+  "properties": {
+    "contact_id": {
+      "type": "string",
+      "description": "UUID of the contact being modified"
+    },
+    "fields_changed": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of field names being updated, e.g. [\"email\", \"phone\"]"
+    },
+    "is_bulk_operation": {
+      "type": "boolean",
+      "description": "True if this update affects more than one contact"
+    }
+  },
+  "required": ["contact_id"]
+}</code></pre>
+
+      <p>
+        These properties map to <code>resource.attrs</code> in the decision request. Your policy conditions can reference them as <code>ctx.resource.attrs.is_bulk_operation</code>.
+        See the <a href="#schema-reference">Input Schema reference</a> for a full field breakdown.
+      </p>
+
+      <!-- Step 2 -->
+      <h3>Step 2 — Create a Role</h3>
+      <p>Navigate to <strong>Roles → New Role</strong>.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Name</td><td><code>CRM Agent — Read + Notes</code></td></tr>
+            <tr><td>Description</td><td>Allows the CRM assistant to read contacts/deals and create notes. Write operations are excluded — add them via a separate role only when required.</td></tr>
+            <tr><td>Scopes</td><td><code>crm:contacts.read</code>, <code>crm:deals.read</code>, <code>crm:notes.create</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Use the scope picker to search and select each scope from the catalog. Do not add <code>crm:contacts.write</code> here — that scope will be governed by a policy condition instead of being freely granted.</p>
+
+      <!-- Step 3 -->
+      <h3>Step 3 — Create the Agent</h3>
+      <p>Navigate to <strong>Agents → New agent</strong>.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Display name</td><td><code>CRM Assistant</code></td></tr>
+            <tr><td>Slug</td><td><code>crm-assistant</code></td></tr>
+            <tr><td>Supervision mode</td><td><code>human_supervised</code></td></tr>
+            <tr><td>Daily action budget</td><td><code>500</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>After creating the agent, open its detail page and go to the <strong>Roles</strong> tab → <strong>Add role</strong> → select <code>CRM Agent — Read + Notes</code>.</p>
+
+      <!-- Step 4 -->
+      <h3>Step 4 — Create a Policy</h3>
+      <p>Navigate to <strong>Policies → New policy</strong>. This policy requires approval for contact writes outside business hours.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Display name</td><td><code>CRM write — require approval off-hours</code></td></tr>
+            <tr><td>Effect</td><td><code>require_approval</code></td></tr>
+            <tr><td>Priority</td><td><code>100</code></td></tr>
+            <tr><td>Scopes</td><td><code>crm:contacts.write</code></td></tr>
+            <tr><td>Resource types</td><td><code>crm.contact</code></td></tr>
+            <tr><td>Condition</td><td>Matches requests outside 09:00–18:00 (see below)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <pre><code>{
+  "op": "not",
+  "args": [
+    { "op": "time_between", "args": ["ctx.context.time", "09:00", "18:00"] }
+  ]
+}</code></pre>
+      <p>Then create a second policy that allows writes during business hours:</p>
+      <pre><code>display_name: "CRM write — allow during business hours"
+effect:       allow
+priority:     200
+scopes:       crm:contacts.write
+condition:    { "op": "time_between", "args": ["ctx.context.time", "09:00", "18:00"] }</code></pre>
+
+      <p>Bind both policies to the agent from the <strong>Bindings</strong> tab on each policy page (subject selector: <code>agent:&lt;agent-uuid&gt;</code>).</p>
+
+      <!-- Step 5 -->
+      <h3>Step 5 — Test with a permission check</h3>
+      <pre><code>POST /api/v1/decisions/check
+{
+  "subject_type": "agent",
+  "subject_id":   "&lt;crm-assistant-uuid&gt;",
+  "action":       "crm:contacts.write",
+  "resource": {
+    "type": "crm.contact",
+    "id":   "contact_8812",
+    "attrs": {
+      "contact_id":      "contact_8812",
+      "fields_changed":  ["email", "phone"],
+      "is_bulk_operation": false
+    }
+  },
+  "context": {
+    "time":       "22:30",          // Outside business hours → require_approval
+    "ip":         "203.0.113.42",
+    "ip_country": "US",
+    "user_id":    "u_sales_rep_007",
+    "session_id": "sess_abc123",
+    "request_id": "req_xyz456"
+  }
+}
+
+// Response:
+{
+  "effect":            "require_approval",
+  "matched_policy_id": "&lt;policy-uuid&gt;",
+  "reason":            "policy: CRM write — require approval off-hours",
+  "approval_id":       "&lt;approval-uuid&gt;"
+}</code></pre>
+
+      <p>Try the same request with <code>"time": "10:00"</code> and it returns <code>allow</code>.</p>
+    </section>
+
+    <!-- ── Example 2: Infra Manager ── -->
+    <section id="example-infra">
+      <h2>Example 2 — Infra Manager</h2>
+      <p class="lead" style="font-size:15px; margin-bottom:24px;">
+        An infrastructure automation agent that can read logs freely, but requires human
+        approval before restarting services or allocating disk — and is blocked entirely
+        outside the EU/US geofence.
+      </p>
+
+      <!-- Step 1 -->
+      <h3>Step 1 — Register scopes in the Scope Catalog</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Namespace</th><th>Name</th><th>Scope string</th><th>Risk</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>infra</code></td><td><code>logs.read</code></td><td><code>infra:logs.read</code></td><td><span class="pill pill-ok">low</span></td><td>Stream or query server logs.</td></tr>
+            <tr><td><code>infra</code></td><td><code>restart</code></td><td><code>infra:restart</code></td><td><span class="pill pill-danger">high</span></td><td>Restart a named service or container.</td></tr>
+            <tr><td><code>infra</code></td><td><code>disk.allocate</code></td><td><code>infra:disk.allocate</code></td><td><span class="pill pill-danger">high</span></td><td>Resize or allocate a disk volume.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Input schema for <code>infra:restart</code>:</p>
+      <pre><code>{
+  "type": "object",
+  "properties": {
+    "service_name": {
+      "type": "string",
+      "description": "Name of the service or container to restart, e.g. \"api-server\""
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["production", "staging", "development"],
+      "description": "Target environment. Policies can deny production restarts unconditionally."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Human-readable justification for the restart (shown to approvers)"
+    }
+  },
+  "required": ["service_name", "environment"]
+}</code></pre>
+
+      <p>Input schema for <code>infra:disk.allocate</code>:</p>
+      <pre><code>{
+  "type": "object",
+  "properties": {
+    "volume_id": {
+      "type": "string",
+      "description": "Cloud provider volume ID, e.g. \"vol-0a1b2c3d\""
+    },
+    "size_gb": {
+      "type": "number",
+      "description": "Requested size in gigabytes. Policies can cap at a maximum."
+    },
+    "region": {
+      "type": "string",
+      "description": "Cloud region, e.g. \"us-east-1\". Used in geo-restriction conditions."
+    }
+  },
+  "required": ["volume_id", "size_gb"]
+}</code></pre>
+
+      <!-- Step 2 -->
+      <h3>Step 2 — Create a Role</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Name</td><td><code>Infra Operator</code></td></tr>
+            <tr><td>Description</td><td>Full infrastructure access — restart, disk allocation, and log reading.</td></tr>
+            <tr><td>Scopes</td><td><code>infra:logs.read</code>, <code>infra:restart</code>, <code>infra:disk.allocate</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Step 3 -->
+      <h3>Step 3 — Create the Agent</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Display name</td><td><code>Infra Manager</code></td></tr>
+            <tr><td>Slug</td><td><code>infra-manager</code></td></tr>
+            <tr><td>Supervision mode</td><td><code>human_supervised</code></td></tr>
+            <tr><td>Daily action budget</td><td><code>100</code> (restarts are expensive, keep the budget tight)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Open the agent's detail page → <strong>Roles</strong> tab → <strong>Add role</strong> → <code>Infra Operator</code>.</p>
+
+      <!-- Step 4 -->
+      <h3>Step 4 — Create Policies</h3>
+
+      <h4>Policy A — Allow log reads anywhere, anytime</h4>
+      <pre><code>display_name: "Infra — allow log reads"
+effect:       allow
+priority:     100
+scopes:       infra:logs.read
+condition:    {}    // no condition = matches all requests</code></pre>
+
+      <h4>Policy B — Geofence: block all infra actions outside US/EU</h4>
+      <pre><code>display_name: "Infra — deny non-US/EU"
+effect:       deny
+priority:     200
+scopes:       infra:restart, infra:disk.allocate
+condition:
+{
+  "op": "not",
+  "args": [{
+    "op": "in",
+    "args": ["ctx.context.ip_country", ["US", "DE", "GB", "FR", "NL", "IE"]]
+  }]
+}</code></pre>
+
+      <h4>Policy C — Require approval for restarts and disk allocation</h4>
+      <pre><code>display_name: "Infra — require approval for destructive ops"
+effect:       require_approval
+priority:     300
+scopes:       infra:restart, infra:disk.allocate
+condition:    {}    // catches everything not already denied by Policy B</code></pre>
+
+      <p>Bind all three policies to the agent. The engine evaluates them in priority order: 100 → 200 → 300. A log read hits Policy A (allow) immediately. A restart from an unknown country hits Policy B (deny). A restart from a valid country skips Policy B (condition doesn't match) and hits Policy C (require_approval).</p>
+
+      <!-- Step 5 -->
+      <h3>Step 5 — Test with a permission check</h3>
+      <pre><code>// ✅ Log read from India — ALLOW (Policy A matches before geofence)
+POST /api/v1/decisions/check
+{
+  "subject_type": "agent",
+  "subject_id":   "&lt;infra-manager-uuid&gt;",
+  "action":       "infra:logs.read",
+  "resource": { "type": "server", "id": "prod-api-01", "attrs": {} },
+  "context": {
+    "time":       "03:00",
+    "ip_country": "IN",
+    "request_id": "req_log_001"
+  }
+}
+// → { "effect": "allow" }
+
+// ❌ Restart from China — DENY (Policy B geofence)
+{
+  "action": "infra:restart",
+  "resource": {
+    "type": "service",
+    "id":   "api-server",
+    "attrs": {
+      "service_name": "api-server",
+      "environment":  "production",
+      "reason":       "high memory usage"
+    }
+  },
+  "context": { "ip_country": "CN", "time": "14:00" }
+}
+// → { "effect": "deny", "reason": "policy: Infra — deny non-US/EU" }
+
+// ⏳ Restart from US — REQUIRE APPROVAL (Policy C)
+{
+  "action": "infra:restart",
+  "resource": {
+    "type": "service",
+    "id":   "api-server",
+    "attrs": {
+      "service_name": "api-server",
+      "environment":  "production",
+      "reason":       "high memory usage"
+    }
+  },
+  "context": { "ip_country": "US", "time": "14:00", "user_id": "u_devops_42" }
+}
+// → { "effect": "require_approval", "approval_id": "apr_..." }</code></pre>
+    </section>
+
+    <!-- ── Example 3: Employee Profile ── -->
+    <section id="example-hr">
+      <h2>Example 3 — Employee Profile Agent</h2>
+      <p class="lead" style="font-size:15px; margin-bottom:24px;">
+        An HR agent that can read and update employee profile fields, but is blocked from
+        accessing salary data unless the requesting user is in the HR admin group, and is
+        always denied during non-working hours.
+      </p>
+
+      <!-- Step 1 -->
+      <h3>Step 1 — Register scopes in the Scope Catalog</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Namespace</th><th>Name</th><th>Scope string</th><th>Risk</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>hr</code></td><td><code>profile.read</code></td><td><code>hr:profile.read</code></td><td><span class="pill pill-ok">low</span></td><td>Read basic employee profile fields (name, title, department).</td></tr>
+            <tr><td><code>hr</code></td><td><code>profile.update</code></td><td><code>hr:profile.update</code></td><td><span class="pill pill-warn">medium</span></td><td>Update mutable profile fields (title, department, manager).</td></tr>
+            <tr><td><code>hr</code></td><td><code>salary.read</code></td><td><code>hr:salary.read</code></td><td><span class="pill pill-danger" style="background:rgba(244,63,94,0.2)">critical</span></td><td>Read compensation data. Restricted to HR admin users only.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Input schema for <code>hr:profile.update</code>:</p>
+      <pre><code>{
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "description": "Internal employee ID being updated"
+    },
+    "fields": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Names of the fields being changed, e.g. [\"title\", \"department\"]"
+    },
+    "self_service": {
+      "type": "boolean",
+      "description": "True if the employee is updating their own record. Policies can allow self-service updates without approval."
+    }
+  },
+  "required": ["employee_id", "fields"]
+}</code></pre>
+
+      <p>Input schema for <code>hr:salary.read</code>:</p>
+      <pre><code>{
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "description": "Employee whose compensation data is being accessed"
+    },
+    "requester_role": {
+      "type": "string",
+      "description": "Role of the requesting user, e.g. \"hr_admin\", \"manager\", \"employee\". Policies use this to gate access."
+    },
+    "purpose": {
+      "type": "string",
+      "enum": ["compensation_review", "offer_creation", "audit"],
+      "description": "Declared purpose for the access — logged in the audit trail."
+    }
+  },
+  "required": ["employee_id", "requester_role"]
+}</code></pre>
+
+      <!-- Step 2 -->
+      <h3>Step 2 — Create Roles</h3>
+      <p>Create two roles to reflect the different access levels:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Role name</th><th>Scopes</th><th>Who gets it</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>HR Agent — Profile Access</code></td>
+              <td><code>hr:profile.read</code>, <code>hr:profile.update</code></td>
+              <td>All HR agents by default</td>
+            </tr>
+            <tr>
+              <td><code>HR Agent — Salary Access</code></td>
+              <td><code>hr:salary.read</code></td>
+              <td>Agents operating on behalf of an HR admin user only</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Step 3 -->
+      <h3>Step 3 — Create the Agent</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Display name</td><td><code>Employee Profile Agent</code></td></tr>
+            <tr><td>Slug</td><td><code>employee-profile</code></td></tr>
+            <tr><td>Supervision mode</td><td><code>human_supervised</code></td></tr>
+            <tr><td>Daily action budget</td><td><code>1000</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Assign both roles to the agent. The agent now has all three scopes in its grant set. Policies will narrow what's actually allowed at decision time.</p>
+
+      <!-- Step 4 -->
+      <h3>Step 4 — Create Policies</h3>
+
+      <h4>Policy A — Allow profile read/update during business hours</h4>
+      <pre><code>display_name: "HR — allow profile ops during business hours"
+effect:       allow
+priority:     100
+scopes:       hr:profile.read, hr:profile.update
+condition:
+{ "op": "time_between", "args": ["ctx.context.time", "08:00", "19:00"] }</code></pre>
+
+      <h4>Policy B — Deny all ops outside business hours</h4>
+      <pre><code>display_name: "HR — deny all ops outside hours"
+effect:       deny
+priority:     200
+scopes:       hr:profile.read, hr:profile.update, hr:salary.read
+condition:
+{
+  "op": "not",
+  "args": [{ "op": "time_between", "args": ["ctx.context.time", "08:00", "19:00"] }]
+}</code></pre>
+
+      <h4>Policy C — Allow salary reads only for hr_admin requester role</h4>
+      <pre><code>display_name: "HR — salary reads for hr_admin only"
+effect:       allow
+priority:     300
+scopes:       hr:salary.read
+condition:
+{
+  "op": "eq",
+  "args": ["ctx.resource.attrs.requester_role", "hr_admin"]
+}</code></pre>
+
+      <h4>Policy D — Deny all other salary reads</h4>
+      <pre><code>display_name: "HR — deny salary reads by default"
+effect:       deny
+priority:     400
+scopes:       hr:salary.read
+condition:    {}    // catch-all for any salary read not matched above</code></pre>
+
+      <!-- Step 5 -->
+      <h3>Step 5 — Test with permission checks</h3>
+      <pre><code>// ✅ Profile read during hours — ALLOW
+{
+  "subject_type": "agent",
+  "subject_id":   "&lt;employee-profile-uuid&gt;",
+  "action":       "hr:profile.read",
+  "resource": {
+    "type": "employee",
+    "id":   "emp_2291",
+    "attrs": { "employee_id": "emp_2291" }
+  },
+  "context": {
+    "time":       "10:30",
+    "ip_country": "US",
+    "user_id":    "u_manager_55",
+    "session_id": "sess_hr_001"
+  }
+}
+// → { "effect": "allow" }
+
+// ❌ Salary read by a non-admin — DENY (Policy C doesn't match, Policy D denies)
+{
+  "action": "hr:salary.read",
+  "resource": {
+    "type": "employee_salary",
+    "id":   "emp_2291",
+    "attrs": {
+      "employee_id":    "emp_2291",
+      "requester_role": "manager",
+      "purpose":        "compensation_review"
+    }
+  },
+  "context": { "time": "11:00", "user_id": "u_manager_55" }
+}
+// → { "effect": "deny", "reason": "policy: HR — deny salary reads by default" }
+
+// ✅ Salary read by hr_admin — ALLOW (Policy C matches)
+{
+  "action": "hr:salary.read",
+  "resource": {
+    "type": "employee_salary",
+    "id":   "emp_2291",
+    "attrs": {
+      "employee_id":    "emp_2291",
+      "requester_role": "hr_admin",
+      "purpose":        "offer_creation"
+    }
+  },
+  "context": { "time": "11:00", "user_id": "u_hr_admin_03" }
+}
+// → { "effect": "allow" }</code></pre>
+
+      <div class="callout ok">
+        <span class="callout-icon">✅</span>
+        <div class="callout-body">
+          <strong>Non-escalation guarantee:</strong> If you pass <code>on_behalf_of_user_id</code>, the agent's effective scopes are automatically intersected with the human user's scopes — so even if the agent has <code>hr:salary.read</code> in its role, it cannot use that scope while acting on behalf of a user who doesn't also have it.
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Context JSON Reference ── -->
+    <section id="context-reference">
+      <h2>Context JSON — field reference</h2>
+      <p>
+        The <code>context</code> object is a free-form map you pass alongside every decision request.
+        It provides the runtime environment that ABAC conditions evaluate against — things like current time,
+        client IP, the user's role, and any custom attributes your policies need.
+        Fields you don't pass default to <code>null</code> in the evaluation engine.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Type</th>
+              <th>Example</th>
+              <th>What it's used for</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>time</code></td>
+              <td>string (HH:MM)</td>
+              <td><code>"14:30"</code></td>
+              <td>
+                Evaluated by the <code>time_between</code> condition operator.
+                Pass the current local time (or a UTC time) to enable business-hours policies.
+                If omitted, <code>time_between</code> conditions always evaluate to <code>false</code>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>ip</code></td>
+              <td>string (IP address)</td>
+              <td><code>"203.0.113.42"</code></td>
+              <td>
+                Logged in the audit event for forensic traceability. Kynara's server-side
+                GeoIP lookup also derives <code>ip_country</code> from this value automatically
+                if you don't supply it explicitly.
+              </td>
+            </tr>
+            <tr>
+              <td><code>ip_country</code></td>
+              <td>string (ISO 3166-1 alpha-2)</td>
+              <td><code>"US"</code></td>
+              <td>
+                Used in <code>in</code> / <code>eq</code> conditions for geographic access control.
+                You can pass this explicitly (e.g. from your own GeoIP lookup) or omit it and let
+                the server derive it from <code>ip</code>. Referenced in policies as
+                <code>ctx.context.ip_country</code>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>user_id</code></td>
+              <td>string</td>
+              <td><code>"u_sales_007"</code></td>
+              <td>
+                The human user on whose behalf the agent is acting, for logging and ABAC
+                conditions that reference user attributes. Distinct from
+                <code>on_behalf_of_user_id</code> — that field is for the non-escalation
+                intersection; <code>context.user_id</code> is purely informational for
+                conditions and the audit log.
+              </td>
+            </tr>
+            <tr>
+              <td><code>session_id</code></td>
+              <td>string</td>
+              <td><code>"sess_abc123"</code></td>
+              <td>
+                Groups a sequence of related decisions in the audit log. Useful for
+                reconstructing everything an agent did during a single user session or
+                workflow run. No policy operators act on this field natively; use it for
+                audit correlation.
+              </td>
+            </tr>
+            <tr>
+              <td><code>request_id</code></td>
+              <td>string</td>
+              <td><code>"req_xyz456"</code></td>
+              <td>
+                A trace ID from your own infrastructure (e.g. a distributed tracing span ID
+                or an HTTP request ID). Stored in the audit event so you can cross-reference
+                Kynara decisions with your application logs. Not evaluated by any condition
+                operator; purely a correlation handle.
+              </td>
+            </tr>
+            <tr>
+              <td><code>env</code></td>
+              <td>string</td>
+              <td><code>"production"</code></td>
+              <td>
+                Identifies the deployment environment. Policies can reference this as
+                <code>ctx.context.env</code> to enforce stricter rules in production than
+                in staging — e.g. always require approval in <code>production</code>, allow
+                freely in <code>development</code>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>mfa_verified</code></td>
+              <td>boolean</td>
+              <td><code>true</code></td>
+              <td>
+                Pass <code>true</code> when the human user has recently authenticated with MFA.
+                Policies can use <code>{ "op": "eq", "args": ["ctx.context.mfa_verified", true] }</code>
+                as a gate for high-risk actions — e.g. only allow salary reads when MFA is confirmed.
+              </td>
+            </tr>
+            <tr>
+              <td><code>user_role</code></td>
+              <td>string</td>
+              <td><code>"hr_admin"</code></td>
+              <td>
+                A custom role or group string from your identity system.
+                Referenced by conditions as <code>ctx.context.user_role</code> to allow
+                different behaviour for different user classes without needing separate agents.
+              </td>
+            </tr>
+            <tr>
+              <td><em>any custom key</em></td>
+              <td>string / number / boolean</td>
+              <td><code>"data_classification": "PII"</code></td>
+              <td>
+                You can pass any additional key-value pairs your policies need.
+                They're accessible in condition ASTs as <code>ctx.context.&lt;key&gt;</code>.
+                Good examples: <code>tenant_id</code>, <code>cost_center</code>,
+                <code>approval_ticket</code>, <code>risk_score</code>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body">
+          <strong>Context ≠ Resource attrs.</strong>
+          <code>context</code> describes the <em>environment at request time</em> (who, when, where, how).
+          <code>resource.attrs</code> describes the <em>object being acted on</em> (what).
+          Keep them separate: time-of-day goes in <code>context</code>; the <code>amount_cents</code>
+          of a payment goes in <code>resource.attrs</code>.
+        </div>
+      </div>
+
+      <h3>How conditions reference context</h3>
+      <p>Every condition field path starts with <code>ctx.</code> to distinguish it from literal values:</p>
+      <pre><code>// Check time-of-day
+{ "op": "time_between", "args": ["ctx.context.time", "09:00", "18:00"] }
+
+// Check country
+{ "op": "in", "args": ["ctx.context.ip_country", ["US", "GB", "DE"]] }
+
+// Check environment
+{ "op": "eq", "args": ["ctx.context.env", "production"] }
+
+// Check a resource attribute (resource.attrs.amount_cents > 10000)
+{ "op": "gt", "args": ["ctx.resource.attrs.amount_cents", 10000] }
+
+// Check the requester's role (from resource.attrs)
+{ "op": "eq", "args": ["ctx.resource.attrs.requester_role", "hr_admin"] }
+
+// Combine conditions
+{
+  "op": "and",
+  "args": [
+    { "op": "eq", "args": ["ctx.context.env", "production"] },
+    { "op": "eq", "args": ["ctx.context.mfa_verified", true] }
+  ]
+}</code></pre>
+    </section>
+
+    <!-- ── Input Schema Reference ── -->
+    <section id="schema-reference">
+      <h2>Input Schema — field reference</h2>
+      <p>
+        Each Scope Catalog entry has an optional <strong>Input Schema</strong> — a
+        <a href="https://json-schema.org/understanding-json-schema/" target="_blank">JSON Schema</a>
+        object that documents the parameters your tool accepts. This schema appears in the Kynara
+        UI to help policy authors understand what's available in <code>resource.attrs</code>, and it
+        can be imported into your agent code so it knows what to send.
+      </p>
+
+      <h3>Schema structure</h3>
+      <pre><code>{
+  "type": "object",          // always "object" for tool inputs
+  "properties": {            // map of parameter name → JSON Schema descriptor
+    "param_name": {
+      "type":        "string | number | boolean | array | object",
+      "description": "Human-readable explanation shown in the Kynara UI and to policy authors",
+      "enum":        ["option_a", "option_b"],  // optional — restricts to fixed values
+      "default":     "some_value"               // optional — shown as the presumed default
+    }
+  },
+  "required": ["param_name"]  // params the agent MUST always send
+}</code></pre>
+
+      <h3>Field-by-field breakdown</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Required</th>
+              <th>What it means</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>type</code></td>
+              <td>Yes</td>
+              <td>
+                The JSON type of this parameter: <code>string</code>, <code>number</code>,
+                <code>boolean</code>, <code>array</code>, or <code>object</code>.
+                Kynara validates that the value passed in <code>resource.attrs</code>
+                matches this type at decision time.
+              </td>
+            </tr>
+            <tr>
+              <td><code>description</code></td>
+              <td>Strongly recommended</td>
+              <td>
+                Plain-English explanation of what this parameter means. This is what
+                policy authors read when deciding which <code>resource.attrs</code>
+                fields to use in conditions. Be specific — e.g. <em>"Amount in cents,
+                not dollars"</em> rather than <em>"Amount"</em>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>enum</code></td>
+              <td>No</td>
+              <td>
+                An array of the only permitted values. When present, Kynara validates
+                incoming values at decision time and rejects any value not in the list.
+                Ideal for fields like <code>environment</code> or <code>risk_level</code>
+                where a free-form string would be a policy bypass risk.
+              </td>
+            </tr>
+            <tr>
+              <td><code>default</code></td>
+              <td>No</td>
+              <td>
+                The value assumed when the parameter is absent. Documented only —
+                Kynara does not inject defaults. Use this to communicate to agent
+                authors what the omitted-value behaviour is.
+              </td>
+            </tr>
+            <tr>
+              <td><code>required</code> (top-level array)</td>
+              <td>No</td>
+              <td>
+                Lists the parameter names the agent <em>must</em> send. If a required
+                parameter is missing from <code>resource.attrs</code>, Kynara returns
+                a validation error before the policy engine runs. Required parameters
+                are the ones your conditions rely on — if they're absent, the condition
+                can't be evaluated safely.
+              </td>
+            </tr>
+            <tr>
+              <td><code>items</code> (for array types)</td>
+              <td>No</td>
+              <td>
+                Describes the schema of each element when <code>type</code> is
+                <code>"array"</code>. Example: <code>"items": { "type": "string" }</code>
+                for a list of field names.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>How the schema relates to policies</h3>
+      <p>
+        The input schema is the contract between your agent code and your policies.
+        When you write a condition like:
+      </p>
+      <pre><code>{ "op": "gt", "args": ["ctx.resource.attrs.amount_cents", 10000] }</code></pre>
+      <p>
+        …you're depending on your agent always passing <code>amount_cents</code> in
+        <code>resource.attrs</code>. The input schema makes this dependency explicit
+        and enforces it. If <code>amount_cents</code> is in <code>required</code>,
+        Kynara will reject any decision request that doesn't include it — preventing
+        a badly-written agent from accidentally bypassing the condition.
+      </p>
+
+      <h3>Does the schema replace policies?</h3>
+      <p>No — they serve completely different purposes:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Input Schema</th><th>Policy</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Describes <em>what parameters</em> exist and their types</td>
+              <td>Describes <em>what is allowed</em> and under what conditions</td>
+            </tr>
+            <tr>
+              <td>Validates that required fields are present</td>
+              <td>Evaluates those fields against rules to produce allow / deny / require_approval</td>
+            </tr>
+            <tr>
+              <td>Static — doesn't change at request time</td>
+              <td>Dynamic — evaluated fresh on every request</td>
+            </tr>
+            <tr>
+              <td>Helps policy authors understand what to reference</td>
+              <td>Is the actual enforcement gate</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Do agents need to re-read the schema on every call?</h3>
+      <p>
+        No. The schema is a static contract defined when the tool is registered. Agent code
+        reads the schema once — typically at initialization or during a build step — and uses it
+        to know which fields to pass in <code>resource.attrs</code>. If you later update the
+        schema (e.g. add a new required field), agent developers must update their code to
+        pass the new field. Kynara will start rejecting requests that are missing it from
+        the moment the schema is saved.
+      </p>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body">
+          <strong>Schema changes are breaking changes.</strong> Adding a field to
+          <code>required</code> is equivalent to a breaking API change — any agent code
+          that doesn't send that field will start receiving validation errors immediately.
+          Always add new required fields in a two-phase deploy: add as optional first,
+          update all agents to send it, then promote to required.
         </div>
       </div>
     </section>
@@ -452,6 +1330,9 @@ curl -X POST https://kynara.ai/api/v1/decisions/check \
       <h3>Access summary</h3>
       <p>The <strong>Access Summary</strong> tab on the agent detail page shows a live view of the agent's effective scopes — combining its role assignments and any active JIT grants — so you can quickly see exactly what the agent is currently permitted to do.</p>
 
+      <h3>Role assignments</h3>
+      <p>The <strong>Roles</strong> tab on the agent detail page lets you assign roles to the agent. Each role grants a set of scopes (permissions). The agent's effective scope set is the union of all active role assignments. You can add or remove roles at any time — changes take effect immediately and are recorded in the audit log.</p>
+
       <h3>Policy bindings</h3>
       <p>Each policy shown on the agent detail page is labelled <strong>Direct</strong> (bound to this agent specifically) or <strong>Org-wide</strong> (bound to all agents via <code>*</code>). Org-wide bindings are managed from the Policies page.</p>
     </section>
@@ -464,7 +1345,7 @@ curl -X POST https://kynara.ai/api/v1/decisions/check \
       <ol class="steps">
         <li><p>Navigate to <strong>Policies → New policy</strong>.</p></li>
         <li><p>Enter a display name, set a priority (lower = evaluated first), and choose an effect.</p></li>
-        <li><p>Specify <strong>actions</strong> (e.g., <code>payments.refund.issue</code>) and optionally resource types.</p></li>
+        <li><p>Specify <strong>scopes</strong> (e.g., <code>payments.refund.issue</code>) and optionally resource types.</p></li>
         <li><p>Add an <strong>ABAC condition</strong> in the JSON editor (e.g., time-of-day, IP, data classification). Leave empty to match all requests.</p></li>
         <li><p>Use the <strong>Simulator</strong> panel (below the condition editor) to test before saving.</p></li>
         <li><p>Toggle <strong>Enabled</strong> and click <strong>Save</strong>.</p></li>
@@ -716,8 +1597,8 @@ def verify(secret: str, body: bytes, sig_header: str) -> bool:
           <tbody>
             <tr><td><strong>Owner</strong></td><td>Full access. Manages billing, SSO, members, org settings, and danger zone.</td></tr>
             <tr><td><strong>Admin</strong></td><td>Creates and modifies agents, policies, tools, and JIT grants. Cannot manage billing.</td></tr>
-            <tr><td><strong>Developer</strong></td><td>Registers agents and attaches/detaches policy bindings. Read-only access to audit log.</td></tr>
-            <tr><td><strong>Auditor / Viewer</strong></td><td>Read-only access to audit log and policy list. Cannot make changes.</td></tr>
+            <tr><td><strong>Developer</strong></td><td>Can access Dashboard, Agents, Scope Catalog, and How It Works. Cannot view Roles, Policies, Audit log, Billing, or Settings.</td></tr>
+            <tr><td><strong>Auditor</strong></td><td>Read-only access to Audit log, Policies, and Roles. Cannot create or modify any records.</td></tr>
           </tbody>
         </table>
       </div>
@@ -798,16 +1679,23 @@ def verify(secret: str, body: bytes, sig_header: str) -> bool:
       <h3>Decisions</h3>
       <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/decisions/check</span></div>
       <pre><code>{
-  "agent_id": "uuid",
+  "subject_type": "agent",           // "agent" | "user" | "api_key"
+  "subject_id": "uuid",
+  "on_behalf_of_user_id": null,      // optional — for delegated agents
   "action": "payments.refund.issue",
-  "resource_type": "payment",
-  "resource_id": "pay_123",
+  "resource": {
+    "type": "payment",
+    "id": "pay_123",
+    "attrs": { "amount_cents": 5000 }
+  },
   "context": { "user_id": "u_123", "time": "03:00", "ip": "1.2.3.4" }
 }
 → { "effect": "allow" | "deny" | "require_approval",
     "matched_policy_id": "uuid",
+    "granted_scopes": ["payments.refund.issue"],
+    "rbac_pass": true,
     "reason": "...",
-    "approval_url": "..." }</code></pre>
+    "approval_id": "..." }</code></pre>
 
       <h3>Policies</h3>
       <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/policies</span></div>
@@ -859,7 +1747,7 @@ from kynara_sdk.context import set_current_kynara
 
 set_current_kynara(Kynara.from_env())  # reads KYNARA_BASE_URL, KYNARA_API_KEY, KYNARA_AGENT_ID
 
-@permission_required("crm.contacts.read", resource_arg="contact_id", resource_type="crm.contact")
+@permission_required("crm:read", resource_arg="contact_id", resource_type="crm.contact")
 def read_contact(contact_id: str) -> dict:
     return crm_client.get_contact(contact_id)</code></pre>
 
@@ -1092,7 +1980,7 @@ GET /api/v1/audit/events?limit=1000&amp;after_cursor=eyJ...
   "description": "Require approval for refunds issued outside business hours.",
   "priority": 100,
   "effect": "require_approval",   // "allow" | "deny" | "require_approval"
-  "actions": ["payments.refund.issue"],
+  "actions": ["payments.refund.issue"],  // "actions" in API = "scopes" in UI
   "resource_types": ["payment"],  // [] or ["*"] = match all
   "condition": {                  // optional JSON AST
     "op": "not",
@@ -1111,7 +1999,7 @@ GET /api/v1/audit/events?limit=1000&amp;after_cursor=eyJ...
             <tr><td><code>display_name</code></td><td>string</td><td>Yes</td><td>Human-readable name shown in the UI.</td></tr>
             <tr><td><code>priority</code></td><td>integer</td><td>Yes</td><td>Evaluation order. Lower = evaluated first. Use gaps (100, 200) for easy insertion.</td></tr>
             <tr><td><code>effect</code></td><td>enum</td><td>Yes</td><td><code>allow</code>, <code>deny</code>, or <code>require_approval</code>.</td></tr>
-            <tr><td><code>actions</code></td><td>string[]</td><td>No</td><td>Dotted action strings. Empty or <code>["*"]</code> = all actions. Wildcards supported: <code>payments.*</code>.</td></tr>
+            <tr><td><code>actions</code></td><td>string[]</td><td>No</td><td>Scope strings (shown as "Scopes" in the UI). Empty or <code>["*"]</code> = all scopes. Wildcards supported: <code>payments.*</code>, <code>infra:*</code>.</td></tr>
             <tr><td><code>resource_types</code></td><td>string[]</td><td>No</td><td>Resource type strings. Empty = all types.</td></tr>
             <tr><td><code>condition</code></td><td>object</td><td>No</td><td>JSON AST condition tree. Leave null to match all requests unconditionally.</td></tr>
             <tr><td><code>is_enabled</code></td><td>boolean</td><td>No</td><td>Defaults to <code>true</code>. Disabled policies are skipped during evaluation.</td></tr>
