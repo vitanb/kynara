@@ -90,9 +90,13 @@ class Settings(BaseSettings):
     stripe_webhook_secret: str | None = None
     # Stripe Price IDs — set these in Railway env vars once you've created
     # products in the Stripe dashboard. Format: price_xxxxxxxxxxxxxxxxxx
-    stripe_price_team: str = "price_team_monthly"          # replace with real ID
-    stripe_price_business: str = "price_business_monthly"  # replace with real ID
+    # Stripe Price IDs — must start with "price_" (Railway → Variables)
+    # Frontend plan IDs: "pro" ($49/seat) and "enterprise" (custom)
+    stripe_price_pro: str = "price_pro_monthly"             # replace with real ID
     stripe_price_enterprise: str = "price_enterprise_monthly"  # replace with real ID
+    # Legacy aliases kept so old env vars don't cause startup errors
+    stripe_price_team: str = "price_team_monthly"
+    stripe_price_business: str = "price_business_monthly"
 
     # ---- Email ----
     # Transport priority: MailChannels → SMTP → console log (dev fallback)

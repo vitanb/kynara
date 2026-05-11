@@ -49,17 +49,20 @@ def create_checkout_session(*, org_id: str, plan: str, success_url: str, cancel_
 def _price_for_plan(plan: str) -> str:
     """Look up the Stripe Price ID for a plan.
 
-    Price IDs come from environment variables (STRIPE_PRICE_TEAM etc.) so you
-    can swap them without a code deploy. Set them in Railway → Variables.
+    Price IDs come from environment variables so you can swap them without a
+    code deploy. Set them in Railway → Variables.
 
+    Frontend sends: "pro" or "enterprise"
     To find your Price ID: Stripe Dashboard → Products → your product → Pricing.
     It looks like:  price_1OxxxxxxxxxxxxxxxxxxxxXX
     """
     s = get_settings()
     mapping = {
+        "pro":        s.stripe_price_pro,
+        "enterprise": s.stripe_price_enterprise,
+        # Legacy aliases — kept for any existing integrations
         "team":       s.stripe_price_team,
         "business":   s.stripe_price_business,
-        "enterprise": s.stripe_price_enterprise,
     }
     if plan not in mapping:
         raise ValueError(f"Unknown plan: {plan!r}. Valid plans: {list(mapping)}")
