@@ -1,10 +1,13 @@
 """Billing: subscription status, checkout, usage summary, Stripe webhook."""
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Header, Request
+
+logger = logging.getLogger("billing.api")
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -176,6 +179,9 @@ async def stripe_webhook(
             if data.get("current_period_end") else None
         sub.cancel_at_period_end = bool(data.get("cancel_at_period_end"))
     elif etype == "invoice.paid":
+        # Reset to active on successful payment (recovers from past_due)
+        if sub.status == "past_due":
+            sub.status = "active"
         session.add(Invoice(
             organization_id=uuid.UUID(org_id),
             stripe_invoice_id=data["id"],
@@ -187,6 +193,10 @@ async def stripe_webhook(
             period_start=datetime.fromtimestamp(data["period_start"], tz=timezone.utc),
             period_end=datetime.fromtimestamp(data["period_end"], tz=timezone.utc),
         ))
+    elif etype == "invoice.payment_failed":
+        # Flip to past_due — policy engine will start denying decisions for this org
+        sub.status = "past_due"
+        logger.warning("invoice.payment_failed org=%s — subscription marked past_due", org_id)
 
     await session.commit()
     await record_admin(

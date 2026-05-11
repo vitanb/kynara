@@ -47,12 +47,30 @@ def create_checkout_session(*, org_id: str, plan: str, success_url: str, cancel_
 
 
 def _price_for_plan(plan: str) -> str:
-    # These come from Stripe dashboard; kept here for clarity.
-    return {
-        "team":       "price_team_monthly",
-        "business":   "price_business_monthly",
-        "enterprise": "price_enterprise_monthly",
-    }[plan]
+    """Look up the Stripe Price ID for a plan.
+
+    Price IDs come from environment variables (STRIPE_PRICE_TEAM etc.) so you
+    can swap them without a code deploy. Set them in Railway → Variables.
+
+    To find your Price ID: Stripe Dashboard → Products → your product → Pricing.
+    It looks like:  price_1OxxxxxxxxxxxxxxxxxxxxXX
+    """
+    s = get_settings()
+    mapping = {
+        "team":       s.stripe_price_team,
+        "business":   s.stripe_price_business,
+        "enterprise": s.stripe_price_enterprise,
+    }
+    if plan not in mapping:
+        raise ValueError(f"Unknown plan: {plan!r}. Valid plans: {list(mapping)}")
+    price_id = mapping[plan]
+    # Catch the case where the operator forgot to set the env var
+    if not price_id.startswith("price_"):
+        raise RuntimeError(
+            f"STRIPE_PRICE_{plan.upper()} is not set to a real Stripe Price ID. "
+            f"Current value: {price_id!r}. Set it in Railway → Variables."
+        )
+    return price_id
 
 
 def report_usage(subscription_item_id: str, quantity: int, ts: int | None = None) -> None:

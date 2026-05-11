@@ -88,6 +88,11 @@ class Settings(BaseSettings):
     # ---- Billing ----
     stripe_secret_key: str | None = None
     stripe_webhook_secret: str | None = None
+    # Stripe Price IDs — set these in Railway env vars once you've created
+    # products in the Stripe dashboard. Format: price_xxxxxxxxxxxxxxxxxx
+    stripe_price_team: str = "price_team_monthly"          # replace with real ID
+    stripe_price_business: str = "price_business_monthly"  # replace with real ID
+    stripe_price_enterprise: str = "price_enterprise_monthly"  # replace with real ID
 
     # ---- Email ----
     # Transport priority: MailChannels → SMTP → console log (dev fallback)
