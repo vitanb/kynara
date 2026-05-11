@@ -76,6 +76,15 @@ def _price_for_plan(plan: str) -> str:
     return price_id
 
 
+def create_portal_session(*, customer_id: str, return_url: str) -> str:
+    _ensure_configured()
+    session = stripe.billing_portal.Session.create(  # type: ignore
+        customer=customer_id,
+        return_url=return_url,
+    )
+    return session.url
+
+
 def report_usage(subscription_item_id: str, quantity: int, ts: int | None = None) -> None:
     _ensure_configured()
     stripe.SubscriptionItem.create_usage_record(  # type: ignore

@@ -22,12 +22,11 @@ from app.models import Invoice, Organization, Subscription, UsageRecord
 router = APIRouter(prefix="/billing", tags=["billing"])
 
 # Quotas applied when a plan activates via Stripe webhook.
-# Seats: 0 = unlimited (no hard cap enforced). Decisions: monthly included allotment.
 _PLAN_QUOTAS: dict[str, dict] = {
-    "free":       {"seats_included": 3,          "decisions_included": 10_000},
-    "trial":      {"seats_included": 5,          "decisions_included": 100_000},
-    "pro":        {"seats_included": 999_999,    "decisions_included": 1_000_000},
-    "enterprise": {"seats_included": 999_999,    "decisions_included": 999_999_999},
+    "free":       {"seats_included": 3,       "decisions_included": 10_000},
+    "trial":      {"seats_included": 5,       "decisions_included": 100_000},
+    "pro":        {"seats_included": 10,      "decisions_included": 50_000},
+    "enterprise": {"seats_included": 999_999, "decisions_included": 10_000_000},
 }
 
 
@@ -130,6 +129,31 @@ async def list_invoices(
     ]
 
 
+@router.post("/portal")
+async def customer_portal(
+    request: Request,
+    principal: Principal = Depends(require_seat("owner", "admin")),
+    session: AsyncSession = Depends(_session),
+):
+    """Return a Stripe Customer Portal URL so the user can manage their subscription."""
+    sub = await session.scalar(select(Subscription).where(
+        Subscription.organization_id == uuid.UUID(principal.org_id)
+    ))
+    customer_id = sub.stripe_customer_id if sub else None
+    if not customer_id:
+        # Try to look up customer by org metadata if we don't have it cached
+        raise HTTPException(503, "No Stripe customer found for this organisation. "
+                                 "Complete a checkout first.")
+    try:
+        url = stripe_service.create_portal_session(
+            customer_id=customer_id,
+            return_url=f"{request.headers.get('origin', '')}/app/billing",
+        )
+    except RuntimeError:
+        raise HTTPException(503, "Billing not configured")
+    return {"redirect_url": url}
+
+
 @router.post("/checkout")
 async def checkout(body: CheckoutIn, request: Request,
                    principal: Principal = Depends(require_seat("owner", "admin")),
@@ -186,6 +210,9 @@ async def stripe_webhook(
         if plan_name:
             sub.plan = plan_name
             sub.status = "active"
+            # Persist the Stripe customer ID so we can open the portal later
+            if data.get("customer"):
+                sub.stripe_customer_id = data["customer"]
             # Apply seats + decisions quota for the new plan
             quotas = _PLAN_QUOTAS.get(plan_name, {})
             if quotas:

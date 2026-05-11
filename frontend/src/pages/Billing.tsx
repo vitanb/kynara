@@ -15,8 +15,8 @@ const PLANS = [
     iconColor: "#6366F1",
     iconBg: "rgba(99,102,241,0.15)",
     features: [
-      "Unlimited seats",
-      "1M policy decisions / month",
+      "Up to 10 seats",
+      "50,000 policy decisions / month",
       "Unlimited AI agents",
       "Audit log (1 year retention)",
       "SSO / OIDC support",
@@ -82,6 +82,17 @@ export default function BillingPage() {
   const trialDaysLeft = sub?.current_period_end
     ? Math.max(0, Math.ceil((new Date(sub.current_period_end).getTime() - Date.now()) / 86_400_000))
     : null;
+
+  const portal = useMutation({
+    mutationFn: () =>
+      api.post<{ redirect_url: string }>("/api/v1/billing/portal", {}),
+    onSuccess: ({ redirect_url }) => {
+      window.location.href = redirect_url;
+    },
+    onError: () => {
+      window.open("mailto:support@kynara.ai?subject=Manage subscription", "_blank");
+    },
+  });
 
   const checkout = useMutation({
     mutationFn: () =>
@@ -194,10 +205,11 @@ export default function BillingPage() {
               </button>
             ) : isOnPaid ? (
               <button
-                className="w-full justify-center py-2 text-sm text-ink-400 hover:text-white transition-colors"
-                onClick={() => window.open("mailto:support@kynara.ai?subject=Manage subscription", "_blank")}
+                className="w-full justify-center py-2 text-sm text-ink-400 hover:text-white transition-colors disabled:opacity-50"
+                disabled={portal.isPending}
+                onClick={() => portal.mutate()}
               >
-                Manage subscription
+                {portal.isPending ? "Opening…" : "Manage subscription"}
               </button>
             ) : (
               <button
