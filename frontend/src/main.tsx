@@ -32,6 +32,7 @@ import NotFoundPage from "./pages/NotFound";
 import HowItWorksPage from "./pages/HowItWorks";
 import ProfilePage from "./pages/Profile";
 import SuperAdminPage from "./pages/SuperAdmin";
+import SsoCallbackPage from "./pages/SsoCallback";
 import RequireAuth from "./components/layout/RequireAuth";
 
 const qc = new QueryClient({
@@ -52,6 +53,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="/invite" element={<AcceptInvitePage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            {/* SSO callback — must be outside RequireAuth, user has no token yet */}
+            <Route path="/app/sso-callback" element={<SsoCallbackPage />} />
             <Route
               path="/app"
               element={

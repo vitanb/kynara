@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { KeyRound, Hexagon, ShieldCheck, Activity, FileText, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
@@ -34,9 +34,13 @@ const features = [
 export default function LoginPage() {
   const { login } = useAuth();
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [err, setErr] = useState<string | null>(null);
+  const ssoErrorParam = searchParams.get("sso_error");
+  const [err, setErr] = useState<string | null>(
+    ssoErrorParam ? "SSO sign-in failed — please try again or contact your admin." : null
+  );
   const [busy, setBusy] = useState(false);
 
   // SSO email picker state
