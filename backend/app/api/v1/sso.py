@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import json
+import logging
 import secrets
 import uuid
 from datetime import datetime, timezone
+
+logger = logging.getLogger("sso.api")
 
 import redis.asyncio as redis_async
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -311,24 +314,20 @@ async def oidc_callback(
     if not conn:
         raise HTTPException(404, "Connection removed")
 
+    # Look up the user in Kynara — they must already exist and have been
+    # explicitly invited to this org. SSO authenticates identity only;
+    # org membership is managed separately via Kynara invites.
     user = await session.scalar(select(User).where(User.email == email))
     if not user:
-        user = User(
-            email=email,
-            display_name=claims.get("name") or claims.get("nickname"),
-            external_idp=conn.display_name.lower().replace(" ", "-"),
-            external_subject=claims["sub"],
-            mfa_enrolled=True,
+        logger.warning(
+            "sso.login: no Kynara user found for email=%s (conn=%s org=%s)",
+            email, conn.id, conn.organization_id,
         )
-        session.add(user)
-        await session.flush()
-        # Auto-add to the connection's org as "member"
-        session.add(OrgMembership(
-            organization_id=conn.organization_id,
-            user_id=user.id,
-            seat_role="member",
-        ))
-        await session.flush()
+        raise HTTPException(
+            403,
+            f"No Kynara account found for {email!r}. "
+            "Ask your organisation administrator to send you an invite."
+        )
 
     mem = await session.scalar(
         select(OrgMembership).where(
@@ -337,7 +336,15 @@ async def oidc_callback(
         )
     )
     if not mem:
-        raise HTTPException(403, "User is not a member of this organization")
+        logger.warning(
+            "sso.login: user %s (%s) has no membership in org %s (conn=%s)",
+            user.id, email, conn.organization_id, conn.id,
+        )
+        raise HTTPException(
+            403,
+            f"{email!r} is not a member of this organisation. "
+            "Go to Settings → Members → Invite in Kynara to add them."
+        )
 
     access = mint_access_token(
         user_id=str(user.id),
