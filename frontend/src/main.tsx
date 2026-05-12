@@ -33,6 +33,7 @@ import HowItWorksPage from "./pages/HowItWorks";
 import ProfilePage from "./pages/Profile";
 import SuperAdminPage from "./pages/SuperAdmin";
 import SsoCallbackPage from "./pages/SsoCallback";
+import UsagePage from "./pages/Usage";
 import RequireAuth from "./components/layout/RequireAuth";
 
 const qc = new QueryClient({
@@ -80,6 +81,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <Route path="guardrails" element={<GuardrailsPage />} />
               <Route path="audit" element={<AuditPage />} />
               <Route path="billing" element={<BillingPage />} />
+              <Route path="usage" element={<UsagePage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="settings/sso/new" element={<SsoSetupPage />} />
             </Route>
