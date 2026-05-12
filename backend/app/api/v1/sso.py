@@ -245,15 +245,39 @@ async def oidc_start(
     if body.connection_id:
         conn = await session.get(SsoConnection, uuid.UUID(body.connection_id))
     elif body.email:
-        domain = body.email.split("@")[-1].lower()
-        # Find any enabled OIDC connection that allows this domain
-        rows = (await session.scalars(
-            select(SsoConnection).where(SsoConnection.protocol == "oidc", SsoConnection.is_enabled.is_(True))
-        )).all()
-        conn = next(
-            (r for r in rows if domain in (r.email_domain_allowlist or [])),
-            None,
-        )
+        email_lower = body.email.lower().strip()
+
+        # Primary lookup: find the user in Kynara → their org → that org's SSO connection.
+        # This ensures the user always lands in the org they actually belong to,
+        # regardless of email domain patterns.
+        user = await session.scalar(select(User).where(User.email == email_lower))
+        if user:
+            mem = await session.scalar(
+                select(OrgMembership).where(OrgMembership.user_id == user.id).limit(1)
+            )
+            if mem:
+                conn = await session.scalar(
+                    select(SsoConnection).where(
+                        SsoConnection.organization_id == mem.organization_id,
+                        SsoConnection.protocol == "oidc",
+                        SsoConnection.is_enabled.is_(True),
+                    )
+                )
+
+        # Fallback: domain-based lookup for users not yet in Kynara
+        # (e.g. first-time SSO login before an explicit invite is sent)
+        if not conn:
+            domain = email_lower.split("@")[-1]
+            rows = (await session.scalars(
+                select(SsoConnection).where(
+                    SsoConnection.protocol == "oidc",
+                    SsoConnection.is_enabled.is_(True),
+                )
+            )).all()
+            conn = next(
+                (r for r in rows if domain in (r.email_domain_allowlist or [])),
+                None,
+            )
 
     if not conn or conn.protocol != "oidc" or not conn.is_enabled:
         raise HTTPException(404, "No active OIDC connection found for this domain or connection ID")
@@ -390,23 +414,46 @@ async def oidc_callback(
 
 @router.get("/lookup")
 async def lookup_by_email(email: str, session: AsyncSession = Depends(_session)):
-    """Return the SSO connection(s) that match the given email's domain.
+    """Return the SSO connection(s) for the given email.
 
-    The login page calls this after the user types their email, so it can
-    decide whether to show the SSO button and which connection_id to pass.
+    Lookup order:
+    1. Find the user in Kynara → their org → that org's SSO connection (most precise).
+    2. Fall back to email domain matching for users not yet in Kynara.
+
+    The login page calls this so it can show the SSO button and pass the right connection_id.
     """
     if "@" not in email:
         return {"connections": []}
 
-    domain = email.split("@")[-1].lower()
-    rows = (await session.scalars(
-        select(SsoConnection).where(
-            SsoConnection.is_enabled.is_(True),
+    email_lower = email.lower().strip()
+
+    # Primary: user-based lookup
+    user = await session.scalar(select(User).where(User.email == email_lower))
+    if user:
+        mem = await session.scalar(
+            select(OrgMembership).where(OrgMembership.user_id == user.id).limit(1)
         )
+        if mem:
+            rows = (await session.scalars(
+                select(SsoConnection).where(
+                    SsoConnection.organization_id == mem.organization_id,
+                    SsoConnection.is_enabled.is_(True),
+                )
+            )).all()
+            if rows:
+                return {"connections": [
+                    {"id": str(r.id), "display_name": r.display_name, "protocol": r.protocol}
+                    for r in rows
+                ]}
+
+    # Fallback: domain-based lookup
+    domain = email_lower.split("@")[-1]
+    all_conns = (await session.scalars(
+        select(SsoConnection).where(SsoConnection.is_enabled.is_(True))
     )).all()
     matches = [
         {"id": str(r.id), "display_name": r.display_name, "protocol": r.protocol}
-        for r in rows
+        for r in all_conns
         if domain in (r.email_domain_allowlist or [])
     ]
     return {"connections": matches}
