@@ -80,6 +80,12 @@ async def complete_flow_with_config(code: str, state_bundle: dict) -> dict:
     """Exchange code → validated id_token claims using credentials embedded in the state bundle."""
     meta = await _fetch_well_known(state_bundle["issuer"])
 
+    # Use the canonical issuer from the well-known config, not the stored string.
+    # Auth0 always includes a trailing slash in its issuer claim
+    # (e.g. "https://tenant.auth0.com/") and PyJWT rejects a mismatch even
+    # if the URLs are otherwise identical.
+    canonical_issuer = meta.get("issuer", state_bundle["issuer"])
+
     async with httpx.AsyncClient(timeout=10.0) as c:
         tok = await c.post(
             meta["token_endpoint"],
@@ -110,7 +116,7 @@ async def complete_flow_with_config(code: str, state_bundle: dict) -> dict:
         public_key,
         algorithms=[header["alg"]],
         audience=state_bundle["client_id"],
-        issuer=state_bundle["issuer"],
+        issuer=canonical_issuer,
     )
     if claims.get("nonce") != state_bundle["nonce"]:
         raise PermissionError("nonce mismatch")
