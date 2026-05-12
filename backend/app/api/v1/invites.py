@@ -88,6 +88,35 @@ async def create_invite(
     org = await session.get(Organization, principal.org_id)
     inviter = await session.get(User, principal.user_id)
 
+    # If the invited email already has a Kynara account, immediately create
+    # the OrgMembership — no need for them to click an invite link.
+    existing_user = await session.scalar(
+        select(User).where(User.email == body.email.lower().strip())
+    ) if body.email else None
+
+    if existing_user:
+        existing_mem = await session.scalar(
+            select(OrgMembership).where(
+                OrgMembership.organization_id == principal.org_id,
+                OrgMembership.user_id == existing_user.id,
+            )
+        )
+        if not existing_mem:
+            session.add(OrgMembership(
+                organization_id=principal.org_id,
+                user_id=existing_user.id,
+                seat_role=body.seat_role,
+            ))
+            await session.commit()
+        # Return a synthetic invite response — no pending token needed
+        return InviteOut(
+            invite_id="direct",
+            token="",
+            expires_at=expires_at.isoformat(),
+            seat_role=body.seat_role,
+            email=body.email,
+        )
+
     invite = OrgInvite(
         organization_id=principal.org_id,
         created_by_user_id=principal.user_id,
