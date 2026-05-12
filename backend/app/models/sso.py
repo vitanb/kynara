@@ -59,3 +59,24 @@ class ScimSync(Base, UUIDPkMixin, TimestampMixin):
     resource_type: Mapped[str] = mapped_column(String(32), nullable=False)  # User | Group
     last_sync_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     payload: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+
+
+class ScimToken(Base, UUIDPkMixin, TimestampMixin):
+    """Per-org bearer token that authenticates SCIM 2.0 provisioning requests.
+
+    One org can have multiple tokens (e.g. migration cut-over, IdP rotation).
+    The token value is never stored; only its SHA-256-over-HMAC hash is kept.
+    Issued from the SSO settings page and immediately shown once in plaintext.
+    """
+
+    __tablename__ = "scim_tokens"
+
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
+    # HMAC-SHA256(token, jwt_secret) — never store the raw token
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    label: Mapped[str] = mapped_column(String(255), nullable=False, default="Default")
+    is_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

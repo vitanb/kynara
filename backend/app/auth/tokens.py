@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import secrets
 import uuid
 from dataclasses import dataclass
@@ -76,14 +77,27 @@ def decode_access_token(token: str) -> AccessTokenClaims:
 
 
 # ------------------------------------------------------------ refresh tokens --
+def _refresh_hmac_key() -> bytes:
+    """Derive a stable HMAC key from the JWT secret for refresh token hashing.
+
+    Using HMAC-SHA256 instead of plain SHA-256 means that an attacker who
+    obtains the hashed token values from the database cannot brute-force them
+    without also knowing the server secret (F-05 remediation).
+    """
+    secret = get_settings().jwt_secret
+    # Domain-separate the key so it can't be reused for JWT verification
+    return hashlib.sha256(f"refresh-token-hmac:{secret}".encode()).digest()
+
+
 def mint_refresh_token() -> tuple[str, str]:
-    """Return (clear_text_token, sha256_hash_for_db)."""
+    """Return (clear_text_token, HMAC-SHA256 hash for DB storage)."""
     raw = secrets.token_urlsafe(48)
-    return raw, hashlib.sha256(raw.encode()).hexdigest()
+    return raw, hash_refresh_token(raw)
 
 
 def hash_refresh_token(raw: str) -> str:
-    return hashlib.sha256(raw.encode()).hexdigest()
+    """Compute HMAC-SHA256(token, derived_key) as a hex string."""
+    return hmac.new(_refresh_hmac_key(), raw.encode(), hashlib.sha256).hexdigest()
 
 
 def refresh_token_expiry() -> datetime:

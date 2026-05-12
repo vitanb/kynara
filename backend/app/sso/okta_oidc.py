@@ -19,8 +19,10 @@ import secrets
 from dataclasses import dataclass
 
 import httpx
+from fastapi import HTTPException
 
 from app.core.config import get_settings
+from app.core.ssrf import assert_safe_url
 
 
 @dataclass
@@ -40,9 +42,22 @@ def _pkce_pair() -> tuple[str, str]:
 
 
 async def _fetch_well_known(issuer: str) -> dict:
-    url = issuer.rstrip("/") + "/.well-known/openid-configuration"
+    """Fetch the OIDC discovery document with SSRF protection.
+
+    The issuer URL comes from admin-configured SSO connections, but we still
+    validate it to prevent SSRF in case of a misconfiguration or a compromised
+    admin account targeting internal metadata endpoints.
+    """
+    discovery_url = issuer.rstrip("/") + "/.well-known/openid-configuration"
+    try:
+        assert_safe_url(discovery_url, scheme_whitelist={"https"})
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"OIDC issuer URL is not allowed: {exc}",
+        ) from exc
     async with httpx.AsyncClient(timeout=10.0) as c:
-        r = await c.get(url)
+        r = await c.get(discovery_url)
         r.raise_for_status()
         return r.json()
 
@@ -85,16 +100,37 @@ async def start_flow_with_config(
     url = meta["authorization_endpoint"] + "?" + "&".join(
         f"{k}={httpx.QueryParams(params)[k]}" for k in params
     )
+    # NOTE: client_secret is intentionally NOT stored in the state bundle.
+    # It is looked up from the database by connection_id in the callback so
+    # that a Redis compromise never exposes OAuth client credentials.
     return url, {
         "state": state, "nonce": nonce, "verifier": verifier,
         "issuer": cfg.issuer, "client_id": cfg.client_id,
-        "client_secret": cfg.client_secret, "redirect_uri": cfg.redirect_uri,
+        "redirect_uri": cfg.redirect_uri,
+        # client_secret omitted — caller must inject it at token-exchange time
     }
 
 
-async def complete_flow_with_config(code: str, state_bundle: dict) -> dict:
-    """Exchange code → validated id_token claims using credentials embedded in the state bundle."""
+async def complete_flow_with_config(
+    code: str,
+    state_bundle: dict,
+    *,
+    client_secret: str | None = None,
+) -> dict:
+    """Exchange code → validated id_token claims.
+
+    Args:
+        code: The authorization code from the IdP callback.
+        state_bundle: The bundle stored in Redis (must contain issuer, client_id,
+            redirect_uri, verifier, nonce).  It must NOT contain client_secret —
+            that is passed explicitly via ``client_secret`` so it never touches Redis.
+        client_secret: The OAuth client secret.  Callers that previously relied on
+            ``state_bundle["client_secret"]`` must migrate to pass it here.
+    """
     meta = await _fetch_well_known(state_bundle["issuer"])
+    # Prefer explicit parameter; fall back to bundle key for backward compat
+    # (legacy Okta routes that haven't been updated yet).
+    resolved_secret = client_secret or state_bundle.get("client_secret", "")
 
     # Use the canonical issuer from the well-known config, not the stored string.
     # Auth0 always includes a trailing slash in its issuer claim
@@ -110,7 +146,7 @@ async def complete_flow_with_config(code: str, state_bundle: dict) -> dict:
                 "code": code,
                 "redirect_uri": state_bundle["redirect_uri"],
                 "client_id": state_bundle["client_id"],
-                "client_secret": state_bundle["client_secret"],
+                "client_secret": resolved_secret,
                 "code_verifier": state_bundle["verifier"],
             },
             headers={"Accept": "application/json"},

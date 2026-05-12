@@ -25,13 +25,14 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, Header, HTTPException, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator as pydantic_validator
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.audit.service import record_admin
 from app.auth.dependencies import Principal, get_principal
 from app.auth.passwords import hash_token
+from app.core.ssrf import assert_safe_url
 from app.db.session import SessionLocal
 from app.models.agent import Agent
 from app.models.guardrail import GuardrailEvent, GuardrailIntegration, GuardrailRule
@@ -71,6 +72,17 @@ class IntegrationIn(BaseModel):
     agent_ids: list[str] | None = None
     monitored_rules: list[str] | None = None
     is_enabled: bool = True
+
+    @pydantic_validator("api_endpoint")
+    @classmethod
+    def _validate_api_endpoint(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        try:
+            assert_safe_url(v)
+        except ValueError as exc:
+            raise ValueError(f"api_endpoint is not allowed: {exc}") from exc
+        return v
 
 
 class IntegrationOut(BaseModel):
@@ -581,10 +593,24 @@ async def inbound_guardrail_event(
 
     org_id = str(integration.organization_id)
 
-    # HMAC verification
+    # HMAC verification (F-14: always use constant-time comparison)
     sig = x_kynara_signature or x_arize_signature
-    if integration.webhook_secret_hash and not sig:
-        raise HTTPException(401, "Missing signature header")
+    if integration.webhook_secret_hash:
+        if not sig:
+            raise HTTPException(401, "Missing signature header")
+        # Compute expected hash and compare in constant time to prevent timing attacks
+        expected_hash = hash_token(sig)
+        if not hmac.compare_digest(expected_hash, integration.webhook_secret_hash):
+            raise HTTPException(401, "Invalid signature")
+    elif not sig:
+        # Log a warning when no secret is configured (F-02: unauthenticated inbound webhooks)
+        from app.core.logging import get_logger as _get_logger
+        _get_logger("kynara.guardrails").warning(
+            "guardrail.inbound.no_secret",
+            integration_id=str(integration_id),
+            msg="Integration has no webhook_secret configured — inbound events are unauthenticated. "
+                "Set webhook_secret when creating/updating the integration.",
+        )
 
     # Normalise fields across providers
     agent_ref: str | None = (

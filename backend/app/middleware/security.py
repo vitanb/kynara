@@ -12,6 +12,14 @@ from app.core.logging import get_logger, request_id_ctx
 log = get_logger("kynara.middleware")
 
 
+_AUTH_PATHS = frozenset({
+    "/api/v1/auth/login",
+    "/api/v1/auth/refresh",
+    "/api/v1/auth/register",
+    "/api/v1/auth/logout",
+})
+
+
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         resp = await call_next(request)
@@ -20,11 +28,17 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         resp.headers["X-Frame-Options"] = "DENY"
         resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         resp.headers["Permissions-Policy"] = "geolocation=(), camera=(), microphone=()"
+        # Prevent Flash/Acrobat cross-domain policy attacks (F-09)
+        resp.headers["X-Permitted-Cross-Domain-Policies"] = "none"
         resp.headers["Content-Security-Policy"] = (
             "default-src 'self'; img-src 'self' data:; "
             "script-src 'self'; style-src 'self' 'unsafe-inline'; "
             "frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
         )
+        # Prevent browsers and proxies from caching authentication responses (F-09)
+        if request.url.path in _AUTH_PATHS:
+            resp.headers["Cache-Control"] = "no-store, max-age=0"
+            resp.headers["Pragma"] = "no-cache"
         return resp
 
 

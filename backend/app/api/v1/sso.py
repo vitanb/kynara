@@ -324,19 +324,22 @@ async def oidc_callback(
     await r.delete(state)
     state = json.loads(blob)
 
+    # Fetch connection from DB *before* token exchange so client_secret is
+    # never stored in Redis (F-07 remediation).
+    conn = await session.get(SsoConnection, uuid.UUID(state["connection_id"]))
+    if not conn:
+        raise HTTPException(404, "Connection removed")
+
     try:
-        claims = await okta_oidc.complete_flow_with_config(code, state)
+        claims = await okta_oidc.complete_flow_with_config(
+            code, state, client_secret=conn.client_secret_enc or "",
+        )
     except Exception as exc:
         raise HTTPException(400, f"OIDC token exchange failed: {exc}") from exc
 
     email = (claims.get("email") or "").lower()
     if not email:
         raise HTTPException(400, "No email claim in id_token")
-
-    # Resolve which org this connection belongs to
-    conn = await session.get(SsoConnection, uuid.UUID(state["connection_id"]))
-    if not conn:
-        raise HTTPException(404, "Connection removed")
 
     # Look up the user in Kynara — they must already exist and have been
     # explicitly invited to this org. SSO authenticates identity only;

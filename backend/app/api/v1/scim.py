@@ -19,7 +19,7 @@ from app.audit.service import record_admin
 from app.auth.passwords import hash_token
 from app.db.session import SessionLocal
 from app.models import OrgMembership, User
-from app.models.sso import ScimSync
+from app.models.sso import ScimSync, ScimToken
 
 router = APIRouter(prefix="/scim/v2", tags=["scim"])
 
@@ -35,8 +35,9 @@ async def _scim_session(authorization: str | None = Header(None)) -> tuple[str, 
     sess = SessionLocal()
     try:
         await sess.execute(text("SELECT set_config('app.org_id', '00000000-0000-0000-0000-000000000000', true)"))
+        # Use ScimToken (the dedicated auth table) — ScimSync is only for event tracking
         row = (await sess.scalars(
-            select(ScimSync).where(ScimSync.token_hash == th, ScimSync.is_enabled.is_(True))
+            select(ScimToken).where(ScimToken.token_hash == th, ScimToken.is_enabled.is_(True))
         )).first()
         if not row:
             await sess.close()
@@ -45,20 +46,45 @@ async def _scim_session(authorization: str | None = Header(None)) -> tuple[str, 
         await sess.execute(
             text("SELECT set_config('app.org_id', :v, true)").bindparams(v=org_id),
         )
+        # Update last_used_at (best-effort)
+        try:
+            from datetime import datetime, timezone as _tz
+            row.last_used_at = datetime.now(tz=_tz.utc)
+            await sess.flush()
+        except Exception:
+            pass
         return org_id, sess
     except HTTPException:
         await sess.close()
         raise
 
 
+def _sanitize_err_detail(detail: str) -> str:
+    """Truncate and strip control characters from error details.
+
+    Prevents reflected user-input from inflating logs or carrying injection
+    payloads across log aggregators (F-06 remediation).
+    """
+    # Strip non-printable / control characters
+    cleaned = "".join(c for c in detail if c.isprintable() or c in (" ", "\t"))
+    # Truncate so log lines stay bounded
+    return cleaned[:256]
+
+
 def _scim_err(status: int, detail: str, scim_type: str | None = None) -> HTTPException:
     payload: dict[str, Any] = {
         "schemas": ["urn:ietf:params:scim:api:messages:2.0:Error"],
         "status": str(status),
-        "detail": detail,
+        "detail": _sanitize_err_detail(detail),
     }
     if scim_type:
-        payload["scimType"] = scim_type
+        # scimType is a fixed enum per RFC 7644 — don't echo user input here
+        allowed_scim_types = {
+            "uniqueness", "tooMany", "mutability", "sensitive",
+            "invalidSyntax", "invalidFilter", "invalidValue",
+            "invalidPath", "noTarget", "invalidVers", "multiValued",
+        }
+        payload["scimType"] = scim_type if scim_type in allowed_scim_types else "invalidValue"
     return HTTPException(status_code=status, detail=payload)
 
 
