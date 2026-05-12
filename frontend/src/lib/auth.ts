@@ -58,6 +58,9 @@ export const useAuth = create<State>((set, get) => ({
     localStorage.removeItem("kynara_access");
     localStorage.removeItem("kynara_refresh");
     set({ me: null, orgs: [] });
+    // Also clear the IdP (Auth0) session so the next SSO attempt always
+    // prompts for credentials rather than silently reusing the old session.
+    window.location.href = "/api/v1/auth/sso/logout?return_to=/login";
   },
 
   fetchOrgs: async () => {

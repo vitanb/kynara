@@ -410,6 +410,41 @@ async def oidc_callback(
     return resp
 
 
+# ── SSO logout — clears the IdP session so the next SSO attempt prompts ──────
+
+@router.get("/logout")
+async def sso_logout(return_to: str = "/login"):
+    """Redirect to the IdP's logout endpoint to clear the SSO browser session.
+
+    Call this from the frontend when the user signs out, so Auth0 (or any OIDC
+    IdP) doesn't silently reuse the existing session for the next SSO login.
+    The IdP will redirect back to `return_to` after clearing the session.
+    """
+    s = get_settings()
+
+    # Build the IdP logout URL from the well-known config if possible.
+    # Auth0 format: https://<domain>/v2/logout?client_id=<id>&returnTo=<url>
+    # Generic OIDC: use end_session_endpoint from well-known config.
+    #
+    # We fall back to a plain redirect to return_to if no IdP is configured
+    # (e.g. password-only orgs that never set up SSO).
+    return_url = s.public_api_url.rstrip("/").replace("/api", "") or "https://kynaraai.com"
+    post_logout = f"{return_url}{return_to}"
+
+    if s.okta_issuer and s.okta_client_id:
+        # Auth0 / Okta style logout
+        issuer = s.okta_issuer.rstrip("/")
+        logout_url = (
+            f"{issuer}/v2/logout"
+            f"?client_id={s.okta_client_id}"
+            f"&returnTo={post_logout}"
+        )
+        return RedirectResponse(url=logout_url, status_code=302)
+
+    # No IdP configured — just redirect back
+    return RedirectResponse(url=post_logout, status_code=302)
+
+
 # ── Domain lookup (for login page UX) ─────────────────────────────────────
 
 @router.get("/lookup")

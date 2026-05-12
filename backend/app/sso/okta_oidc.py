@@ -77,6 +77,10 @@ async def start_flow_with_config(
         "nonce": nonce,
         "code_challenge": challenge,
         "code_challenge_method": "S256",
+        # Always prompt for credentials — prevents Auth0 from silently reusing
+        # a browser session from a previously logged-in user, which would cause
+        # the wrong user's claims to come back in the callback.
+        "prompt": "login",
     }
     url = meta["authorization_endpoint"] + "?" + "&".join(
         f"{k}={httpx.QueryParams(params)[k]}" for k in params
