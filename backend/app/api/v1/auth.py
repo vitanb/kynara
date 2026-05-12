@@ -223,7 +223,10 @@ async def me(principal: Principal = Depends(get_principal), session: AsyncSessio
         mfa_enrolled=user.mfa_enrolled,
         timezone=user.timezone,
         avatar_url=user.avatar_url,
-        is_superadmin=user.is_superadmin,
+        # Use is_superadmin from the JWT claim, not the DB.
+        # SSO tokens intentionally omit superadmin so a user who happens to
+        # be a superadmin doesn't get elevated privileges via an SSO session.
+        is_superadmin=principal.is_superadmin,
     )
 
 
