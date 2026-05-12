@@ -5,16 +5,16 @@ resource_type, last_sync_at, payload) and never stored token credentials.
 This migration adds a dedicated scim_tokens table so SCIM authentication
 works correctly.
 
-Revision ID: 0013_scim_tokens
-Revises: 0012_superadmin
+Revision ID: 20260506_0013
+Revises: 20260505_0012
 Create Date: 2026-05-06
 """
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID
 
-revision = "0013_scim_tokens"
-down_revision = "0012_superadmin"
+revision = "20260506_0013"
+down_revision = "20260505_0012"
 branch_labels = None
 depends_on = None
 
