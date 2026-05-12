@@ -27,6 +27,8 @@ dependencies = [
   "prometheus-client>=0.20",
   "slowapi>=0.1.9",
   "email-validator>=2.1",
+  "mcp>=1.0",               # MCP server — /mcp/v1 endpoint
+  "anyio>=4.0",
 ]
 
 [project.optional-dependencies]

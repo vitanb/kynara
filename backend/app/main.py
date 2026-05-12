@@ -11,6 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from app.api.v1 import v1
+from app.api.mcp_server import router as mcp_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging, get_logger
 from app.core.telemetry import init_telemetry
@@ -67,6 +68,7 @@ def create_app() -> FastAPI:
     app.add_middleware(DebugCORSMiddleware, allow_origins=settings.cors_origins)
 
     app.include_router(v1)
+    app.include_router(mcp_router)
 
     @app.get("/metrics", include_in_schema=False)
     def metrics():
