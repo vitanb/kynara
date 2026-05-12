@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation, Link } from "react-router-do
 import {
   LayoutDashboard, Bot, Wrench, ShieldCheck, ScrollText,
   CreditCard, Settings, LogOut, Hexagon, ChevronDown, Check, Building2,
-  Menu, X, CheckCircle2, Plug, ShieldAlert, KeyRound, BookOpen, UserCircle, Crown, BarChart2,
+  Menu, X, CheckCircle2, Plug, ShieldAlert, KeyRound, BookOpen, UserCircle, Crown,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
@@ -22,7 +22,6 @@ const allNav = [
   { to: "guardrails", label: "Guardrails",   icon: ShieldAlert,     roles: ["owner","admin"] },
   { to: "audit",      label: "Audit log",    icon: ScrollText,      roles: ["owner","admin","auditor"] },
   { to: "billing",    label: "Billing",      icon: CreditCard,      roles: ["owner","admin"] },
-  { to: "usage",      label: "Usage",        icon: BarChart2,       roles: ["owner","admin"] },
   { to: "settings",   label: "Settings",     icon: Settings,        roles: ["owner","admin"] },
   { to: "superadmin", label: "Super Admin",  icon: Crown,           roles: ["owner","admin","developer","auditor","member"], superadminOnly: true },
 ];

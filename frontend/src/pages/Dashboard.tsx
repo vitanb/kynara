@@ -1,11 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
-  Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  Area, AreaChart, Bar, BarChart, CartesianGrid,
+  ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import {
   Bot, CheckCircle2, XCircle, AlertTriangle, TrendingUp,
-  ArrowRight, ShieldCheck, FileText, Plus,
+  ArrowRight, ShieldCheck, FileText, Plus, Zap,
 } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 import { api } from "@/lib/api";
@@ -17,6 +19,7 @@ const C = {
   deny:    "#F43F5E",
   accent:  "#6366F1",
   teal:    "#2DD4BF",
+  quota:   "#2DD4BF",
 };
 
 type Tone = "ok" | "warn" | "danger" | "info";
@@ -27,10 +30,87 @@ const TONE: Record<Tone, { text: string; iconColor: string; bg: string; border: 
   info:   { text: "text-accent-400", iconColor: C.accent,  bg: "rgba(99,102,241,0.09)",  border: "rgba(67,56,202,0.25)" },
 };
 
+// ── Helpers ────────────────────────────────────────────────────────────────
+function fmtN(n: number) {
+  return n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M`
+    : n >= 1_000 ? `${(n / 1_000).toFixed(1)}k`
+    : String(n);
+}
+
+function pct(used: number, total: number) {
+  if (!total) return 0;
+  return Math.min(100, Math.round((used / total) * 100));
+}
+
+function dayLabel(d: Date) {
+  return d.toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
+// ── QuotaMeter ─────────────────────────────────────────────────────────────
+function QuotaMeter({ used, total, label, color }: {
+  used: number; total: number; label: string; color: string;
+}) {
+  const p = pct(used, total);
+  const tone = p >= 90 ? C.deny : p >= 70 ? C.approve : color;
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5 text-xs">
+        <span className="text-ink-300 font-medium">{label}</span>
+        <span className="text-ink-200 tabular-nums font-semibold">
+          {fmtN(used)}<span className="text-ink-500 font-normal"> / {fmtN(total)}</span>
+        </span>
+      </div>
+      <div className="h-2 rounded-full bg-ink-700 overflow-hidden">
+        <div className="h-full rounded-full transition-all duration-500"
+          style={{ width: `${p}%`, background: tone }} />
+      </div>
+      <div className="mt-1 text-[10px] text-ink-500 tabular-nums">{p}% used</div>
+    </div>
+  );
+}
+
+// ── Chart gradient defs ────────────────────────────────────────────────────
+const ChartGradients = () => (
+  <defs>
+    <linearGradient id="ga" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stopColor={C.allow}   stopOpacity={0.3} />
+      <stop offset="100%" stopColor={C.allow}   stopOpacity={0} />
+    </linearGradient>
+    <linearGradient id="gw" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stopColor={C.approve} stopOpacity={0.3} />
+      <stop offset="100%" stopColor={C.approve} stopOpacity={0} />
+    </linearGradient>
+    <linearGradient id="gd" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stopColor={C.deny}    stopOpacity={0.3} />
+      <stop offset="100%" stopColor={C.deny}    stopOpacity={0} />
+    </linearGradient>
+  </defs>
+);
+
+const tooltipStyle = {
+  contentStyle: {
+    background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)",
+    borderRadius: "10px", fontSize: "12px", color: "#CBD5E1",
+  },
+  cursor: { stroke: "rgba(99,102,241,0.2)", strokeWidth: 1 },
+};
+
+// ── Main ───────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
-  const { data: events } = useQuery({
+  const [chartWindow, setChartWindow] = useState<"24h" | "30d">("24h");
+
+  // ── Queries ──────────────────────────────────────────────────────────────
+  const since30d = useMemo(() => new Date(Date.now() - 30 * 86400e3).toISOString(), []);
+
+  const { data: recentEvents = [] } = useQuery({
     queryKey: ["audit", "recent"],
     queryFn: () => api.get<any[]>("/api/v1/audit/events?limit=100"),
+  });
+
+  const { data: events30d = [] } = useQuery({
+    queryKey: ["audit", "events", "30d"],
+    queryFn: () =>
+      api.get<any[]>(`/api/v1/audit/events?limit=5000&since=${encodeURIComponent(since30d)}`),
   });
 
   const { data: agents = [] } = useQuery({
@@ -43,18 +123,92 @@ export default function DashboardPage() {
     queryFn: () => api.get<any[]>("/api/v1/policies"),
   });
 
-  const bucketed = bucketDecisions(events || []);
-  const activeAgents = agents.filter((a: any) => a.is_active).length;
-  const decisions7d = (events || []).filter((e: any) => {
-    const ts = new Date(e.ts).getTime();
-    return ts > Date.now() - 7 * 86400e3 && e.event_type === "policy.decision";
+  const { data: usage } = useQuery({
+    queryKey: ["billing", "usage"],
+    queryFn: () =>
+      api.get<{
+        decisions_used: number;
+        decisions_included: number;
+        period_start: string;
+        period_end: string;
+      }>("/api/v1/billing/usage").catch(() => null),
   });
-  const approvalsPending = decisions7d.filter((e: any) => e.outcome === "require_approval").length;
-  const denials7d       = decisions7d.filter((e: any) => e.outcome === "deny").length;
-  const totalDecisions  = decisions7d.length;
-  const isNew = agents.length === 0;
 
-  const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+  const { data: sub } = useQuery({
+    queryKey: ["billing", "subscription"],
+    queryFn: () =>
+      api.get<{ plan: string; seats_included: number; seats_used?: number }>(
+        "/api/v1/billing/subscription"
+      ).catch(() => null),
+  });
+
+  // ── Derived stats ─────────────────────────────────────────────────────────
+  const activeAgents     = agents.filter((a: any) => a.is_active).length;
+  const isNew            = agents.length === 0;
+
+  const decisions30d  = events30d.filter((e: any) => e.event_type === "policy.decision");
+  const approvalsPending = decisions30d.filter((e: any) => e.outcome === "require_approval").length;
+  const denials30d       = decisions30d.filter((e: any) => e.outcome === "deny").length;
+  const total30d         = decisions30d.length;
+
+  // ── 24h chart buckets ──────────────────────────────────────────────────
+  const buckets24h = useMemo(() => {
+    const hours: Record<string, any> = {};
+    for (let i = 23; i >= 0; i--) {
+      const h = new Date(Date.now() - i * 3600e3);
+      const key = h.getHours().toString().padStart(2, "0") + "h";
+      hours[key] = { label: key, allow: 0, deny: 0, require_approval: 0 };
+    }
+    for (const e of recentEvents) {
+      if (e.event_type !== "policy.decision") continue;
+      const k = new Date(e.ts).getHours().toString().padStart(2, "0") + "h";
+      if (hours[k]) hours[k][e.outcome] = (hours[k][e.outcome] || 0) + 1;
+    }
+    return Object.values(hours);
+  }, [recentEvents]);
+
+  // ── 30d chart buckets ──────────────────────────────────────────────────
+  const buckets30d = useMemo(() => {
+    const days: Record<string, any> = {};
+    for (let i = 29; i >= 0; i--) {
+      const k = dayLabel(new Date(Date.now() - i * 86400e3));
+      days[k] = { label: k, allow: 0, deny: 0, require_approval: 0 };
+    }
+    for (const e of events30d) {
+      if (e.event_type !== "policy.decision") continue;
+      const k = dayLabel(new Date(e.ts));
+      if (days[k]) days[k][e.outcome] = (days[k][e.outcome] || 0) + 1;
+    }
+    return Object.values(days);
+  }, [events30d]);
+
+  // ── Top agents ─────────────────────────────────────────────────────────
+  const topAgents = useMemo(() => {
+    const counts: Record<string, { allow: number; deny: number; total: number }> = {};
+    for (const e of events30d) {
+      if (e.event_type !== "policy.decision") continue;
+      const id = e.actor?.replace("agent:", "") ?? "unknown";
+      if (!counts[id]) counts[id] = { allow: 0, deny: 0, total: 0 };
+      counts[id].total++;
+      if (e.outcome === "allow") counts[id].allow++;
+      if (e.outcome === "deny")  counts[id].deny++;
+    }
+    return Object.entries(counts)
+      .map(([id, c]) => {
+        const agent = agents.find((a: any) => a.id === id || a.slug === id);
+        return { id, name: agent?.name ?? id, ...c };
+      })
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 8);
+  }, [events30d, agents]);
+
+  const chartData  = chartWindow === "24h" ? buckets24h : buckets30d;
+  const chartXKey  = "label";
+  const xInterval  = chartWindow === "24h" ? 3 : 6;
+
+  const periodEnd = usage?.period_end
+    ? new Date(usage.period_end).toLocaleDateString([], { month: "short", day: "numeric" })
+    : "—";
 
   const stats = [
     {
@@ -63,8 +217,8 @@ export default function DashboardPage() {
       tone: "info" as Tone, icon: Bot, to: "/app/agents",
     },
     {
-      label: "Decisions (7d)", value: fmt(totalDecisions),
-      delta: totalDecisions === 0 ? "No decisions yet" : `${totalDecisions} evaluated`,
+      label: "Decisions (30d)", value: fmtN(total30d),
+      delta: total30d === 0 ? "No decisions yet" : `${total30d} evaluated`,
       tone: "ok" as Tone, icon: TrendingUp, to: "/app/audit",
     },
     {
@@ -73,8 +227,8 @@ export default function DashboardPage() {
       tone: "warn" as Tone, icon: AlertTriangle, to: "/app/approvals",
     },
     {
-      label: "Denials (7d)", value: String(denials7d),
-      delta: denials7d === 0 ? "No denials" : `${denials7d} blocked`,
+      label: "Denials (30d)", value: String(denials30d),
+      delta: denials30d === 0 ? "No denials" : `${denials30d} blocked`,
       tone: "danger" as Tone, icon: XCircle, to: "/app/audit",
     },
   ];
@@ -83,15 +237,16 @@ export default function DashboardPage() {
     <div className="page-enter">
       <PageHeader
         title="Overview"
-        subtitle="Agent activity, authorization decisions, and pending approvals."
+        subtitle="Agent activity, authorization decisions, and quota."
       />
 
-      {/* ── Stat cards ── */}
+      {/* ── Stat cards ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 px-6 pt-5 pb-4">
         {stats.map((s) => {
           const t = TONE[s.tone];
           return (
-            <Link key={s.label} to={s.to} className="stat-card hover:border-accent-600/40 transition-colors group">
+            <Link key={s.label} to={s.to}
+              className="stat-card hover:border-accent-600/40 transition-colors group">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="text-[11px] font-medium text-ink-400 mb-2">{s.label}</div>
@@ -100,10 +255,8 @@ export default function DashboardPage() {
                   </div>
                   <div className={`text-xs font-medium mt-1.5 ${t.text}`}>{s.delta}</div>
                 </div>
-                <div
-                  className="size-9 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: t.bg, border: `1px solid ${t.border}` }}
-                >
+                <div className="size-9 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ background: t.bg, border: `1px solid ${t.border}` }}>
                   <s.icon className="size-4" style={{ color: t.iconColor }} />
                 </div>
               </div>
@@ -112,28 +265,22 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* ── Getting started panel (shown only for empty orgs) ── */}
+      {/* ── Getting started (empty state) ─────────────────────────────────── */}
       {isNew && (
         <div className="mx-6 mb-4 rounded-xl p-4"
           style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.2)" }}>
           <div className="text-sm font-semibold text-white mb-3">Get started with Kynara</div>
           <div className="grid md:grid-cols-3 gap-3">
             {[
-              {
-                step: "1", icon: Bot, title: "Register an agent",
+              { step: "1", icon: Bot,        title: "Register an agent",
                 desc: "Give your AI agent an identity and supervision mode.",
-                to: "/app/agents", cta: "New agent",
-              },
-              {
-                step: "2", icon: ShieldCheck, title: "Create a policy",
+                to: "/app/agents",      cta: "New agent" },
+              { step: "2", icon: ShieldCheck, title: "Create a policy",
                 desc: "Define what the agent can and cannot do per action and resource.",
-                to: "/app/policies/new", cta: "New policy",
-              },
-              {
-                step: "3", icon: FileText, title: "Review audit logs",
+                to: "/app/policies/new", cta: "New policy" },
+              { step: "3", icon: FileText,    title: "Review audit logs",
                 desc: "Every decision is logged with actor, outcome, and context.",
-                to: "/app/audit", cta: "View audit",
-              },
+                to: "/app/audit",       cta: "View audit" },
             ].map((item) => {
               const Icon = item.icon;
               return (
@@ -160,47 +307,53 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 px-6 pb-6">
-        {/* ── Area chart ── */}
+      {/* ── Chart + Quota row ─────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 px-6 pb-4">
+
+        {/* Area chart with 24h / 30d toggle */}
         <div className="lg:col-span-2 card p-4">
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="text-sm font-semibold text-white">Decision volume</div>
-              <div className="text-xs text-ink-300 mt-0.5">Allow · require approval · deny · last 24h</div>
+              <div className="text-xs text-ink-300 mt-0.5">Allow · require approval · deny</div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="pill pill-ok"><CheckCircle2 className="size-3" />allow</span>
-              <span className="pill pill-warn"><AlertTriangle className="size-3" />approval</span>
-              <span className="pill pill-danger"><XCircle className="size-3" />deny</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                {[["allow", C.allow], ["approval", C.approve], ["deny", C.deny]].map(([l, col]) => (
+                  <span key={l} className="flex items-center gap-1 text-[10px] font-medium text-ink-300">
+                    <span className="size-2 rounded-full inline-block" style={{ background: col as string }} />{l}
+                  </span>
+                ))}
+              </div>
+              {/* Time window toggle */}
+              <div className="flex rounded-md overflow-hidden border border-ink-700/60 text-[10px] font-semibold">
+                {(["24h", "30d"] as const).map((w) => (
+                  <button
+                    key={w}
+                    onClick={() => setChartWindow(w)}
+                    className="px-2.5 py-1 transition-colors"
+                    style={{
+                      background: chartWindow === w ? "rgba(99,102,241,0.2)" : "transparent",
+                      color: chartWindow === w ? "#818CF8" : "#475569",
+                    }}
+                  >
+                    {w}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="h-64">
+          <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={bucketed} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="ga" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor={C.allow}   stopOpacity={0.35} />
-                    <stop offset="100%" stopColor={C.allow}   stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gw" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor={C.approve} stopOpacity={0.35} />
-                    <stop offset="100%" stopColor={C.approve} stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gd" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor={C.deny}    stopOpacity={0.35} />
-                    <stop offset="100%" stopColor={C.deny}    stopOpacity={0} />
-                  </linearGradient>
-                </defs>
+              <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
+                <ChartGradients />
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.06)" vertical={false} />
-                <XAxis dataKey="hour" stroke="rgba(148,163,184,0)" tick={{ fill: "#475569", fontSize: 10 }}
-                  tickLine={false} axisLine={false} />
-                <YAxis stroke="rgba(148,163,184,0)" tick={{ fill: "#475569", fontSize: 10 }}
-                  tickLine={false} axisLine={false} />
-                <Tooltip
-                  contentStyle={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)",
-                    borderRadius: "10px", fontSize: "12px", color: "#CBD5E1" }}
-                  cursor={{ stroke: "rgba(99,102,241,0.2)", strokeWidth: 1 }}
-                />
+                <XAxis dataKey={chartXKey} stroke="rgba(0,0,0,0)"
+                  tick={{ fill: "#475569", fontSize: 9 }} tickLine={false} axisLine={false}
+                  interval={xInterval} />
+                <YAxis stroke="rgba(0,0,0,0)"
+                  tick={{ fill: "#475569", fontSize: 10 }} tickLine={false} axisLine={false} />
+                <Tooltip {...tooltipStyle} />
                 <Area type="monotone" dataKey="allow"            stroke={C.allow}   strokeWidth={1.8} fill="url(#ga)" />
                 <Area type="monotone" dataKey="require_approval" stroke={C.approve} strokeWidth={1.8} fill="url(#gw)" />
                 <Area type="monotone" dataKey="deny"             stroke={C.deny}    strokeWidth={1.8} fill="url(#gd)" />
@@ -209,20 +362,147 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* ── Activity feed ── */}
+        {/* Plan quota card */}
+        <div className="card p-5 flex flex-col gap-5">
+          <div className="flex items-center gap-2">
+            <Zap className="size-4" style={{ color: C.quota }} />
+            <span className="text-sm font-semibold text-white">Plan quota</span>
+            {sub?.plan && (
+              <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(99,102,241,0.15)", color: "#818CF8" }}>
+                {sub.plan.toUpperCase()}
+              </span>
+            )}
+          </div>
+
+          {usage ? (
+            <QuotaMeter
+              label="Decisions this period"
+              used={usage.decisions_used ?? 0}
+              total={usage.decisions_included ?? 1}
+              color={C.quota}
+            />
+          ) : (
+            <div className="text-xs text-ink-500">No billing data</div>
+          )}
+
+          {sub && sub.seats_used !== undefined && (
+            <QuotaMeter
+              label="Seats occupied"
+              used={sub.seats_used ?? 0}
+              total={sub.seats_included ?? 1}
+              color={C.accent}
+            />
+          )}
+
+          <div className="mt-auto pt-3 border-t border-ink-700/60 text-xs text-ink-400 flex items-center justify-between">
+            <span>Resets <span className="text-ink-200">{periodEnd}</span></span>
+            <Link to="/app/billing" className="text-[10px] font-medium"
+              style={{ color: "#818CF8" }}>
+              Billing →
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Top agents + Live feed row ────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 px-6 pb-8">
+
+        {/* Top agents */}
+        <div className="lg:col-span-2 card p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Bot className="size-4 text-ink-300" />
+            <span className="text-sm font-semibold text-white">Top agents</span>
+            <span className="text-xs text-ink-500 ml-1">by decision volume · 30d</span>
+          </div>
+
+          {topAgents.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-xs text-ink-400 mb-3">No agent activity yet.</p>
+              <Link to="/app/agents"
+                className="inline-flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5"
+                style={{ background: "rgba(99,102,241,0.12)", color: "#818CF8" }}>
+                <Plus className="size-3" /> Create your first agent
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={topAgents.slice(0, 6)}
+                    layout="vertical"
+                    margin={{ top: 0, right: 8, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.06)" horizontal={false} />
+                    <XAxis type="number" stroke="rgba(0,0,0,0)"
+                      tick={{ fill: "#475569", fontSize: 10 }} tickLine={false} axisLine={false} />
+                    <YAxis type="category" dataKey="name" width={80}
+                      stroke="rgba(0,0,0,0)" tick={{ fill: "#94A3B8", fontSize: 10 }}
+                      tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)",
+                        borderRadius: "10px", fontSize: "12px", color: "#CBD5E1" }}
+                      cursor={{ fill: "rgba(99,102,241,0.06)" }}
+                    />
+                    <Bar dataKey="allow" stackId="a" fill={C.allow} />
+                    <Bar dataKey="deny"  stackId="a" fill={C.deny}  radius={[0, 3, 3, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="overflow-hidden rounded-lg border border-ink-700/60">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-ink-700/60">
+                      <th className="text-left px-3 py-2 text-ink-400 font-medium">Agent</th>
+                      <th className="text-right px-3 py-2 text-ink-400 font-medium">Total</th>
+                      <th className="text-right px-3 py-2 text-ink-400 font-medium">Allow%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topAgents.map((a, i) => (
+                      <tr key={a.id} className={i % 2 === 0 ? "" : "bg-ink-800/30"}>
+                        <td className="px-3 py-2 text-ink-200 font-medium truncate max-w-[100px]">
+                          {a.name}
+                        </td>
+                        <td className="px-3 py-2 text-ink-300 tabular-nums text-right">
+                          {fmtN(a.total)}
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                            style={{
+                              background: a.total ? `${C.allow}18` : "transparent",
+                              color: a.total ? C.allow : "#475569",
+                            }}>
+                            {a.total ? Math.round((a.allow / a.total) * 100) : 0}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Live activity feed */}
         <div className="card p-4 flex flex-col">
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-semibold text-white">Recent activity</div>
             <span className="pill pill-teal flex items-center gap-1">
-              <span className="size-1.5 rounded-full" style={{ background: C.teal, boxShadow: `0 0 5px ${C.teal}` }} />
+              <span className="size-1.5 rounded-full"
+                style={{ background: C.teal, boxShadow: `0 0 5px ${C.teal}` }} />
               live
             </span>
           </div>
           <div className="flex-1 overflow-y-auto space-y-1 -mx-1 px-1">
-            {(events || []).slice(0, 20).map((e) => {
-              const col = e.outcome === "allow" ? C.allow : e.outcome === "deny" ? C.deny : C.approve;
+            {recentEvents.slice(0, 20).map((e: any) => {
+              const col = e.outcome === "allow" ? C.allow
+                : e.outcome === "deny" ? C.deny : C.approve;
               return (
-                <div key={e.id} className="flex items-start gap-2.5 py-1.5 text-xs group rounded-md px-1 hover:bg-ink-700/40 transition-colors">
+                <div key={e.id}
+                  className="flex items-start gap-2.5 py-1.5 text-xs rounded-md px-1 hover:bg-ink-700/40 transition-colors">
                   <div className="mt-1.5 size-1.5 rounded-full shrink-0" style={{ background: col }} />
                   <div className="flex-1 min-w-0">
                     <div className="text-ink-100 truncate font-medium">{e.event_type}</div>
@@ -236,7 +516,7 @@ export default function DashboardPage() {
                 </div>
               );
             })}
-            {!events?.length && (
+            {!recentEvents.length && (
               <div className="py-10 text-center">
                 <p className="text-xs text-ink-400 mb-3">No activity yet.</p>
                 <Link to="/app/agents"
@@ -249,23 +529,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-
-
     </div>
   );
-}
-
-function bucketDecisions(evts: any[]) {
-  const hours: Record<string, any> = {};
-  for (let i = 23; i >= 0; i--) {
-    const h = new Date(Date.now() - i * 3600e3);
-    const key = h.getHours().toString().padStart(2, "0") + "h";
-    hours[key] = { hour: key, allow: 0, deny: 0, require_approval: 0 };
-  }
-  for (const e of evts) {
-    if (e.event_type !== "policy.decision") continue;
-    const h = new Date(e.ts).getHours().toString().padStart(2, "0") + "h";
-    if (hours[h]) hours[h][e.outcome] = (hours[h][e.outcome] || 0) + 1;
-  }
-  return Object.values(hours);
 }
