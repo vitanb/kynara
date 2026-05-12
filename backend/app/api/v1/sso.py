@@ -266,12 +266,18 @@ async def oidc_start(
         client_secret=conn.client_secret_enc or "",
         redirect_uri=redirect_uri,
     )
-    url, state_bundle = await okta_oidc.start_flow_with_config(cfg)
+
+    # Generate the Redis key first and use it as the OIDC `state` parameter.
+    # Auth0 (and all OIDC IdPs) echo `state` back verbatim in the callback URL,
+    # so the callback can use ?state=<key> to look up the bundle — no separate
+    # state_key query param needed.
+    r = await _redis()
+    key = f"ssos:{secrets.token_urlsafe(16)}"
+
+    url, state_bundle = await okta_oidc.start_flow_with_config(cfg, state_override=key)
     state_bundle["connection_id"] = str(conn.id)
     state_bundle["org_id"] = str(conn.organization_id)
 
-    r = await _redis()
-    key = f"ssos:{secrets.token_urlsafe(16)}"
     await r.setex(key, 600, json.dumps(state_bundle))
     return {"redirect_url": url, "state_key": key}
 
@@ -279,16 +285,16 @@ async def oidc_start(
 @router.get("/oidc/callback")
 async def oidc_callback(
     code: str,
-    state_key: str,
+    state: str,  # OIDC standard — IdP echoes back whatever we sent as `state`
     request: Request,
     session: AsyncSession = Depends(_session),
 ):
     """Handle callback for any OIDC connection (Auth0, Azure AD, Google, etc.)."""
     r = await _redis()
-    blob = await r.get(state_key)
+    blob = await r.get(state)
     if not blob:
         raise HTTPException(400, "State expired or invalid")
-    await r.delete(state_key)
+    await r.delete(state)
     state = json.loads(blob)
 
     try:

@@ -49,10 +49,22 @@ async def _fetch_well_known(issuer: str) -> dict:
 
 # ── Generic (connection-aware) helpers ─────────────────────────────────────
 
-async def start_flow_with_config(cfg: OidcConfig) -> tuple[str, dict]:
-    """Return (redirect_url, state_bundle). Accepts explicit IdP credentials."""
+async def start_flow_with_config(
+    cfg: OidcConfig,
+    *,
+    state_override: str | None = None,
+) -> tuple[str, dict]:
+    """Return (redirect_url, state_bundle). Accepts explicit IdP credentials.
+
+    ``state_override`` lets the caller supply the OIDC ``state`` value (e.g. a
+    Redis key) so that Auth0/any IdP echoes it back verbatim in the callback,
+    making it trivial to look up the stored bundle without a separate parameter.
+    """
     meta = await _fetch_well_known(cfg.issuer)
-    state = secrets.token_urlsafe(32)
+    # Use caller-supplied state (the Redis key) so the IdP echoes it back in
+    # the callback query string as ?state=<key>. Falls back to a random value
+    # for the legacy Okta routes that manage state separately.
+    state = state_override or secrets.token_urlsafe(32)
     nonce = secrets.token_urlsafe(32)
     verifier, challenge = _pkce_pair()
 
