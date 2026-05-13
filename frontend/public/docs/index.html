@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kynara — User Guide</title>
+  <style>
+    :root {
+      --bg: #05080F;
+      --surface: #080C14;
+      --surface2: #0D1421;
+      --border: rgba(148,163,184,0.1);
+      --accent: #6366F1;
+      --accent-light: #818CF8;
+      --text: #CBD5E1;
+      --text-muted: #64748B;
+      --text-strong: #F1F5F9;
+      --ok: #10B981;
+      --warn: #F59E0B;
+      --danger: #F43F5E;
+      --teal: #2DD4BF;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    a { color: var(--accent-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .layout { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 28px 0;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 0 1px rgba(99,102,241,0.5), 0 4px 14px rgba(79,70,229,0.4);
+    }
+
+    .logo-icon svg { width: 18px; height: 18px; color: white; }
+    .logo-text { font-size: 15px; font-weight: 700; color: white; letter-spacing: -0.02em; }
+    .logo-sub { font-size: 10px; color: var(--accent-light); letter-spacing: 0.06em; margin-top: 1px; }
+
+    .nav-section { padding: 0 12px; margin-bottom: 20px; }
+
+    .nav-section-label {
+      font-size: 10px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 0 8px; margin-bottom: 6px;
+    }
+
+    .nav-link {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 7px;
+      font-size: 13px; color: var(--text-muted);
+      transition: all 0.15s; cursor: pointer; text-decoration: none;
+    }
+
+    .nav-link:hover { background: rgba(99,102,241,0.08); color: var(--text); text-decoration: none; }
+    .nav-link.active { background: rgba(99,102,241,0.12); color: var(--accent-light); }
+
+    /* ── Main ── */
+    .main { flex: 1; min-width: 0; padding: 52px 72px; max-width: 880px; }
+
+    h1 { font-size: 36px; font-weight: 800; color: white; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 12px; }
+    h2 { font-size: 22px; font-weight: 700; color: white; letter-spacing: -0.02em; margin-top: 56px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 16px; font-weight: 600; color: var(--text-strong); margin-top: 28px; margin-bottom: 8px; }
+    h4 { font-size: 14px; font-weight: 600; color: var(--text-strong); margin-top: 20px; margin-bottom: 6px; }
+    p { margin-bottom: 14px; }
+    .lead { font-size: 17px; color: var(--text-muted); margin-bottom: 32px; line-height: 1.6; }
+    ul, ol { padding-left: 22px; margin-bottom: 14px; }
+    li { margin-bottom: 6px; }
+
+    code {
+      font-family: var(--mono); font-size: 12.5px;
+      background: rgba(148,163,184,0.08); border: 1px solid var(--border);
+      border-radius: 4px; padding: 1px 6px; color: var(--accent-light);
+    }
+
+    pre {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px 20px; overflow-x: auto; margin-bottom: 18px;
+    }
+
+    pre code { background: none; border: none; padding: 0; font-size: 13px; color: #94A3B8; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
+    .card-title { font-size: 14px; font-weight: 600; color: white; margin-bottom: 6px; }
+    .card p { margin-bottom: 0; font-size: 13.5px; }
+
+    .callout { border-radius: 10px; padding: 14px 18px; margin-bottom: 18px; display: flex; gap: 12px; align-items: flex-start; }
+    .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { font-size: 13.5px; line-height: 1.6; }
+    .callout-body strong { font-weight: 600; }
+    .callout.info { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2); }
+    .callout.info .callout-body { color: #A5B4FC; }
+    .callout.warn { background: rgba(245,158,11,0.08); border: 1px solid rgba(180,83,9,0.25); }
+    .callout.warn .callout-body { color: #FCD34D; }
+    .callout.ok { background: rgba(16,185,129,0.08); border: 1px solid rgba(4,120,87,0.25); }
+    .callout.ok .callout-body { color: #6EE7B7; }
+    .callout.new { background: rgba(45,212,191,0.08); border: 1px solid rgba(45,212,191,0.25); }
+    .callout.new .callout-body { color: #5EEAD4; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13.5px; }
+    thead tr { background: rgba(148,163,184,0.04); border-bottom: 1px solid var(--border); }
+    th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+    td { padding: 10px 14px; border-bottom: 1px solid rgba(148,163,184,0.06); color: var(--text); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+    .pill-ok    { background: rgba(16,185,129,0.12);  color: #34D399; border: 1px solid rgba(4,120,87,0.3); }
+    .pill-warn  { background: rgba(245,158,11,0.12);  color: #FCD34D; border: 1px solid rgba(180,83,9,0.3); }
+    .pill-danger{ background: rgba(244,63,94,0.12);   color: #FB7185; border: 1px solid rgba(190,18,60,0.3); }
+    .pill-info  { background: rgba(99,102,241,0.12);  color: #A5B4FC; border: 1px solid rgba(67,56,202,0.3); }
+    .pill-new   { background: rgba(45,212,191,0.12);  color: #5EEAD4; border: 1px solid rgba(45,212,191,0.3); }
+
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
+    .steps li::before {
+      content: counter(step); min-width: 26px; height: 26px;
+      background: rgba(99,102,241,0.15); color: var(--accent-light);
+      border-radius: 50%; font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .steps li p { margin-bottom: 0; font-size: 14px; }
+
+    .doc-header { padding-bottom: 32px; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25);
+      color: var(--accent-light); letter-spacing: 0.04em; margin-bottom: 16px;
+    }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+    .api-block { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; }
+    .api-method { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; flex-shrink: 0; }
+    .method-get  { background: rgba(16,185,129,0.15); color: #34D399; }
+    .method-post { background: rgba(99,102,241,0.15); color: #A5B4FC; }
+    .method-del  { background: rgba(244,63,94,0.15);  color: #FB7185; }
+    .method-put  { background: rgba(245,158,11,0.15); color: #FCD34D; }
+    .api-path { font-family: var(--mono); font-size: 12.5px; color: var(--text); }
+
+    section { scroll-margin-top: 24px; }
+
+    .new-tag { font-size: 10px; font-weight: 700; background: rgba(45,212,191,0.15); color: #5EEAD4; border: 1px solid rgba(45,212,191,0.3); border-radius: 4px; padding: 1px 6px; letter-spacing: 0.05em; margin-left: 6px; vertical-align: middle; }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ── Sidebar nav ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11.5 2 2 7 2 17 11.5 22 21 17 21 7 11.5 2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">Kynara</div>
+        <div class="logo-sub">USER GUIDE</div>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Getting Started</div>
+      <a href="#overview" class="nav-link">Overview</a>
+      <a href="#quickstart" class="nav-link">Quick start</a>
+      <a href="#concepts" class="nav-link">Key concepts</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Worked Examples</div>
+      <a href="#example-crm" class="nav-link">CRM Assistant</a>
+      <a href="#example-infra" class="nav-link">Infra Manager</a>
+      <a href="#example-hr" class="nav-link">Employee Profile</a>
+      <a href="#context-reference" class="nav-link">Context JSON fields</a>
+      <a href="#schema-reference" class="nav-link">Input Schema fields</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Features</div>
+      <a href="#dashboard" class="nav-link">Dashboard</a>
+      <a href="#agents" class="nav-link">Agents</a>
+      <a href="#policies" class="nav-link">Policies &amp; Simulator</a>
+      <a href="#policy-replay" class="nav-link">Policy Replay</a>
+      <a href="#approvals" class="nav-link">Approvals</a>
+      <a href="#jit-grants" class="nav-link">JIT Grants</a>
+      <a href="#guardrails" class="nav-link">Guardrails</a>
+      <a href="#audit" class="nav-link">Audit log</a>
+      <a href="#scope-catalog" class="nav-link">Scope Catalog</a>
+      <a href="#webhooks" class="nav-link">Webhooks</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Admin</div>
+      <a href="#settings" class="nav-link">Settings</a>
+      <a href="#members" class="nav-link">Team members</a>
+      <a href="#billing" class="nav-link">Billing</a>
+      <a href="#superadmin" class="nav-link">Superadmin</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Integration</div>
+      <a href="#api" class="nav-link">REST API</a>
+      <a href="#python-sdk" class="nav-link">Python SDK</a>
+      <a href="#typescript-sdk" class="nav-link">TypeScript SDK</a>
+      <a href="#frameworks" class="nav-link">Agent frameworks</a>
+      <a href="#sidecar" class="nav-link">Go sidecar</a>
+      <a href="#policy-as-code" class="nav-link">Policy-as-code CLI</a>
+      <a href="#sso" class="nav-link">SSO / Okta</a>
+      <a href="#siem" class="nav-link">SIEM integration</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Reference</div>
+      <a href="#policy-schema" class="nav-link">Policy schema</a>
+      <a href="#outcomes" class="nav-link">Decision outcomes</a>
+      <a href="#webhook-events" class="nav-link">Webhook events</a>
+      <a href="#faq" class="nav-link">FAQ</a>
+    </div>
+  </aside>
+
+  <!-- ── Main content ── -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <div class="doc-header">
+      <div class="badge"><span class="badge-dot"></span> v2.1 · May 2026</div>
+      <h1>Kynara User Guide</h1>
+      <p class="lead">
+        Everything you need to register agents, define access policies, govern approvals,
+        and audit every decision made by your AI agents — in real time.
+      </p>
+    </div>
+
+    <!-- OVERVIEW -->
+    <section id="overview">
+      <h2>Overview</h2>
+      <p>
+        Kynara is an <strong>AI agent permission control plane</strong>. It sits between your AI agents
+        and the resources they act on, evaluating every tool call against your organisation's
+        policies before allowing it to proceed.
+      </p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;">
+        <div class="card">
+          <div class="card-title">🛡️ Policy enforcement</div>
+          <p>RBAC + ABAC rules evaluated in priority order. First matching decision wins; the default is <em>deny</em>.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">📋 Tamper-evident audit</div>
+          <p>Every allow, deny, and approval is SHA-256 hash-chained. Any tampering is mathematically detectable.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">⚡ Sub-millisecond decisions</div>
+          <p>In-process SDK cache and optional Go sidecar for local evaluation at &lt;1ms latency.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">👥 Human-in-the-loop</div>
+          <p>Policies can require approval before sensitive actions execute. Agents pause and wait.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">🔑 JIT grants</div>
+          <p>Time-bound break-glass permission elevations with justification and ticket link.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">🔬 Policy replay</div>
+          <p>Simulate a proposed policy change against 30 days of real decisions before deploying.</p>
+        </div>
+      </div>
+
+      <h3>Architecture at a glance</h3>
+      <p>
+        Your agent sends a <strong>decision request</strong> to Kynara describing the action,
+        resource, and principal. Kynara evaluates your policies (including any active JIT grants),
+        returns <code>allow</code>, <code>deny</code>, or <code>require_approval</code>, and
+        appends an immutable record to the audit log.
+      </p>
+
+      <pre><code>Agent (Python / TypeScript / AutoGen / CrewAI / OpenAI / Anthropic...)
+  │  SDK wraps tool call
+  ▼
+kynara.check(subject, action, resource, context)
+  │
+  ├─ Option A: HTTPS → Central API  (p95 &lt;8ms)
+  └─ Option B: HTTP  → Go Sidecar   (p95 &lt;1ms) ──batches telemetry──▶ Central API
+                           ↓
+             Policy engine evaluates: hard gates → JIT grants → RBAC → ABAC
+                           ↓
+          { effect: "allow" | "deny" | "require_approval" }
+                           ↓
+                   Audit event appended (hash-chained)</code></pre>
+    </section>
+
+    <!-- QUICK START -->
+    <section id="quickstart">
+      <h2>Quick start</h2>
+      <p>Get from zero to your first policy decision in under five minutes.</p>
+
+      <ol class="steps">
+        <li><p><strong>Create your account</strong> at <a href="https://kynara.ai">kynara.ai</a>. The free plan includes 3 seats and 10,000 policy decisions per month.</p></li>
+        <li><p><strong>Register your first agent.</strong> Navigate to <em>Agents → New agent</em>. Give it a display name, choose a supervision mode, and set a daily action budget. Copy the <strong>Agent ID</strong> — you'll need it in your code.</p></li>
+        <li><p><strong>Create an API key.</strong> Go to <em>Settings → API Keys → New API Key</em>. Copy it immediately — it is shown only once.</p></li>
+        <li><p><strong>Create a policy.</strong> Navigate to <em>Policies → New policy</em>. For example: effect <code>allow</code>, actions <code>file.read</code>, resources <code>file</code>. Test it in the integrated <strong>Simulator</strong> panel.</p></li>
+        <li><p><strong>Bind the policy</strong> to your agent via the Bindings tab.</p></li>
+        <li><p><strong>Call the decision API</strong> from your agent:</p></li>
+      </ol>
+
+      <pre><code># Python SDK
+pip install kynara-sdk
+
+from kynara_sdk import Kynara, permission_required
+from kynara_sdk.context import set_current_kynara
+
+set_current_kynara(Kynara.from_env())  # reads KYNARA_BASE_URL, KYNARA_API_KEY, KYNARA_AGENT_ID
+
+@permission_required("file.read", resource_arg="file_id", resource_type="file")
+def read_file(file_id: str):
+    return open(file_id).read()</code></pre>
+
+      <pre><code># Or call the REST API directly
+curl -X POST https://kynara.ai/api/v1/decisions/check \
+  -H "Authorization: Bearer &lt;your-api-key&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subject_type": "agent",
+    "subject_id": "&lt;agent-uuid&gt;",
+    "action": "file.read",
+    "resource": { "type": "file", "id": "reports/q4.csv", "attrs": {} },
+    "context": { "user_id": "u_123" }
+  }'</code></pre>
+
+      <div class="callout info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body">
+          <strong>No policy = deny.</strong> If no policy matches a request, Kynara returns <code>deny</code> by default. Start with broad allow policies and narrow them down — not the other way around.
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         WORKED EXAMPLES
+    ══════════════════════════════════════════════════════════════ -->
+
+    <!-- ── Example 1: CRM Assistant ── -->
+    <section id="example-crm">
+      <h2>Example 1 — CRM Assistant</h2>
+      <p class="lead" style="font-size:15px; margin-bottom:24px;">
+        A CRM assistant agent that reads contacts and deals, creates notes, and requires
+        human approval before writing or modifying contact records outside business hours.
+      </p>
+
+      <div class="callout info">
+        <span class="callout-icon">🗺️</span>
+        <div class="callout-body">
+          <strong>Setup order:</strong> Scope Catalog → Role → Agent → Policy → Bind policy to agent.
+          Always register your scopes first so they appear in the role editor's scope picker.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <h3>Step 1 — Register scopes in the Scope Catalog</h3>
+      <p>Navigate to <strong>Scope Catalog → New Tool</strong> and create four entries:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Namespace</th><th>Name</th><th>Scope string</th><th>Risk</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>crm</code></td><td><code>contacts.read</code></td><td><code>crm:contacts.read</code></td><td><span class="pill pill-ok">low</span></td><td>Read a CRM contact by ID or email.</td></tr>
+            <tr><td><code>crm</code></td><td><code>contacts.write</code></td><td><code>crm:contacts.write</code></td><td><span class="pill pill-warn">medium</span></td><td>Create or update a CRM contact record.</td></tr>
+            <tr><td><code>crm</code></td><td><code>deals.read</code></td><td><code>crm:deals.read</code></td><td><span class="pill pill-ok">low</span></td><td>Read deal pipeline data.</td></tr>
+            <tr><td><code>crm</code></td><td><code>notes.create</code></td><td><code>crm:notes.create</code></td><td><span class="pill pill-ok">low</span></td><td>Append a note to a contact or deal.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>For each entry, the <strong>Input Schema</strong> describes what parameters the agent passes at decision time. Example for <code>crm:contacts.write</code>:</p>
+
+      <pre><code>{
+  "type": "object",
+  "properties": {
+    "contact_id": {
+      "type": "string",
+      "description": "UUID of the contact being modified"
+    },
+    "fields_changed": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of field names being updated, e.g. [\"email\", \"phone\"]"
+    },
+    "is_bulk_operation": {
+      "type": "boolean",
+      "description": "True if this update affects more than one contact"
+    }
+  },
+  "required": ["contact_id"]
+}</code></pre>
+
+      <p>
+        These properties map to <code>resource.attrs</code> in the decision request. Your policy conditions can reference them as <code>ctx.resource.attrs.is_bulk_operation</code>.
+        See the <a href="#schema-reference">Input Schema reference</a> for a full field breakdown.
+      </p>
+
+      <!-- Step 2 -->
+      <h3>Step 2 — Create a Role</h3>
+      <p>Navigate to <strong>Roles → New Role</strong>.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Name</td><td><code>CRM Agent — Read + Notes</code></td></tr>
+            <tr><td>Description</td><td>Allows the CRM assistant to read contacts/deals and create notes. Write operations are excluded — add them via a separate role only when required.</td></tr>
+            <tr><td>Scopes</td><td><code>crm:contacts.read</code>, <code>crm:deals.read</code>, <code>crm:notes.create</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Use the scope picker to search and select each scope from the catalog. Do not add <code>crm:contacts.write</code> here — that scope will be governed by a policy condition instead of being freely granted.</p>
+
+      <!-- Step 3 -->
+      <h3>Step 3 — Create the Agent</h3>
+      <p>Navigate to <strong>Agents → New agent</strong>.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Display name</td><td><code>CRM Assistant</code></td></tr>
+            <tr><td>Slug</td><td><code>crm-assistant</code></td></tr>
+            <tr><td>Supervision mode</td><td><code>human_supervised</code></td></tr>
+            <tr><td>Daily action budget</td><td><code>500</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>After creating the agent, open its detail page and go to the <strong>Roles</strong> tab → <strong>Add role</strong> → select <code>CRM Agent — Read + Notes</code>.</p>
+
+      <!-- Step 4 -->
+      <h3>Step 4 — Create a Policy</h3>
+      <p>Navigate to <strong>Policies → New policy</strong>. This policy requires approval for contact writes outside business hours.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Display name</td><td><code>CRM write — require approval off-hours</code></td></tr>
+            <tr><td>Effect</td><td><code>require_approval</code></td></tr>
+            <tr><td>Priority</td><td><code>100</code></td></tr>
+            <tr><td>Scopes</td><td><code>crm:contacts.write</code></td></tr>
+            <tr><td>Resource types</td><td><code>crm.contact</code></td></tr>
+            <tr><td>Condition</td><td>Matches requests outside 09:00–18:00 (see below)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <pre><code>{
+  "op": "not",
+  "args": [
+    { "op": "time_between", "args": ["ctx.context.time", "09:00", "18:00"] }
+  ]
+}</code></pre>
+      <p>Then create a second policy that allows writes during business hours:</p>
+      <pre><code>display_name: "CRM write — allow during business hours"
+effect:       allow
+priority:     200
+scopes:       crm:contacts.write
+condition:    { "op": "time_between", "args": ["ctx.context.time", "09:00", "18:00"] }</code></pre>
+
+      <p>Bind both policies to the agent from the <strong>Bindings</strong> tab on each policy page (subject selector: <code>agent:&lt;agent-uuid&gt;</code>).</p>
+
+      <!-- Step 5 -->
+      <h3>Step 5 — Test with a permission check</h3>
+      <pre><code>POST /api/v1/decisions/check
+{
+  "subject_type": "agent",
+  "subject_id":   "&lt;crm-assistant-uuid&gt;",
+  "action":       "crm:contacts.write",
+  "resource": {
+    "type": "crm.contact",
+    "id":   "contact_8812",
+    "attrs": {
+      "contact_id":      "contact_8812",
+      "fields_changed":  ["email", "phone"],
+      "is_bulk_operation": false
+    }
+  },
+  "context": {
+    "time":       "22:30",          // Outside business hours → require_approval
+    "ip":         "203.0.113.42",
+    "ip_country": "US",
+    "user_id":    "u_sales_rep_007",
+    "session_id": "sess_abc123",
+    "request_id": "req_xyz456"
+  }
+}
+
+// Response:
+{
+  "effect":            "require_approval",
+  "matched_policy_id": "&lt;policy-uuid&gt;",
+  "reason":            "policy: CRM write — require approval off-hours",
+  "approval_id":       "&lt;approval-uuid&gt;"
+}</code></pre>
+
+      <p>Try the same request with <code>"time": "10:00"</code> and it returns <code>allow</code>.</p>
+    </section>
+
+    <!-- ── Example 2: Infra Manager ── -->
+    <section id="example-infra">
+      <h2>Example 2 — Infra Manager</h2>
+      <p class="lead" style="font-size:15px; margin-bottom:24px;">
+        An infrastructure automation agent that can read logs freely, but requires human
+        approval before restarting services or allocating disk — and is blocked entirely
+        outside the EU/US geofence.
+      </p>
+
+      <!-- Step 1 -->
+      <h3>Step 1 — Register scopes in the Scope Catalog</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Namespace</th><th>Name</th><th>Scope string</th><th>Risk</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>infra</code></td><td><code>logs.read</code></td><td><code>infra:logs.read</code></td><td><span class="pill pill-ok">low</span></td><td>Stream or query server logs.</td></tr>
+            <tr><td><code>infra</code></td><td><code>restart</code></td><td><code>infra:restart</code></td><td><span class="pill pill-danger">high</span></td><td>Restart a named service or container.</td></tr>
+            <tr><td><code>infra</code></td><td><code>disk.allocate</code></td><td><code>infra:disk.allocate</code></td><td><span class="pill pill-danger">high</span></td><td>Resize or allocate a disk volume.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Input schema for <code>infra:restart</code>:</p>
+      <pre><code>{
+  "type": "object",
+  "properties": {
+    "service_name": {
+      "type": "string",
+      "description": "Name of the service or container to restart, e.g. \"api-server\""
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["production", "staging", "development"],
+      "description": "Target environment. Policies can deny production restarts unconditionally."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Human-readable justification for the restart (shown to approvers)"
+    }
+  },
+  "required": ["service_name", "environment"]
+}</code></pre>
+
+      <p>Input schema for <code>infra:disk.allocate</code>:</p>
+      <pre><code>{
+  "type": "object",
+  "properties": {
+    "volume_id": {
+      "type": "string",
+      "description": "Cloud provider volume ID, e.g. \"vol-0a1b2c3d\""
+    },
+    "size_gb": {
+      "type": "number",
+      "description": "Requested size in gigabytes. Policies can cap at a maximum."
+    },
+    "region": {
+      "type": "string",
+      "description": "Cloud region, e.g. \"us-east-1\". Used in geo-restriction conditions."
+    }
+  },
+  "required": ["volume_id", "size_gb"]
+}</code></pre>
+
+      <!-- Step 2 -->
+      <h3>Step 2 — Create a Role</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Name</td><td><code>Infra Operator</code></td></tr>
+            <tr><td>Description</td><td>Full infrastructure access — restart, disk allocation, and log reading.</td></tr>
+            <tr><td>Scopes</td><td><code>infra:logs.read</code>, <code>infra:restart</code>, <code>infra:disk.allocate</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Step 3 -->
+      <h3>Step 3 — Create the Agent</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Display name</td><td><code>Infra Manager</code></td></tr>
+            <tr><td>Slug</td><td><code>infra-manager</code></td></tr>
+            <tr><td>Supervision mode</td><td><code>human_supervised</code></td></tr>
+            <tr><td>Daily action budget</td><td><code>100</code> (restarts are expensive, keep the budget tight)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Open the agent's detail page → <strong>Roles</strong> tab → <strong>Add role</strong> → <code>Infra Operator</code>.</p>
+
+      <!-- Step 4 -->
+      <h3>Step 4 — Create Policies</h3>
+
+      <h4>Policy A — Allow log reads anywhere, anytime</h4>
+      <pre><code>display_name: "Infra — allow log reads"
+effect:       allow
+priority:     100
+scopes:       infra:logs.read
+condition:    {}    // no condition = matches all requests</code></pre>
+
+      <h4>Policy B — Geofence: block all infra actions outside US/EU</h4>
+      <pre><code>display_name: "Infra — deny non-US/EU"
+effect:       deny
+priority:     200
+scopes:       infra:restart, infra:disk.allocate
+condition:
+{
+  "op": "not",
+  "args": [{
+    "op": "in",
+    "args": ["ctx.context.ip_country", ["US", "DE", "GB", "FR", "NL", "IE"]]
+  }]
+}</code></pre>
+
+      <h4>Policy C — Require approval for restarts and disk allocation</h4>
+      <pre><code>display_name: "Infra — require approval for destructive ops"
+effect:       require_approval
+priority:     300
+scopes:       infra:restart, infra:disk.allocate
+condition:    {}    // catches everything not already denied by Policy B</code></pre>
+
+      <p>Bind all three policies to the agent. The engine evaluates them in priority order: 100 → 200 → 300. A log read hits Policy A (allow) immediately. A restart from an unknown country hits Policy B (deny). A restart from a valid country skips Policy B (condition doesn't match) and hits Policy C (require_approval).</p>
+
+      <!-- Step 5 -->
+      <h3>Step 5 — Test with a permission check</h3>
+      <pre><code>// ✅ Log read from India — ALLOW (Policy A matches before geofence)
+POST /api/v1/decisions/check
+{
+  "subject_type": "agent",
+  "subject_id":   "&lt;infra-manager-uuid&gt;",
+  "action":       "infra:logs.read",
+  "resource": { "type": "server", "id": "prod-api-01", "attrs": {} },
+  "context": {
+    "time":       "03:00",
+    "ip_country": "IN",
+    "request_id": "req_log_001"
+  }
+}
+// → { "effect": "allow" }
+
+// ❌ Restart from China — DENY (Policy B geofence)
+{
+  "action": "infra:restart",
+  "resource": {
+    "type": "service",
+    "id":   "api-server",
+    "attrs": {
+      "service_name": "api-server",
+      "environment":  "production",
+      "reason":       "high memory usage"
+    }
+  },
+  "context": { "ip_country": "CN", "time": "14:00" }
+}
+// → { "effect": "deny", "reason": "policy: Infra — deny non-US/EU" }
+
+// ⏳ Restart from US — REQUIRE APPROVAL (Policy C)
+{
+  "action": "infra:restart",
+  "resource": {
+    "type": "service",
+    "id":   "api-server",
+    "attrs": {
+      "service_name": "api-server",
+      "environment":  "production",
+      "reason":       "high memory usage"
+    }
+  },
+  "context": { "ip_country": "US", "time": "14:00", "user_id": "u_devops_42" }
+}
+// → { "effect": "require_approval", "approval_id": "apr_..." }</code></pre>
+    </section>
+
+    <!-- ── Example 3: Employee Profile ── -->
+    <section id="example-hr">
+      <h2>Example 3 — Employee Profile Agent</h2>
+      <p class="lead" style="font-size:15px; margin-bottom:24px;">
+        An HR agent that can read and update employee profile fields, but is blocked from
+        accessing salary data unless the requesting user is in the HR admin group, and is
+        always denied during non-working hours.
+      </p>
+
+      <!-- Step 1 -->
+      <h3>Step 1 — Register scopes in the Scope Catalog</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Namespace</th><th>Name</th><th>Scope string</th><th>Risk</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>hr</code></td><td><code>profile.read</code></td><td><code>hr:profile.read</code></td><td><span class="pill pill-ok">low</span></td><td>Read basic employee profile fields (name, title, department).</td></tr>
+            <tr><td><code>hr</code></td><td><code>profile.update</code></td><td><code>hr:profile.update</code></td><td><span class="pill pill-warn">medium</span></td><td>Update mutable profile fields (title, department, manager).</td></tr>
+            <tr><td><code>hr</code></td><td><code>salary.read</code></td><td><code>hr:salary.read</code></td><td><span class="pill pill-danger" style="background:rgba(244,63,94,0.2)">critical</span></td><td>Read compensation data. Restricted to HR admin users only.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Input schema for <code>hr:profile.update</code>:</p>
+      <pre><code>{
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "description": "Internal employee ID being updated"
+    },
+    "fields": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Names of the fields being changed, e.g. [\"title\", \"department\"]"
+    },
+    "self_service": {
+      "type": "boolean",
+      "description": "True if the employee is updating their own record. Policies can allow self-service updates without approval."
+    }
+  },
+  "required": ["employee_id", "fields"]
+}</code></pre>
+
+      <p>Input schema for <code>hr:salary.read</code>:</p>
+      <pre><code>{
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "description": "Employee whose compensation data is being accessed"
+    },
+    "requester_role": {
+      "type": "string",
+      "description": "Role of the requesting user, e.g. \"hr_admin\", \"manager\", \"employee\". Policies use this to gate access."
+    },
+    "purpose": {
+      "type": "string",
+      "enum": ["compensation_review", "offer_creation", "audit"],
+      "description": "Declared purpose for the access — logged in the audit trail."
+    }
+  },
+  "required": ["employee_id", "requester_role"]
+}</code></pre>
+
+      <!-- Step 2 -->
+      <h3>Step 2 — Create Roles</h3>
+      <p>Create two roles to reflect the different access levels:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Role name</th><th>Scopes</th><th>Who gets it</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>HR Agent — Profile Access</code></td>
+              <td><code>hr:profile.read</code>, <code>hr:profile.update</code></td>
+              <td>All HR agents by default</td>
+            </tr>
+            <tr>
+              <td><code>HR Agent — Salary Access</code></td>
+              <td><code>hr:salary.read</code></td>
+              <td>Agents operating on behalf of an HR admin user only</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Step 3 -->
+      <h3>Step 3 — Create the Agent</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Display name</td><td><code>Employee Profile Agent</code></td></tr>
+            <tr><td>Slug</td><td><code>employee-profile</code></td></tr>
+            <tr><td>Supervision mode</td><td><code>human_supervised</code></td></tr>
+            <tr><td>Daily action budget</td><td><code>1000</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Assign both roles to the agent. The agent now has all three scopes in its grant set. Policies will narrow what's actually allowed at decision time.</p>
+
+      <!-- Step 4 -->
+      <h3>Step 4 — Create Policies</h3>
+
+      <h4>Policy A — Allow profile read/update during business hours</h4>
+      <pre><code>display_name: "HR — allow profile ops during business hours"
+effect:       allow
+priority:     100
+scopes:       hr:profile.read, hr:profile.update
+condition:
+{ "op": "time_between", "args": ["ctx.context.time", "08:00", "19:00"] }</code></pre>
+
+      <h4>Policy B — Deny all ops outside business hours</h4>
+      <pre><code>display_name: "HR — deny all ops outside hours"
+effect:       deny
+priority:     200
+scopes:       hr:profile.read, hr:profile.update, hr:salary.read
+condition:
+{
+  "op": "not",
+  "args": [{ "op": "time_between", "args": ["ctx.context.time", "08:00", "19:00"] }]
+}</code></pre>
+
+      <h4>Policy C — Allow salary reads only for hr_admin requester role</h4>
+      <pre><code>display_name: "HR — salary reads for hr_admin only"
+effect:       allow
+priority:     300
+scopes:       hr:salary.read
+condition:
+{
+  "op": "eq",
+  "args": ["ctx.resource.attrs.requester_role", "hr_admin"]
+}</code></pre>
+
+      <h4>Policy D — Deny all other salary reads</h4>
+      <pre><code>display_name: "HR — deny salary reads by default"
+effect:       deny
+priority:     400
+scopes:       hr:salary.read
+condition:    {}    // catch-all for any salary read not matched above</code></pre>
+
+      <!-- Step 5 -->
+      <h3>Step 5 — Test with permission checks</h3>
+      <pre><code>// ✅ Profile read during hours — ALLOW
+{
+  "subject_type": "agent",
+  "subject_id":   "&lt;employee-profile-uuid&gt;",
+  "action":       "hr:profile.read",
+  "resource": {
+    "type": "employee",
+    "id":   "emp_2291",
+    "attrs": { "employee_id": "emp_2291" }
+  },
+  "context": {
+    "time":       "10:30",
+    "ip_country": "US",
+    "user_id":    "u_manager_55",
+    "session_id": "sess_hr_001"
+  }
+}
+// → { "effect": "allow" }
+
+// ❌ Salary read by a non-admin — DENY (Policy C doesn't match, Policy D denies)
+{
+  "action": "hr:salary.read",
+  "resource": {
+    "type": "employee_salary",
+    "id":   "emp_2291",
+    "attrs": {
+      "employee_id":    "emp_2291",
+      "requester_role": "manager",
+      "purpose":        "compensation_review"
+    }
+  },
+  "context": { "time": "11:00", "user_id": "u_manager_55" }
+}
+// → { "effect": "deny", "reason": "policy: HR — deny salary reads by default" }
+
+// ✅ Salary read by hr_admin — ALLOW (Policy C matches)
+{
+  "action": "hr:salary.read",
+  "resource": {
+    "type": "employee_salary",
+    "id":   "emp_2291",
+    "attrs": {
+      "employee_id":    "emp_2291",
+      "requester_role": "hr_admin",
+      "purpose":        "offer_creation"
+    }
+  },
+  "context": { "time": "11:00", "user_id": "u_hr_admin_03" }
+}
+// → { "effect": "allow" }</code></pre>
+
+      <div class="callout ok">
+        <span class="callout-icon">✅</span>
+        <div class="callout-body">
+          <strong>Non-escalation guarantee:</strong> If you pass <code>on_behalf_of_user_id</code>, the agent's effective scopes are automatically intersected with the human user's scopes — so even if the agent has <code>hr:salary.read</code> in its role, it cannot use that scope while acting on behalf of a user who doesn't also have it.
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Context JSON Reference ── -->
+    <section id="context-reference">
+      <h2>Context JSON — field reference</h2>
+      <p>
+        The <code>context</code> object is a free-form map you pass alongside every decision request.
+        It provides the runtime environment that ABAC conditions evaluate against — things like current time,
+        client IP, the user's role, and any custom attributes your policies need.
+        Fields you don't pass default to <code>null</code> in the evaluation engine.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Type</th>
+              <th>Example</th>
+              <th>What it's used for</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>time</code></td>
+              <td>string (HH:MM)</td>
+              <td><code>"14:30"</code></td>
+              <td>
+                Evaluated by the <code>time_between</code> condition operator.
+                Pass the current local time (or a UTC time) to enable business-hours policies.
+                If omitted, <code>time_between</code> conditions always evaluate to <code>false</code>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>ip</code></td>
+              <td>string (IP address)</td>
+              <td><code>"203.0.113.42"</code></td>
+              <td>
+                Logged in the audit event for forensic traceability. Kynara's server-side
+                GeoIP lookup also derives <code>ip_country</code> from this value automatically
+                if you don't supply it explicitly.
+              </td>
+            </tr>
+            <tr>
+              <td><code>ip_country</code></td>
+              <td>string (ISO 3166-1 alpha-2)</td>
+              <td><code>"US"</code></td>
+              <td>
+                Used in <code>in</code> / <code>eq</code> conditions for geographic access control.
+                You can pass this explicitly (e.g. from your own GeoIP lookup) or omit it and let
+                the server derive it from <code>ip</code>. Referenced in policies as
+                <code>ctx.context.ip_country</code>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>user_id</code></td>
+              <td>string</td>
+              <td><code>"u_sales_007"</code></td>
+              <td>
+                The human user on whose behalf the agent is acting, for logging and ABAC
+                conditions that reference user attributes. Distinct from
+                <code>on_behalf_of_user_id</code> — that field is for the non-escalation
+                intersection; <code>context.user_id</code> is purely informational for
+                conditions and the audit log.
+              </td>
+            </tr>
+            <tr>
+              <td><code>session_id</code></td>
+              <td>string</td>
+              <td><code>"sess_abc123"</code></td>
+              <td>
+                Groups a sequence of related decisions in the audit log. Useful for
+                reconstructing everything an agent did during a single user session or
+                workflow run. No policy operators act on this field natively; use it for
+                audit correlation.
+              </td>
+            </tr>
+            <tr>
+              <td><code>request_id</code></td>
+              <td>string</td>
+              <td><code>"req_xyz456"</code></td>
+              <td>
+                A trace ID from your own infrastructure (e.g. a distributed tracing span ID
+                or an HTTP request ID). Stored in the audit event so you can cross-reference
+                Kynara decisions with your application logs. Not evaluated by any condition
+                operator; purely a correlation handle.
+              </td>
+            </tr>
+            <tr>
+              <td><code>env</code></td>
+              <td>string</td>
+              <td><code>"production"</code></td>
+              <td>
+                Identifies the deployment environment. Policies can reference this as
+                <code>ctx.context.env</code> to enforce stricter rules in production than
+                in staging — e.g. always require approval in <code>production</code>, allow
+                freely in <code>development</code>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>mfa_verified</code></td>
+              <td>boolean</td>
+              <td><code>true</code></td>
+              <td>
+                Pass <code>true</code> when the human user has recently authenticated with MFA.
+                Policies can use <code>{ "op": "eq", "args": ["ctx.context.mfa_verified", true] }</code>
+                as a gate for high-risk actions — e.g. only allow salary reads when MFA is confirmed.
+              </td>
+            </tr>
+            <tr>
+              <td><code>user_role</code></td>
+              <td>string</td>
+              <td><code>"hr_admin"</code></td>
+              <td>
+                A custom role or group string from your identity system.
+                Referenced by conditions as <code>ctx.context.user_role</code> to allow
+                different behaviour for different user classes without needing separate agents.
+              </td>
+            </tr>
+            <tr>
+              <td><em>any custom key</em></td>
+              <td>string / number / boolean</td>
+              <td><code>"data_classification": "PII"</code></td>
+              <td>
+                You can pass any additional key-value pairs your policies need.
+                They're accessible in condition ASTs as <code>ctx.context.&lt;key&gt;</code>.
+                Good examples: <code>tenant_id</code>, <code>cost_center</code>,
+                <code>approval_ticket</code>, <code>risk_score</code>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body">
+          <strong>Context ≠ Resource attrs.</strong>
+          <code>context</code> describes the <em>environment at request time</em> (who, when, where, how).
+          <code>resource.attrs</code> describes the <em>object being acted on</em> (what).
+          Keep them separate: time-of-day goes in <code>context</code>; the <code>amount_cents</code>
+          of a payment goes in <code>resource.attrs</code>.
+        </div>
+      </div>
+
+      <h3>How conditions reference context</h3>
+      <p>Every condition field path starts with <code>ctx.</code> to distinguish it from literal values:</p>
+      <pre><code>// Check time-of-day
+{ "op": "time_between", "args": ["ctx.context.time", "09:00", "18:00"] }
+
+// Check country
+{ "op": "in", "args": ["ctx.context.ip_country", ["US", "GB", "DE"]] }
+
+// Check environment
+{ "op": "eq", "args": ["ctx.context.env", "production"] }
+
+// Check a resource attribute (resource.attrs.amount_cents > 10000)
+{ "op": "gt", "args": ["ctx.resource.attrs.amount_cents", 10000] }
+
+// Check the requester's role (from resource.attrs)
+{ "op": "eq", "args": ["ctx.resource.attrs.requester_role", "hr_admin"] }
+
+// Combine conditions
+{
+  "op": "and",
+  "args": [
+    { "op": "eq", "args": ["ctx.context.env", "production"] },
+    { "op": "eq", "args": ["ctx.context.mfa_verified", true] }
+  ]
+}</code></pre>
+    </section>
+
+    <!-- ── Input Schema Reference ── -->
+    <section id="schema-reference">
+      <h2>Input Schema — field reference</h2>
+      <p>
+        Each Scope Catalog entry has an optional <strong>Input Schema</strong> — a
+        <a href="https://json-schema.org/understanding-json-schema/" target="_blank">JSON Schema</a>
+        object that documents the parameters your tool accepts. This schema appears in the Kynara
+        UI to help policy authors understand what's available in <code>resource.attrs</code>, and it
+        can be imported into your agent code so it knows what to send.
+      </p>
+
+      <h3>Schema structure</h3>
+      <pre><code>{
+  "type": "object",          // always "object" for tool inputs
+  "properties": {            // map of parameter name → JSON Schema descriptor
+    "param_name": {
+      "type":        "string | number | boolean | array | object",
+      "description": "Human-readable explanation shown in the Kynara UI and to policy authors",
+      "enum":        ["option_a", "option_b"],  // optional — restricts to fixed values
+      "default":     "some_value"               // optional — shown as the presumed default
+    }
+  },
+  "required": ["param_name"]  // params the agent MUST always send
+}</code></pre>
+
+      <h3>Field-by-field breakdown</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Required</th>
+              <th>What it means</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>type</code></td>
+              <td>Yes</td>
+              <td>
+                The JSON type of this parameter: <code>string</code>, <code>number</code>,
+                <code>boolean</code>, <code>array</code>, or <code>object</code>.
+                Kynara validates that the value passed in <code>resource.attrs</code>
+                matches this type at decision time.
+              </td>
+            </tr>
+            <tr>
+              <td><code>description</code></td>
+              <td>Strongly recommended</td>
+              <td>
+                Plain-English explanation of what this parameter means. This is what
+                policy authors read when deciding which <code>resource.attrs</code>
+                fields to use in conditions. Be specific — e.g. <em>"Amount in cents,
+                not dollars"</em> rather than <em>"Amount"</em>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>enum</code></td>
+              <td>No</td>
+              <td>
+                An array of the only permitted values. When present, Kynara validates
+                incoming values at decision time and rejects any value not in the list.
+                Ideal for fields like <code>environment</code> or <code>risk_level</code>
+                where a free-form string would be a policy bypass risk.
+              </td>
+            </tr>
+            <tr>
+              <td><code>default</code></td>
+              <td>No</td>
+              <td>
+                The value assumed when the parameter is absent. Documented only —
+                Kynara does not inject defaults. Use this to communicate to agent
+                authors what the omitted-value behaviour is.
+              </td>
+            </tr>
+            <tr>
+              <td><code>required</code> (top-level array)</td>
+              <td>No</td>
+              <td>
+                Lists the parameter names the agent <em>must</em> send. If a required
+                parameter is missing from <code>resource.attrs</code>, Kynara returns
+                a validation error before the policy engine runs. Required parameters
+                are the ones your conditions rely on — if they're absent, the condition
+                can't be evaluated safely.
+              </td>
+            </tr>
+            <tr>
+              <td><code>items</code> (for array types)</td>
+              <td>No</td>
+              <td>
+                Describes the schema of each element when <code>type</code> is
+                <code>"array"</code>. Example: <code>"items": { "type": "string" }</code>
+                for a list of field names.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>How the schema relates to policies</h3>
+      <p>
+        The input schema is the contract between your agent code and your policies.
+        When you write a condition like:
+      </p>
+      <pre><code>{ "op": "gt", "args": ["ctx.resource.attrs.amount_cents", 10000] }</code></pre>
+      <p>
+        …you're depending on your agent always passing <code>amount_cents</code> in
+        <code>resource.attrs</code>. The input schema makes this dependency explicit
+        and enforces it. If <code>amount_cents</code> is in <code>required</code>,
+        Kynara will reject any decision request that doesn't include it — preventing
+        a badly-written agent from accidentally bypassing the condition.
+      </p>
+
+      <h3>Does the schema replace policies?</h3>
+      <p>No — they serve completely different purposes:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Input Schema</th><th>Policy</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Describes <em>what parameters</em> exist and their types</td>
+              <td>Describes <em>what is allowed</em> and under what conditions</td>
+            </tr>
+            <tr>
+              <td>Validates that required fields are present</td>
+              <td>Evaluates those fields against rules to produce allow / deny / require_approval</td>
+            </tr>
+            <tr>
+              <td>Static — doesn't change at request time</td>
+              <td>Dynamic — evaluated fresh on every request</td>
+            </tr>
+            <tr>
+              <td>Helps policy authors understand what to reference</td>
+              <td>Is the actual enforcement gate</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Do agents need to re-read the schema on every call?</h3>
+      <p>
+        No. The schema is a static contract defined when the tool is registered. Agent code
+        reads the schema once — typically at initialization or during a build step — and uses it
+        to know which fields to pass in <code>resource.attrs</code>. If you later update the
+        schema (e.g. add a new required field), agent developers must update their code to
+        pass the new field. Kynara will start rejecting requests that are missing it from
+        the moment the schema is saved.
+      </p>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body">
+          <strong>Schema changes are breaking changes.</strong> Adding a field to
+          <code>required</code> is equivalent to a breaking API change — any agent code
+          that doesn't send that field will start receiving validation errors immediately.
+          Always add new required fields in a two-phase deploy: add as optional first,
+          update all agents to send it, then promote to required.
+        </div>
+      </div>
+    </section>
+
+    <!-- KEY CONCEPTS -->
+    <section id="concepts">
+      <h2>Key concepts</h2>
+
+      <h3>Agents</h3>
+      <p>An <strong>agent</strong> is a registered identity for an AI process. Every agent has a unique ID, an API key, a supervision mode, a daily action budget, and role assignments. Agents are the <em>subject</em> of policy evaluation.</p>
+
+      <h3>Bounded authority</h3>
+      <p>An agent's effective permissions are always the <strong>intersection</strong> of the agent's own role and the role of the supervising human on whose behalf it is acting. An agent can never have more authority than the person who dispatched it — regardless of how its policies are configured.</p>
+
+      <h3>Policies</h3>
+      <p>A <strong>policy</strong> is an RBAC + ABAC rule that defines what an agent can do. Each policy has a priority, actions, resource types, conditions (optional), and an effect: <code>allow</code>, <code>deny</code>, or <code>require_approval</code>. Policies are evaluated in ascending priority order; the first match wins.</p>
+
+      <h3>Decision outcomes</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Outcome</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill pill-ok">allow</span></td><td>The action is permitted. The agent may proceed. Decision cached for the policy's TTL.</td></tr>
+            <tr><td><span class="pill pill-danger">deny</span></td><td>The action is blocked. Raised as <code>PermissionDenied</code> in the SDK before any side effect occurs.</td></tr>
+            <tr><td><span class="pill pill-warn">require_approval</span></td><td>A human must approve before the action can proceed. The agent pauses; an <code>approval_url</code> is returned.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>JIT grants</h3>
+      <p>A <strong>JIT (Just-in-Time) grant</strong> is a time-bound, break-glass permission elevation. It temporarily widens an agent's effective scopes without modifying any permanent policy. Every grant requires a justification and optionally a ticket link, and is fully recorded in the audit chain.</p>
+
+      <h3>Scope Catalog</h3>
+      <p>The <strong>Scope Catalog</strong> (formerly "Tools") is the registry of callable functions your agents expose. Each entry has a namespace, name, risk class, input schema, and scope string. Policies and role editors reference scope strings from this catalog.</p>
+
+      <h3>Supervision modes</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Mode</th><th>Behaviour</th></tr></thead>
+          <tbody>
+            <tr><td><code>autonomous</code></td><td>Decisions are evaluated against policies with no additional human checkpoint.</td></tr>
+            <tr><td><code>human_supervised</code></td><td>High-sensitivity actions escalate to a human reviewer as configured by policy.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard">
+      <h2>Dashboard</h2>
+      <p>The dashboard gives you a real-time view of agent activity. It shows data for the last 24 hours (chart) and 7 days (stat cards), and surfaces an onboarding checklist for new organisations.</p>
+
+      <h3>Stat cards</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Card</th><th>What it shows</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Active agents</strong></td><td>Agents currently enabled.</td></tr>
+            <tr><td><strong>Decisions (7d)</strong></td><td>Total decision events in the past 7 days.</td></tr>
+            <tr><td><strong>Approvals pending</strong></td><td><code>require_approval</code> decisions awaiting a human reviewer.</td></tr>
+            <tr><td><strong>Denials (7d)</strong></td><td><code>deny</code> outcomes in the past 7 days.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Decision volume chart</h3>
+      <p>Area chart showing allow, require_approval, and deny events bucketed by hour for the last 24 hours.</p>
+
+      <h3>Onboarding checklist</h3>
+      <p>New organisations see a guided checklist: register an agent, create a policy, bind it, make your first decision. The checklist disappears once all steps are complete.</p>
+    </section>
+
+    <!-- AGENTS -->
+    <section id="agents">
+      <h2>Agents</h2>
+
+      <h3>Creating an agent</h3>
+      <ol class="steps">
+        <li><p>Navigate to <strong>Agents → New agent</strong>.</p></li>
+        <li><p>Enter a display name, optional description, and choose a supervision mode.</p></li>
+        <li><p>Set a <strong>daily action budget</strong> to cap runaway execution.</p></li>
+        <li><p>Click <strong>Create agent</strong>. Copy the Agent ID from the detail page URL.</p></li>
+      </ol>
+
+      <h3>Kill switch</h3>
+      <p>Every agent has a kill switch accessible from its detail page. When triggered, the agent is immediately disabled across all sessions — all subsequent decision requests return <code>deny</code>. Re-enabling requires an explicit admin action, which is itself recorded in the audit log. The <code>agent.killed</code> webhook fires immediately.</p>
+
+      <h3>Access summary</h3>
+      <p>The <strong>Access Summary</strong> tab on the agent detail page shows a live view of the agent's effective scopes — combining its role assignments and any active JIT grants — so you can quickly see exactly what the agent is currently permitted to do.</p>
+
+      <h3>Role assignments</h3>
+      <p>The <strong>Roles</strong> tab on the agent detail page lets you assign roles to the agent. Each role grants a set of scopes (permissions). The agent's effective scope set is the union of all active role assignments. You can add or remove roles at any time — changes take effect immediately and are recorded in the audit log.</p>
+
+      <h3>Policy bindings</h3>
+      <p>Each policy shown on the agent detail page is labelled <strong>Direct</strong> (bound to this agent specifically) or <strong>Org-wide</strong> (bound to all agents via <code>*</code>). Org-wide bindings are managed from the Policies page.</p>
+    </section>
+
+    <!-- POLICIES & SIMULATOR -->
+    <section id="policies">
+      <h2>Policies &amp; Simulator</h2>
+
+      <h3>Creating a policy</h3>
+      <ol class="steps">
+        <li><p>Navigate to <strong>Policies → New policy</strong>.</p></li>
+        <li><p>Enter a display name, set a priority (lower = evaluated first), and choose an effect.</p></li>
+        <li><p>Specify <strong>scopes</strong> (e.g., <code>payments.refund.issue</code>) and optionally resource types.</p></li>
+        <li><p>Add an <strong>ABAC condition</strong> in the JSON editor (e.g., time-of-day, IP, data classification). Leave empty to match all requests.</p></li>
+        <li><p>Use the <strong>Simulator</strong> panel (below the condition editor) to test before saving.</p></li>
+        <li><p>Toggle <strong>Enabled</strong> and click <strong>Save</strong>.</p></li>
+      </ol>
+
+      <div class="callout info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body">
+          <strong>Simulator is embedded.</strong> The policy simulator lives inside the Policy Editor — there is no separate Simulator nav item. Open any policy and scroll down to the Simulator panel to test it against a hypothetical subject, action, resource, and context.
+        </div>
+      </div>
+
+      <h3>Condition grammar</h3>
+      <p>Conditions are JSON ASTs. The engine supports an allow-listed set of operators — no dynamic code evaluation. Example:</p>
+
+      <pre><code>{
+  "op": "not",
+  "args": [
+    { "op": "time_between", "args": ["ctx.context.time", "09:00", "18:00"] }
+  ]
+}</code></pre>
+
+      Common operators: <code>eq</code>, <code>neq</code>, <code>in</code>, <code>gt</code>, <code>lt</code>, <code>time_between</code>, <code>and</code>, <code>or</code>, <code>not</code>.
+
+      <h3>Evaluation order</h3>
+      <p>Policies are evaluated in ascending priority order. The first match wins. If no policy matches, the outcome is <code>deny</code>. Place broad <code>deny</code> rules at low priority numbers and narrower <code>allow</code> rules higher to build an allow-list model.</p>
+
+      <h3>Disabling a policy</h3>
+      <p>Setting a policy to <em>disabled</em> excludes it from evaluation without removing its bindings — useful for temporarily suspending a rule during an incident.</p>
+    </section>
+
+    <!-- POLICY REPLAY -->
+    <section id="policy-replay">
+      <h2>Policy Replay <span class="new-tag">NEW</span></h2>
+      <p>Before deploying a new or modified policy, simulate its impact against real historical decisions to understand exactly what would flip — before it affects live agents.</p>
+
+      <div class="callout new">
+        <span class="callout-icon">🔬</span>
+        <div class="callout-body">
+          <strong>Why replay?</strong> A policy that looks correct in the simulator may have unintended consequences at scale. Replay shows you the real blast radius across up to 30 days and 100,000 historical decisions.
+        </div>
+      </div>
+
+      <h3>Running a replay</h3>
+      <ol class="steps">
+        <li><p>Open a policy (new or existing) in the Policy Editor.</p></li>
+        <li><p>Click <strong>Replay against history</strong> below the condition editor.</p></li>
+        <li><p>Choose a <strong>lookback window</strong> (1–30 days).</p></li>
+        <li><p>Click <strong>Run Replay</strong> and wait for results (typically &lt;10 seconds).</p></li>
+        <li><p>Review the flip counts and click any affected decision ID to inspect its full context.</p></li>
+        <li><p>If the impact looks acceptable, click <strong>Save</strong> to deploy.</p></li>
+      </ol>
+
+      <h3>Replay results</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>total_events</code></td><td>Number of historical decision events evaluated.</td></tr>
+            <tr><td><code>flipped</code></td><td>Events whose outcome would change under the new policy.</td></tr>
+            <tr><td><code>allow → deny</code></td><td>Previously-allowed actions that would now be blocked.</td></tr>
+            <tr><td><code>allow → require_approval</code></td><td>Previously-allowed actions that would now require human sign-off.</td></tr>
+            <tr><td><code>deny → allow</code></td><td>Previously-blocked actions that would now be permitted.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Results cap at 30 days × 100k events. For larger windows, use <code>scripts/kynara-cli.py</code> with the offline replayer.</p>
+    </section>
+
+    <!-- APPROVALS -->
+    <section id="approvals">
+      <h2>Approvals</h2>
+      <p>When a policy returns <code>require_approval</code>, Kynara creates an approval request and the agent pauses. A human reviewer must approve or deny the specific action before the agent can proceed.</p>
+
+      <h3>Reviewing approvals</h3>
+      <ol class="steps">
+        <li><p>Click <strong>Approvals</strong> in the left sidebar — a badge shows the pending count.</p></li>
+        <li><p>Open a pending request. It shows the agent, action, resource, inputs, matched policy, and a computed risk score.</p></li>
+        <li><p>Review the agent's <strong>historical denial rate</strong> for this action type to gauge risk.</p></li>
+        <li><p>Click <strong>Approve</strong> or <strong>Deny</strong> and enter a mandatory justification.</p></li>
+      </ol>
+
+      <h3>Notification channels</h3>
+      <p>Your agent can surface the <code>approval_url</code> to reviewers via any channel — Slack message, email, PagerDuty, or your own app UI. Subscribe to the <code>decision.approval_requested</code> webhook to push notifications automatically.</p>
+
+      <h3>Approval expiry</h3>
+      <p>Approvals expire after 24 hours by default (configurable per policy). An expired approval counts as <code>deny</code>.</p>
+    </section>
+
+    <!-- JIT GRANTS -->
+    <section id="jit-grants">
+      <h2>JIT Grants <span class="new-tag">NEW</span></h2>
+      <p>JIT (Just-in-Time) grants give an agent a temporary, time-bound permission elevation for break-glass scenarios — without modifying any permanent policy.</p>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body">
+          <strong>Use sparingly.</strong> JIT grants bypass normal policy evaluation for their duration. Always provide a valid justification and ticket link so the grant is traceable in the audit log.
+        </div>
+      </div>
+
+      <h3>Creating a grant</h3>
+      <ol class="steps">
+        <li><p>Click <strong>JIT Grants</strong> in the sidebar (or Settings → JIT Grants).</p></li>
+        <li><p>Click <strong>+ New Grant</strong>.</p></li>
+        <li><p>Enter the <strong>scope</strong> to grant (e.g., <code>crm:write</code>), <strong>duration</strong> in minutes, a <strong>justification</strong>, and a <strong>ticket URL</strong>.</p></li>
+        <li><p>Click <strong>Create Grant</strong>. The grant is active immediately.</p></li>
+      </ol>
+
+      <h3>Revocation</h3>
+      <p>Grants expire automatically after the requested duration. To revoke early, open the grant and click <strong>Revoke</strong>. Both creation and revocation are recorded in the audit chain with <code>event_type = jit_grant.created</code> / <code>jit_grant.revoked</code>.</p>
+    </section>
+
+    <!-- GUARDRAILS -->
+    <section id="guardrails">
+      <h2>Guardrails <span class="new-tag">NEW</span></h2>
+      <p>Guardrails provide a second defense layer beyond per-action policies. They watch the stream of events your agents emit in real time and automatically revoke access when predefined thresholds are exceeded.</p>
+
+      <h3>Setting up an integration</h3>
+      <ol class="steps">
+        <li><p>Click <strong>Guardrails</strong> in the sidebar.</p></li>
+        <li><p>Click <strong>+ New Integration</strong> and give it a name (e.g., your agent's name).</p></li>
+        <li><p>Copy the generated <strong>Webhook URL</strong> — your agent runtime POSTs events here.</p></li>
+      </ol>
+
+      <h3>Configuring threshold rules</h3>
+      <ol class="steps">
+        <li><p>Click the <strong>Rules</strong> tab → <strong>+ New Rule</strong>.</p></li>
+        <li><p>Set a <strong>threshold</strong> (e.g., 5 events), <strong>time window</strong> (e.g., 5 minutes), and <strong>severity filter</strong> (high, critical).</p></li>
+        <li><p>Set the <strong>action</strong> to <code>revoke</code>.</p></li>
+        <li><p>Click <strong>Save Rule</strong>.</p></li>
+      </ol>
+
+      <p>When the threshold is breached, Kynara immediately revokes the agent's access. The <code>agent.killed</code> webhook fires. This is the primary defense against prompt injection attacks — because Kynara sits outside the LLM's trust boundary, no instruction written into a prompt can change the guardrail evaluation.</p>
+    </section>
+
+    <!-- AUDIT LOG -->
+    <section id="audit">
+      <h2>Audit log</h2>
+      <p>The audit log records every event that passes through Kynara. It is append-only and SHA-256 hash-chained — tampering with any entry breaks the chain and is detected on the next integrity check.</p>
+
+      <h3>Event types</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Event type</th><th>When it fires</th></tr></thead>
+          <tbody>
+            <tr><td><code>policy.decision</code></td><td>Every time the decision engine evaluates a request.</td></tr>
+            <tr><td><code>agent.created</code></td><td>A new agent is registered.</td></tr>
+            <tr><td><code>agent.killed</code></td><td>Kill switch activated; guardrail threshold exceeded.</td></tr>
+            <tr><td><code>policy.created / updated / deleted</code></td><td>Policy lifecycle events.</td></tr>
+            <tr><td><code>jit_grant.created / revoked</code></td><td>Break-glass grant lifecycle.</td></tr>
+            <tr><td><code>approval.approved / denied</code></td><td>Human resolved a pending approval request.</td></tr>
+            <tr><td><code>auth.login / logout / sso</code></td><td>User authentication events with IP, user agent, device fingerprint.</td></tr>
+            <tr><td><code>member.invited / removed</code></td><td>Team membership changes.</td></tr>
+            <tr><td><code>admin.*</code></td><td>All admin and superadmin actions.</td></tr>
+            <tr><td><code>audit.chain_broken</code></td><td>Integrity verifier detected a gap in the hash chain.</td></tr>
+            <tr><td><code>permissions_changed</code></td><td>Role assignment or JIT grant changed an agent's effective scopes.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Chain verification</h3>
+      <p>Click <strong>Verify Chain</strong> on the Audit page to run a full SHA-256 chain replay. A green banner confirms integrity. You can also verify offline using <code>scripts/verify_chain_offline.py</code> — no API dependency required.</p>
+
+      <h3>CSV export</h3>
+      <p>Click <strong>Export CSV</strong> to download all filtered events. Enterprise plans support streaming nightly exports to S3-compatible storage.</p>
+
+      <div class="callout ok">
+        <span class="callout-icon">✅</span>
+        <div class="callout-body">
+          <strong>Compliance note:</strong> The audit log is designed to satisfy SOC 2 Type II, ISO 27001, GDPR, and HIPAA log-integrity requirements. The hash chain means any deletion or modification of a record is detectable on the next integrity check.
+        </div>
+      </div>
+    </section>
+
+    <!-- SCOPE CATALOG -->
+    <section id="scope-catalog">
+      <h2>Scope Catalog</h2>
+      <p>The Scope Catalog (formerly "Tools") is the registry of callable functions your agents expose. Each entry defines a namespace, name, risk class, input schema, and scope string that policies and role editors can reference.</p>
+
+      <h3>Registering a tool</h3>
+      <ol class="steps">
+        <li><p>Click <strong>Scope Catalog → New Tool</strong>.</p></li>
+        <li><p>Enter a <strong>namespace</strong> (e.g., <code>payments</code>), <strong>name</strong> (e.g., <code>refund.issue</code>), and <strong>risk class</strong> (low / medium / high / critical).</p></li>
+        <li><p>Add an optional JSON Schema for the tool's inputs.</p></li>
+        <li><p>Set the <strong>scope</strong> string (e.g., <code>payments.refund.issue</code>) — this is what roles grant and policies check.</p></li>
+        <li><p>Click <strong>Save</strong>.</p></li>
+      </ol>
+
+      <h3>Scope picker in role editor</h3>
+      <p>When creating or editing a role, the scope picker lets you search and select scopes directly from the Scope Catalog — no manual typing required.</p>
+    </section>
+
+    <!-- WEBHOOKS -->
+    <section id="webhooks">
+      <h2>Webhooks <span class="new-tag">NEW</span></h2>
+      <p>Subscribe to Kynara events to receive real-time HMAC-signed HTTP notifications in your own systems — Slack bots, PagerDuty, SIEM, approval workflows, or any HTTPS endpoint.</p>
+
+      <h3>Creating a webhook</h3>
+      <ol class="steps">
+        <li><p>Click <strong>Settings → Webhooks → + New Webhook</strong>.</p></li>
+        <li><p>Enter your HTTPS endpoint URL.</p></li>
+        <li><p>Select the events you want to subscribe to.</p></li>
+        <li><p>Click <strong>Save</strong>, then <strong>Send Test Event</strong> to verify your endpoint.</p></li>
+      </ol>
+
+      <h3>Verifying signatures</h3>
+      <pre><code>import hmac, hashlib
+
+def verify(secret: str, body: bytes, sig_header: str) -> bool:
+    computed = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest("sha256=" + computed, sig_header)</code></pre>
+
+      <p>See <a href="#webhook-events">Webhook events reference</a> for the full list of subscribable events.</p>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings">
+      <h2>Settings</h2>
+
+      <h3>API keys</h3>
+      <p>Settings → API Keys lets you create, view, and revoke API keys with per-key scope restrictions and rate limits. Keys are prefixed <code>sk_live_</code> and shown only once — store them in a secret manager.</p>
+
+      <h3>SSO configuration</h3>
+      <p>Settings → SSO is where owners configure Okta, Azure AD, Google Workspace, or any SAML 2.0 / OIDC-compliant provider. Multiple SSO connections can coexist. See the <a href="#sso">SSO section</a> for step-by-step instructions.</p>
+
+      <h3>Danger zone</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Action</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Rotate API keys</strong></td><td>Immediately invalidates all existing API keys and issues new ones. All agents lose access until re-configured.</td></tr>
+            <tr><td><strong>Revoke all sessions</strong></td><td>Signs out all active users. Useful after a suspected credential compromise.</td></tr>
+            <tr><td><strong>Delete organization</strong></td><td>Permanently deletes the org and all data. Requires typing the org name to confirm. Irreversible.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- MEMBERS -->
+    <section id="members">
+      <h2>Team members</h2>
+
+      <h3>Seat roles</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Role</th><th>Permissions</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Owner</strong></td><td>Full access. Manages billing, SSO, members, org settings, and danger zone.</td></tr>
+            <tr><td><strong>Admin</strong></td><td>Creates and modifies agents, policies, tools, and JIT grants. Cannot manage billing.</td></tr>
+            <tr><td><strong>Developer</strong></td><td>Can access Dashboard, Agents, Scope Catalog, and How It Works. Cannot view Roles, Policies, Audit log, Billing, or Settings.</td></tr>
+            <tr><td><strong>Auditor</strong></td><td>Read-only access to Audit log, Policies, and Roles. Cannot create or modify any records.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Inviting members</h3>
+      <ol class="steps">
+        <li><p>Navigate to <strong>Settings → Members → + Invite member</strong>.</p></li>
+        <li><p>Enter the invitee's email and choose a role.</p></li>
+        <li><p>Click <strong>Send invite</strong>. The invitation appears in <strong>Pending Invites</strong> until accepted.</p></li>
+      </ol>
+
+      <p>To resend or cancel a pending invite, click the <strong>...</strong> menu next to it. Role assignments are restricted by your own role — you cannot grant a role above your own.</p>
+    </section>
+
+    <!-- BILLING -->
+    <section id="billing">
+      <h2>Billing</h2>
+
+      <h3>Plans</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:20px;">
+        <div class="card">
+          <div class="card-title">Free</div>
+          <p>3 seats · 10,000 decisions/mo · 30-day audit retention. No credit card required.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">Pro <span style="color:var(--accent-light)">$49/mo</span></div>
+          <p>15 seats · 500,000 decisions/mo · 1-year retention · SSO · Webhooks · Priority support.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">Enterprise</div>
+          <p>Unlimited seats &amp; decisions · Custom retention · HIPAA BAA · SLA · Dedicated deployment.</p>
+        </div>
+      </div>
+
+      <h3>Quota enforcement</h3>
+      <p>When the monthly decision quota is reached, the decision endpoint returns <code>deny</code> with <code>reason: "quota_exceeded"</code> until the billing cycle resets or the plan is upgraded. Seat limits block new member invitations when the seat cap is reached.</p>
+
+      <h3>Upgrading</h3>
+      <ol class="steps">
+        <li><p>Navigate to <strong>Billing → Upgrade plan</strong>.</p></li>
+        <li><p>Select Pro or Enterprise in the modal.</p></li>
+        <li><p>Click <strong>Upgrade to Pro</strong> — you'll be redirected to Stripe Checkout. Enterprise upgrades open a sales email.</p></li>
+      </ol>
+    </section>
+
+    <!-- SUPERADMIN -->
+    <section id="superadmin">
+      <h2>Superadmin <span class="new-tag">NEW</span></h2>
+      <p>Superadmin accounts have platform-wide management access — they can view all organisations, create new ones, and invite members to any org regardless of their own membership.</p>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body">
+          <strong>Restricted access.</strong> Superadmin status is set at the database level and is not configurable through the UI. All superadmin actions are recorded with <code>event_type = admin.superadmin.*</code> in the audit chain.
+        </div>
+      </div>
+
+      <h3>Admin Console</h3>
+      <p>Superadmins see an <strong>Admin Console</strong> link in the top-right user menu. The console shows all organisations (with member counts and plan details), all users across all orgs, and platform-wide usage metrics.</p>
+    </section>
+
+    <!-- REST API -->
+    <section id="api">
+      <h2>REST API</h2>
+      <p>The Kynara REST API is at <code>https://kynara.ai/api/v1</code>. All endpoints require a JWT in <code>Authorization: Bearer &lt;token&gt;</code> or an API key in <code>X-Kynara-Key: sk_live_...</code>. Full OpenAPI 3.1 spec is available at <code>/api/docs</code>.</p>
+
+      <h3>Auth</h3>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/auth/login</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/auth/refresh</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/auth/sso/okta/start</span></div>
+
+      <h3>Agents</h3>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/agents</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/agents</span></div>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/agents/{agent_id}</span></div>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/agents/{agent_id}/access-summary</span></div>
+
+      <h3>Decisions</h3>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/decisions/check</span></div>
+      <pre><code>{
+  "subject_type": "agent",           // "agent" | "user" | "api_key"
+  "subject_id": "uuid",
+  "on_behalf_of_user_id": null,      // optional — for delegated agents
+  "action": "payments.refund.issue",
+  "resource": {
+    "type": "payment",
+    "id": "pay_123",
+    "attrs": { "amount_cents": 5000 }
+  },
+  "context": { "user_id": "u_123", "time": "03:00", "ip": "1.2.3.4" }
+}
+→ { "effect": "allow" | "deny" | "require_approval",
+    "matched_policy_id": "uuid",
+    "granted_scopes": ["payments.refund.issue"],
+    "rbac_pass": true,
+    "reason": "...",
+    "approval_id": "..." }</code></pre>
+
+      <h3>Policies</h3>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/policies</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/policies</span></div>
+      <div class="api-block"><span class="api-method method-put">PUT</span><span class="api-path">/api/v1/policies/{policy_id}</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/policy-replay</span></div>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/policy-bundle</span></div>
+
+      <h3>JIT Grants</h3>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/jit-grants</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/jit-grants</span></div>
+      <div class="api-block"><span class="api-method method-del">DEL</span><span class="api-path">/api/v1/jit-grants/{grant_id}</span></div>
+
+      <h3>Approvals</h3>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/approvals</span></div>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/approvals/{approval_id}</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/approvals/{approval_id}/approve</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/approvals/{approval_id}/deny</span></div>
+
+      <h3>Audit</h3>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/audit/events</span></div>
+      <p style="margin-top:-6px; margin-bottom:10px; font-size:13px;">Query params: <code>limit</code>, <code>offset</code>, <code>after_cursor</code>, <code>event_type</code>, <code>agent_id</code>, <code>outcome</code>, <code>from</code>, <code>to</code>, <code>format=csv</code>.</p>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/audit/verify</span></div>
+
+      <h3>Webhooks</h3>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/webhooks</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/webhooks</span></div>
+      <div class="api-block"><span class="api-method method-del">DEL</span><span class="api-path">/api/v1/webhooks/{endpoint_id}</span></div>
+
+      <h3>Guardrails</h3>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/guardrails/events</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/guardrails/rules</span></div>
+
+      <h3>Billing</h3>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/billing/usage</span></div>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/billing/invoices</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/billing/checkout</span></div>
+    </section>
+
+    <!-- PYTHON SDK -->
+    <section id="python-sdk">
+      <h2>Python SDK</h2>
+
+      <pre><code>pip install kynara-sdk</code></pre>
+
+      <h4>Decorator</h4>
+      <pre><code>from kynara_sdk import Kynara, permission_required
+from kynara_sdk.context import set_current_kynara
+
+set_current_kynara(Kynara.from_env())  # reads KYNARA_BASE_URL, KYNARA_API_KEY, KYNARA_AGENT_ID
+
+@permission_required("crm:read", resource_arg="contact_id", resource_type="crm.contact")
+def read_contact(contact_id: str) -> dict:
+    return crm_client.get_contact(contact_id)</code></pre>
+
+      <h4>Context manager</h4>
+      <pre><code>with kynara.guard("payments.refund.issue",
+                  resource={"type": "payment", "id": payment_id,
+                            "attrs": {"amount_cents": 50000}}) as grant:
+    result = issue_refund(payment_id)
+    # success auto-recorded on clean exit; error auto-recorded on raise</code></pre>
+
+      <h4>Manual check</h4>
+      <pre><code>decision = kynara.check(
+    subject=("agent", os.environ["KYNARA_AGENT_ID"]),
+    action="payments.refund.issue",
+    resource={"type": "payment.refund", "id": refund_id, "attrs": {"amount_cents": 5000}},
+    context={"session_id": session_id},
+)
+if decision.effect == "allow":
+    process_refund(refund_id)
+elif decision.effect == "require_approval":
+    notify_approver(decision.approval_url)
+else:
+    raise PermissionError(decision.reason)</code></pre>
+
+      <h4>Failure modes</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Setting</th><th>Behaviour when Kynara unreachable</th></tr></thead>
+          <tbody>
+            <tr><td><code>fail_closed=True</code> (default)</td><td>Raises <code>KynaraUnavailable</code> — agent is blocked.</td></tr>
+            <tr><td><code>fail_closed=False</code></td><td>Treats as <code>allow</code> and logs locally — only use for read-only tools.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TYPESCRIPT SDK -->
+    <section id="typescript-sdk">
+      <h2>TypeScript / Node SDK <span class="new-tag">NEW</span></h2>
+
+      <pre><code>npm install @kynara/sdk</code></pre>
+
+      <h4>guarded() wrapper</h4>
+      <pre><code>import { Kynara, guarded, PermissionDenied, ApprovalRequired } from "@kynara/sdk";
+
+const client = Kynara.fromEnv(); // reads KYNARA_BASE_URL, KYNARA_API_KEY, KYNARA_AGENT_ID
+
+const issueRefund = guarded({
+  client,
+  action: "payments.refund.issue",
+  resource: (refundId: string, amountCents: number) => ({
+    type: "payment.refund",
+    id: refundId,
+    attrs: { amount_cents: amountCents, currency: "USD" },
+  }),
+}, async (refundId: string, amountCents: number) => {
+  return await processRefund(refundId, amountCents);
+});
+
+try {
+  await issueRefund("r_123", 500_00);
+} catch (e) {
+  if (e instanceof ApprovalRequired) notifyApprover(e.approvalUrl);
+  else if (e instanceof PermissionDenied) auditDeny(e.decision.reason);
+  else throw e;
+}</code></pre>
+
+      <h4>Express middleware</h4>
+      <pre><code>import { requirePermission } from "@kynara/sdk/express";
+
+app.post("/refunds/:id",
+  requirePermission({
+    client,
+    action: "payments.refund.issue",
+    resource: (req) => ({ type: "payment.refund", id: req.params.id, attrs: req.body }),
+  }),
+  refundController,
+);</code></pre>
+
+      <h4>LangChain.js</h4>
+      <pre><code>import { KynaraCallbackHandler } from "@kynara/sdk/langchain";
+const executor = new AgentExecutor({
+  agent, tools,
+  callbacks: [new KynaraCallbackHandler(client, "agent_crm_assistant")],
+});</code></pre>
+    </section>
+
+    <!-- AGENT FRAMEWORKS -->
+    <section id="frameworks">
+      <h2>Agent framework integrations <span class="new-tag">NEW</span></h2>
+      <p>Kynara integrates with every major Python and TypeScript agent framework. See the <code>sdk/examples/</code> directory for complete, runnable examples.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Framework</th><th>Integration point</th><th>Example file</th></tr></thead>
+          <tbody>
+            <tr><td>LangChain / LangGraph (Python)</td><td><code>KynaraCallbackHandler</code> on <code>on_tool_start</code></td><td><code>sdk/examples/crm_agent.py</code></td></tr>
+            <tr><td>LangChain.js (TypeScript)</td><td><code>KynaraCallbackHandler</code> from <code>@kynara/sdk/langchain</code></td><td><code>sdk-ts/src/langchain.ts</code></td></tr>
+            <tr><td>Microsoft AutoGen</td><td>Wrapper around registered tool functions</td><td><code>sdk/examples/autogen_agent.py</code></td></tr>
+            <tr><td>CrewAI</td><td><code>kynara_guard</code> decorator on <code>BaseTool._run</code></td><td><code>sdk/examples/crewai_agent.py</code></td></tr>
+            <tr><td>OpenAI Assistants / Chat</td><td>Guard in the tool-call dispatch loop</td><td><code>sdk/examples/openai_assistants.py</code></td></tr>
+            <tr><td>Anthropic tool use</td><td>Intercept <code>ToolUseBlock</code> before dispatch</td><td><code>sdk/examples/anthropic_tool_use.py</code></td></tr>
+            <tr><td>Express.js routes</td><td><code>requirePermission</code> middleware</td><td><code>sdk-ts/src/express.ts</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SIDECAR -->
+    <section id="sidecar">
+      <h2>Go Sidecar <span class="new-tag">NEW</span></h2>
+      <p>For high-throughput workloads where per-action API latency must be below 1ms, run the Go decision-cache sidecar alongside your agent.</p>
+
+      <pre><code>docker run --rm -p 7070:7070 \
+  -e KYNARA_API_KEY=$KEY \
+  -e KYNARA_BASE_URL=https://api.kynara.ai \
+  ghcr.io/kynara/decision-cache:latest</code></pre>
+
+      <p>Point your SDK at the sidecar:</p>
+
+      <pre><code># Python
+kynara = Kynara(api_key=KEY, base_url="http://localhost:7070", agent_id=AGENT_ID)
+
+# TypeScript
+const client = new Kynara({ apiKey: KEY, baseUrl: "http://localhost:7070", agentId: AGENT_ID });</code></pre>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Path</th><th>p95 latency</th></tr></thead>
+          <tbody>
+            <tr><td>SDK in-process cache hit</td><td>~200µs</td></tr>
+            <tr><td>Go sidecar (local bundle)</td><td>&lt;1ms</td></tr>
+            <tr><td>Central API over LAN</td><td>&lt;8ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The sidecar fetches a JWS Ed25519–signed policy bundle every 30 seconds and evaluates locally. Decisions stream back to the central audit log in 5-second batches. <code>require_approval</code> decisions always go to the central API — they are never evaluated locally.</p>
+    </section>
+
+    <!-- POLICY AS CODE -->
+    <section id="policy-as-code">
+      <h2>Policy-as-code CLI <span class="new-tag">NEW</span></h2>
+      <p>Manage Kynara policies through git using <code>scripts/kynara-cli.py</code> — no pip install required (stdlib only).</p>
+
+      <pre><code>export KYNARA_BASE_URL=https://api.kynara.ai
+export KYNARA_API_KEY=sk_live_...
+
+# Pull the live bundle to a JSON file
+python scripts/kynara-cli.py pull --out policies.json
+
+# Diff a local change against live (run this in CI on every PR)
+python scripts/kynara-cli.py diff --bundle policies.json
+
+# Push (dry-run first)
+python scripts/kynara-cli.py push --bundle policies.json --dry-run
+python scripts/kynara-cli.py push --bundle policies.json
+
+# Verify the bundle checksum matches the server
+python scripts/kynara-cli.py verify --bundle policies.json</code></pre>
+
+      <h3>GitOps workflow</h3>
+      <ol class="steps">
+        <li><p>Run <code>pull</code> to export the live bundle to <code>policies.json</code> and commit it to git.</p></li>
+        <li><p>Edit <code>policies.json</code> in a feature branch and open a PR.</p></li>
+        <li><p>A CI step runs <code>diff</code> and posts the impact report as a PR comment.</p></li>
+        <li><p>After review, merge and run <code>push</code> on merge to main.</p></li>
+      </ol>
+    </section>
+
+    <!-- SSO -->
+    <section id="sso">
+      <h2>SSO / Okta</h2>
+      <p>Pro and Enterprise plans support SAML 2.0 and OIDC via Okta, Azure AD, Google Workspace, or any compatible provider. Multiple SSO connections can coexist per org.</p>
+
+      <h3>Configuring Okta OIDC</h3>
+      <ol class="steps">
+        <li><p>In Okta admin, create a new <strong>OIDC – Web Application</strong>. Set the sign-in redirect URI to <code>https://kynara.ai/api/v1/auth/sso/okta/callback</code>.</p></li>
+        <li><p>Copy the <strong>Client ID</strong>, <strong>Client Secret</strong>, and <strong>Okta domain</strong>.</p></li>
+        <li><p>In Kynara, navigate to <strong>Settings → SSO → + New SSO Connection</strong>.</p></li>
+        <li><p>Choose <strong>Okta OIDC</strong>, enter the Okta domain, Client ID, and Client Secret.</p></li>
+        <li><p>Click <strong>Test Connection</strong> before enabling.</p></li>
+      </ol>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body">
+          <strong>Do not disable password login</strong> until you have verified at least one owner can sign in via SSO. If SSO misconfiguration locks you out, contact support.
+        </div>
+      </div>
+    </section>
+
+    <!-- SIEM -->
+    <section id="siem">
+      <h2>SIEM integration <span class="new-tag">NEW</span></h2>
+      <p>Stream Kynara audit events into your existing SIEM using the stateless polling cursor API. No persistent connection required.</p>
+
+      <pre><code># Initial call — no cursor
+GET /api/v1/audit/events?limit=1000
+→ { "events": [...], "next_cursor": "eyJ..." }
+
+# Subsequent calls — pass the cursor from the previous response
+GET /api/v1/audit/events?limit=1000&amp;after_cursor=eyJ...
+→ { "events": [...], "next_cursor": "eyJ..." }</code></pre>
+
+      <p>Store <code>next_cursor</code> between poll cycles. When <code>events</code> is empty, you're caught up.</p>
+
+      <h3>Supported SIEMs</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>SIEM</th><th>Setup</th></tr></thead>
+          <tbody>
+            <tr><td>Splunk</td><td>Install the Kynara Add-on; configure the polling cursor URL + API key as a scripted input.</td></tr>
+            <tr><td>Datadog</td><td>Configure a Datadog Log Pipeline with the cursor endpoint as a custom log source.</td></tr>
+            <tr><td>Elastic / ECS</td><td>Install the Filebeat module with the cursor endpoint; events map to ECS field names.</td></tr>
+            <tr><td>Microsoft Sentinel</td><td>Use the Sentinel data connector; analytic rules for <code>agent.killed</code> and <code>audit.chain_broken</code> are pre-built.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Navigate to <strong>Settings → Integrations</strong> or <strong>Audit → SIEM Setup</strong> for guided setup instructions for each platform.</p>
+    </section>
+
+    <!-- POLICY SCHEMA -->
+    <section id="policy-schema">
+      <h2>Policy schema reference</h2>
+
+      <pre><code>{
+  "display_name": "Deny off-hours refunds",
+  "description": "Require approval for refunds issued outside business hours.",
+  "priority": 100,
+  "effect": "require_approval",   // "allow" | "deny" | "require_approval"
+  "actions": ["payments.refund.issue"],  // "actions" in API = "scopes" in UI
+  "resource_types": ["payment"],  // [] or ["*"] = match all
+  "condition": {                  // optional JSON AST
+    "op": "not",
+    "args": [
+      { "op": "time_between", "args": ["ctx.context.time", "09:00", "18:00"] }
+    ]
+  },
+  "is_enabled": true
+}</code></pre>
+
+      <h3>Field reference</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>display_name</code></td><td>string</td><td>Yes</td><td>Human-readable name shown in the UI.</td></tr>
+            <tr><td><code>priority</code></td><td>integer</td><td>Yes</td><td>Evaluation order. Lower = evaluated first. Use gaps (100, 200) for easy insertion.</td></tr>
+            <tr><td><code>effect</code></td><td>enum</td><td>Yes</td><td><code>allow</code>, <code>deny</code>, or <code>require_approval</code>.</td></tr>
+            <tr><td><code>actions</code></td><td>string[]</td><td>No</td><td>Scope strings (shown as "Scopes" in the UI). Empty or <code>["*"]</code> = all scopes. Wildcards supported: <code>payments.*</code>, <code>infra:*</code>.</td></tr>
+            <tr><td><code>resource_types</code></td><td>string[]</td><td>No</td><td>Resource type strings. Empty = all types.</td></tr>
+            <tr><td><code>condition</code></td><td>object</td><td>No</td><td>JSON AST condition tree. Leave null to match all requests unconditionally.</td></tr>
+            <tr><td><code>is_enabled</code></td><td>boolean</td><td>No</td><td>Defaults to <code>true</code>. Disabled policies are skipped during evaluation.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- OUTCOMES -->
+    <section id="outcomes">
+      <h2>Decision outcomes reference</h2>
+
+      <h3>allow</h3>
+      <p>A matching policy with <code>effect: allow</code> was found. Decision is cached in the SDK for <code>ttl_seconds</code> (default 5s). On cache hit, enforcement adds ~200µs.</p>
+
+      <h3>deny</h3>
+      <p>Either a matching <code>effect: deny</code> policy was found, or no policy matched at all (default-deny). The SDK raises <code>PermissionDenied</code> before any side effect occurs. Deny decisions are never cached.</p>
+
+      <h3>require_approval</h3>
+      <p>A matching <code>effect: require_approval</code> policy was found. The SDK raises <code>ApprovalRequired</code> with <code>approval_url</code> and <code>decision_id</code>. The agent should pause and surface the URL to a human reviewer. Approval decisions are never cached — every request is re-evaluated.</p>
+    </section>
+
+    <!-- WEBHOOK EVENTS -->
+    <section id="webhook-events">
+      <h2>Webhook events reference</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Event</th><th>When it fires</th></tr></thead>
+          <tbody>
+            <tr><td><code>decision.denied</code></td><td>Agent action blocked by policy.</td></tr>
+            <tr><td><code>decision.approval_requested</code></td><td>Policy returned <code>require_approval</code>.</td></tr>
+            <tr><td><code>decision.approved</code></td><td>Human approved a pending request.</td></tr>
+            <tr><td><code>decision.denied_by_approver</code></td><td>Human denied a pending approval.</td></tr>
+            <tr><td><code>agent.killed</code></td><td>Kill switch activated or guardrail threshold exceeded.</td></tr>
+            <tr><td><code>policy.changed</code></td><td>Policy created, updated, or deleted.</td></tr>
+            <tr><td><code>audit.chain_broken</code></td><td>Integrity verifier detected a hash chain gap.</td></tr>
+            <tr><td><code>permissions_changed</code></td><td>Role assignment or JIT grant changed an agent's effective scopes.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>All deliveries are HMAC-signed with <code>X-Kynara-Signature: sha256=&lt;hex&gt;</code> and include a timestamp to prevent replay attacks.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <h2>FAQ</h2>
+
+      <h3>What happens if the Kynara API is unreachable?</h3>
+      <p>Kynara is fail-closed. If the API (or Go sidecar) cannot be reached, the SDK raises <code>KynaraUnavailable</code> — equivalent to <code>deny</code>. Never default to <code>allow</code> on timeout. Both SDKs enforce this automatically (<code>fail_closed=True</code> / <code>failClosed: true</code> by default).</p>
+
+      <h3>Can I have policies that apply to all agents?</h3>
+      <p>Yes. Create a policy binding with <code>subject_selector: "*"</code>. Useful for org-wide deny rules like "no agent may execute shell commands."</p>
+
+      <h3>How do I manage policies through git?</h3>
+      <p>Use <code>scripts/kynara-cli.py</code> — a stdlib-only Python script that supports <code>pull</code>, <code>push</code>, <code>diff</code>, and <code>verify</code> subcommands. See the <a href="#policy-as-code">Policy-as-code CLI</a> section for the full GitOps workflow.</p>
+
+      <h3>Is there a TypeScript SDK?</h3>
+      <p>Yes — <code>npm install @kynara/sdk</code>. It provides <code>guarded()</code> function wrappers, Express middleware, and a LangChain.js callback handler. See the <a href="#typescript-sdk">TypeScript SDK</a> section.</p>
+
+      <h3>What agent frameworks does Kynara support?</h3>
+      <p>LangChain, LangGraph, LangChain.js, Microsoft AutoGen, CrewAI, OpenAI Assistants API, and Anthropic tool use. See <a href="#frameworks">Agent framework integrations</a> and the <code>sdk/examples/</code> directory.</p>
+
+      <h3>How do I grant temporary elevated access for a break-glass scenario?</h3>
+      <p>Create a JIT grant via <strong>JIT Grants → New Grant</strong> or <code>POST /api/v1/jit-grants</code>. Provide a scope, duration, justification, and ticket URL. The grant is active immediately and auto-expires. See <a href="#jit-grants">JIT Grants</a>.</p>
+
+      <h3>How long is audit log data retained?</h3>
+      <p>Free plans: 30 days. Pro plans: 1 year. Enterprise: custom retention with optional nightly S3 export.</p>
+
+      <h3>Is my data encrypted at rest?</h3>
+      <p>Yes — AES-256 at rest, TLS 1.3 in transit. Enterprise plans support customer-managed encryption keys (CMEK).</p>
+
+      <h3>How do I rotate an agent API key?</h3>
+      <p>Open the agent detail page → <strong>Rotate key</strong>. The old key is immediately invalidated. For org-wide key rotation, use <strong>Settings → Danger Zone → Rotate API keys</strong>.</p>
+
+      <h3>What regions is Kynara available in?</h3>
+      <p>Currently <code>us-east-1</code>. EU (<code>eu-west-1</code>) and APAC are on the roadmap. Enterprise plans can request a dedicated single-tenant deployment.</p>
+    </section>
+
+    <div style="height:80px;"></div>
+  </main>
+</div>
+</body>
+</html>
