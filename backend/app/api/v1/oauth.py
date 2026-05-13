@@ -57,7 +57,7 @@ async def _db():
         yield s
 
 
-# ── RFC 8414 metadata ─────────────────────────────────────────────────────────
+# -- RFC 8414 metadata --------------------------------------------------------
 
 @router.get("/.well-known/oauth-authorization-server", include_in_schema=False)
 async def oauth_metadata(request: Request):
@@ -75,7 +75,7 @@ async def oauth_metadata(request: Request):
     })
 
 
-# ── GET /oauth/authorize ──────────────────────────────────────────────────────
+# -- GET /oauth/authorize -----------------------------------------------------
 
 @router.get("/oauth/authorize")
 async def authorize_get(
@@ -114,7 +114,7 @@ async def authorize_get(
     )
 
 
-# ── POST /oauth/authorize ─────────────────────────────────────────────────────
+# -- POST /oauth/authorize ----------------------------------------------------
 
 @router.post("/oauth/authorize")
 async def authorize_post(
@@ -127,7 +127,7 @@ async def authorize_post(
     db: AsyncSession = Depends(_db),
     principal: Principal = Depends(get_principal),
 ):
-    """User approved — mint an auth code and redirect."""
+    """User approved -- mint an auth code and redirect."""
     client = await _validate_client(client_id, redirect_uri, db)
 
     code_str = secrets.token_urlsafe(32)
@@ -149,7 +149,7 @@ async def authorize_post(
     return RedirectResponse(url=f"{redirect_uri}?{qs}", status_code=302)
 
 
-# ── POST /oauth/token ─────────────────────────────────────────────────────────
+# -- POST /oauth/token --------------------------------------------------------
 
 @router.post("/oauth/token")
 async def token_endpoint(
@@ -204,11 +204,21 @@ async def token_endpoint(
     if not membership:
         raise HTTPException(400, "invalid_grant: org membership not found")
 
+    # Derive scopes from what the client was granted (map "read"/"write" to
+    # internal scope strings so the Principal looks normal to downstream code)
+    granted_scopes = [s.strip() for s in row.scope.split() if s.strip()]
+    internal_scopes: list[str] = []
+    if "read" in granted_scopes:
+        internal_scopes += ["agents:read", "audit:read", "approvals:read", "roles:read"]
+    if "write" in granted_scopes:
+        internal_scopes += ["approvals:write", "agents:write", "roles:write"]
+
     access_token = mint_access_token(
         user_id=str(row.user_id),
         org_id=str(row.org_id),
         seat_role=membership.seat_role,
-        expires_in=_TOKEN_TTL_SECONDS,
+        scopes=internal_scopes,
+        amr=["oauth2"],
     )
 
     return JSONResponse({
@@ -219,7 +229,7 @@ async def token_endpoint(
     })
 
 
-# ── GET /oauth/userinfo ───────────────────────────────────────────────────────
+# -- GET /oauth/userinfo ------------------------------------------------------
 
 @router.get("/oauth/userinfo")
 async def userinfo(
@@ -236,7 +246,7 @@ async def userinfo(
     })
 
 
-# ── helpers ───────────────────────────────────────────────────────────────────
+# -- helpers ------------------------------------------------------------------
 
 async def _validate_client(
     client_id: str, redirect_uri: str, db: AsyncSession
@@ -252,6 +262,6 @@ async def _validate_client(
 
     allowed = [u.strip() for u in client.redirect_uris.split(",")]
     if redirect_uri not in allowed:
-        raise HTTPException(400, f"redirect_uri not allowed for this client")
+        raise HTTPException(400, "redirect_uri not allowed for this client")
 
     return client
