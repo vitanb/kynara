@@ -16,6 +16,23 @@ from app.db.session import SessionLocal
 from app.models import ApiKey, OrgMembership, User
 
 
+def _www_authenticate() -> dict[str, str]:
+    """RFC 6750 WWW-Authenticate header for 401 responses.
+
+    Including resource_metadata tells Claude (and any RFC 9728-aware OAuth
+    client) exactly where to find the authorization server so it can trigger
+    the OAuth consent flow instead of showing a generic error.
+    """
+    settings = get_settings()
+    base = settings.app_url.rstrip("/")
+    return {
+        "WWW-Authenticate": (
+            'Bearer realm="Kynara",'
+            f' resource_metadata="{base}/.well-known/oauth-protected-resource"'
+        )
+    }
+
+
 @dataclass(frozen=True)
 class Principal:
     user_id: str | None
@@ -36,8 +53,13 @@ async def get_principal(
     authorization: Annotated[str | None, Header()] = None,
     session: AsyncSession = Depends(_get_session),
 ) -> Principal:
+    www_auth = _www_authenticate()
     if not authorization or not authorization.lower().startswith("bearer "):
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Missing bearer credential")
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            "Missing bearer credential",
+            headers=www_auth,
+        )
     credential = authorization.split(" ", 1)[1].strip()
 
     settings = get_settings()
@@ -47,7 +69,11 @@ async def get_principal(
             select(ApiKey).where(ApiKey.key_hash == h, ApiKey.revoked.is_(False))
         )
         if not row:
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid API key")
+            raise HTTPException(
+                status.HTTP_401_UNAUTHORIZED,
+                "Invalid API key",
+                headers=www_auth,
+            )
         try:
             row.last_used_at = datetime.now(timezone.utc)
             await session.commit()
@@ -65,7 +91,11 @@ async def get_principal(
     try:
         claims = decode_access_token(credential)
     except Exception as e:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid token") from e
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid token",
+            headers=www_auth,
+        ) from e
 
     membership = await session.scalar(
         select(OrgMembership).where(
