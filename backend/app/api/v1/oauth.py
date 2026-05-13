@@ -6,13 +6,15 @@ Anthropic Connectors Directory.  No client_secret needed for public clients
 
 Endpoints
 ---------
-GET  /oauth/authorize                          Show consent page (redirect to /oauth/consent)
-POST /oauth/authorize                          Accept consent, issue auth code, redirect
-POST /oauth/token                              Exchange auth code for access token
-GET  /oauth/userinfo                           Return basic claims for the authed user
-POST /oauth/register                           RFC 7591 dynamic client registration
-GET  /.well-known/oauth-authorization-server   RFC 8414 AS metadata
-GET  /.well-known/oauth-protected-resource     RFC 9728 resource metadata
+GET  /oauth/authorize                                    Show consent page (redirect to /oauth/consent)
+POST /oauth/authorize                                    Accept consent, issue auth code, redirect
+POST /oauth/token                                        Exchange auth code for access token
+GET  /oauth/userinfo                                     Return basic claims for the authed user
+GET  /oauth/register                                     RFC 7591 endpoint probe (returns 200)
+POST /oauth/register                                     RFC 7591 dynamic client registration
+GET  /.well-known/oauth-authorization-server             RFC 8414 AS metadata
+GET  /.well-known/oauth-protected-resource               RFC 9728 resource metadata (root form)
+GET  /.well-known/oauth-protected-resource/{path:path}   RFC 9728 resource metadata (path form)
 """
 from __future__ import annotations
 
@@ -22,9 +24,8 @@ import secrets
 import urllib.parse
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request, status
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -65,24 +66,49 @@ async def oauth_metadata(request: Request):
 
 # -- RFC 9728 protected resource metadata -------------------------------------
 
-@router.get("/.well-known/oauth-protected-resource", include_in_schema=False)
-async def oauth_protected_resource(request: Request):
-    """RFC 9728 -- tells OAuth clients which AS protects this resource.
-
-    Claude fetches this before starting the OAuth flow to discover the auth
-    server.  Without it Claude cannot locate the authorization_endpoint and
-    falls back to showing a generic error.
-    """
-    base = str(request.base_url).rstrip("/")
+def _protected_resource_response(base: str) -> JSONResponse:
     return JSONResponse({
-        "resource":                   base,
-        "authorization_servers":      [base],
-        "bearer_methods_supported":   ["header"],
-        "resource_documentation":     f"{base}/docs",
+        "resource":                 base,
+        "authorization_servers":    [base],
+        "bearer_methods_supported": ["header"],
+        "resource_documentation":   f"{base}/docs",
     })
 
 
+@router.get("/.well-known/oauth-protected-resource", include_in_schema=False)
+async def oauth_protected_resource(request: Request):
+    """RFC 9728 root form."""
+    base = str(request.base_url).rstrip("/")
+    return _protected_resource_response(base)
+
+
+@router.get("/.well-known/oauth-protected-resource/{path:path}", include_in_schema=False)
+async def oauth_protected_resource_path(request: Request, path: str):
+    """RFC 9728 path-appended form.
+
+    When the protected resource URL has a path component (e.g. /mcp/v1/sse),
+    RFC 9728 §3.1 says clients MUST also try:
+      /.well-known/oauth-protected-resource/mcp/v1/sse
+    Return the same metadata as the root form.
+    """
+    base = str(request.base_url).rstrip("/")
+    return _protected_resource_response(base)
+
+
 # -- RFC 7591 dynamic client registration -------------------------------------
+
+@router.get("/oauth/register", include_in_schema=False)
+async def register_client_get(request: Request):
+    """GET /oauth/register — not defined by RFC 7591 but Anthropic's MCP client
+    probes this with GET before POSTing.  Return 200 so it proceeds to register.
+    """
+    base = str(request.base_url).rstrip("/")
+    return JSONResponse({
+        "registration_endpoint":               f"{base}/oauth/register",
+        "grant_types_supported":               ["authorization_code"],
+        "token_endpoint_auth_methods_supported": ["none"],
+    })
+
 
 @router.post("/oauth/register", include_in_schema=False)
 async def register_client(request: Request, db: AsyncSession = Depends(_db)):
@@ -101,7 +127,7 @@ async def register_client(request: Request, db: AsyncSession = Depends(_db)):
         select(OAuthClient).where(OAuthClient.client_id == client_id)
     )
     if existing:
-        # Idempotent -- update URIs in case they changed
+        # Idempotent — update URIs in case they changed
         stored = set(existing.redirect_uris.split(",")) if existing.redirect_uris else set()
         merged = stored | set(redirect_uris)
         existing.redirect_uris = ",".join(u for u in merged if u)
@@ -118,11 +144,11 @@ async def register_client(request: Request, db: AsyncSession = Depends(_db)):
         await db.commit()
 
     return JSONResponse(status_code=201, content={
-        "client_id":               client_id,
-        "client_name":             client_name,
-        "redirect_uris":           redirect_uris,
-        "grant_types":             ["authorization_code"],
-        "response_types":          ["code"],
+        "client_id":                  client_id,
+        "client_name":                client_name,
+        "redirect_uris":              redirect_uris,
+        "grant_types":                ["authorization_code"],
+        "response_types":             ["code"],
         "token_endpoint_auth_method": "none",
     })
 
@@ -150,11 +176,11 @@ async def authorize_get(
         raise HTTPException(400, "Only code_challenge_method=S256 is supported")
 
     params = urllib.parse.urlencode({
-        "client_id":            client_id,
-        "redirect_uri":         redirect_uri,
-        "scope":                scope,
-        "state":                state,
-        "code_challenge":       code_challenge,
+        "client_id":             client_id,
+        "redirect_uri":          redirect_uri,
+        "scope":                 scope,
+        "state":                 state,
+        "code_challenge":        code_challenge,
         "code_challenge_method": code_challenge_method,
     })
     return RedirectResponse(url=f"/oauth/consent?{params}", status_code=302)
@@ -173,8 +199,8 @@ async def authorize_post(
     db: AsyncSession = Depends(_db),
     principal: Principal = Depends(get_principal),
 ):
-    """User approved -- mint an auth code and redirect."""
-    client = await _validate_client(client_id, redirect_uri, db)
+    """User approved — mint an auth code and redirect."""
+    await _validate_client(client_id, redirect_uri, db)
 
     code_str = secrets.token_urlsafe(32)
     db.add(OAuthCode(
@@ -278,8 +304,8 @@ async def userinfo(
 ):
     user = await db.get(User, principal.user_id)
     return JSONResponse({
-        "sub":    principal.user_id,
-        "org_id": principal.org_id,
+        "sub":    str(principal.user_id),
+        "org_id": str(principal.org_id),
         "email":  user.email if user else None,
         "name":   user.display_name if user else None,
         "role":   principal.seat_role,
