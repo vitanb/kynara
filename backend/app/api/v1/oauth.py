@@ -75,6 +75,25 @@ async def oauth_metadata(request: Request):
     })
 
 
+# -- RFC 9728 protected resource metadata -------------------------------------
+
+@router.get("/.well-known/oauth-protected-resource", include_in_schema=False)
+async def oauth_protected_resource(request: Request):
+    """RFC 9728 — tells OAuth clients which authorization server protects this resource.
+
+    Claude fetches this before starting the OAuth flow to discover the auth server.
+    Without it, Claude cannot locate the authorization_endpoint and falls back to
+    showing a generic "Couldn't reach the MCP server" error.
+    """
+    base = str(request.base_url).rstrip("/")
+    return JSONResponse({
+        "resource": base,
+        "authorization_servers": [base],
+        "bearer_methods_supported": ["header"],
+        "resource_documentation": f"{base}/docs",
+    })
+
+
 # -- GET /oauth/authorize -----------------------------------------------------
 
 @router.get("/oauth/authorize")

@@ -1,12 +1,11 @@
-"""Kynara MCP server — exposes Kynara tools over HTTP+SSE (Model Context Protocol).
+"""Kynara MCP server — exposes Kynara tools over Streamable HTTP (MCP 2025 spec).
 
 Mount at /mcp/v1 in main.py.  Authentication uses the same Bearer token /
 API-key mechanism as the REST API.
 
 Endpoints
 ---------
-GET  /mcp/v1/sse          — SSE stream (client opens and keeps open)
-POST /mcp/v1/messages     — JSON-RPC message from client → server
+GET|POST|DELETE  /mcp/v1   — single Streamable HTTP endpoint (MCP 2025)
 
 Tools exposed
 -------------
@@ -32,11 +31,10 @@ import json
 import uuid
 from typing import Any
 
-import anyio
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from mcp import types as mct
 from mcp.server import Server
-from mcp.server.sse import SseServerTransport
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -49,9 +47,6 @@ from app.models import (
 
 # ── router (mounted at /mcp/v1 in main.py) ────────────────────────────────────
 router = APIRouter(prefix="/mcp/v1", tags=["mcp"])
-
-# ── SSE transport (one instance, shared across requests) ──────────────────────
-_transport = SseServerTransport("/mcp/v1/messages")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -579,29 +574,21 @@ async def _dispatch(
 # FastAPI route handlers
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("/sse")
-async def sse_endpoint(
+@router.api_route("", methods=["GET", "POST", "DELETE"])
+async def mcp_endpoint(
     request: Request,
     principal: Principal = Depends(get_principal),
 ):
-    """SSE stream — client keeps this open for the duration of the session."""
+    """Streamable HTTP endpoint — handles all MCP traffic (MCP 2025 spec).
+
+    Claude sends POST for initialize + tool calls.
+    GET opens a long-lived SSE notification stream (optional, for server push).
+    DELETE terminates a session.
+    Each request is fully stateless — a new server + manager is built per call.
+    """
     srv = _build_server(principal)
-    async with anyio.create_task_group() as tg:
-        async with _transport.connect_sse(
+    manager = StreamableHTTPSessionManager(app=srv, stateless=True)
+    async with manager.run():
+        await manager.handle_request(
             request.scope, request.receive, request._send  # type: ignore[attr-defined]
-        ) as (read_stream, write_stream):
-            init_opts = srv.create_initialization_options()
-            tg.start_soon(
-                srv.run, read_stream, write_stream, init_opts, False, True
-            )
-
-
-@router.post("/messages")
-async def post_message(
-    request: Request,
-    principal: Principal = Depends(get_principal),
-):
-    """Receive a JSON-RPC message from the client and route it to the SSE session."""
-    await _transport.handle_post_message(
-        request.scope, request.receive, request._send  # type: ignore[attr-defined]
-    )
+        )
