@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Bot, ShieldOff, Clock, ShieldCheck, Plus, Trash2,
+  Bot, ShieldOff, ShieldCheck as ShieldOn, Clock, ShieldCheck, Plus, Trash2, Pencil,
   CheckCircle2, XCircle, AlertTriangle, ExternalLink, Copy, Check,
   Users, X,
 } from "lucide-react";
@@ -57,6 +57,12 @@ export default function AgentDetailPage() {
   const [assignOpen, setAssignOpen] = useState(false);
   const [assignUserId, setAssignUserId] = useState("");
   const [assignRoleId, setAssignRoleId] = useState("");
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+  const [editMode, setEditMode] = useState("");
+  const [editModel, setEditModel] = useState("");
+  const [editBudget, setEditBudget] = useState(10000);
 
   // ── data ──
   const { data: agents = [] } = useQuery({
@@ -103,6 +109,34 @@ export default function AgentDetailPage() {
     mutationFn: () => api.post(`/api/v1/agents/${id}/kill`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["agents"] }),
   });
+
+  const reactivate = useMutation({
+    mutationFn: () => api.post(`/api/v1/agents/${id}/reactivate`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["agents"] }),
+  });
+
+  const updateAgent = useMutation({
+    mutationFn: () => api.patch(`/api/v1/agents/${id}`, {
+      display_name: editName,
+      description: editDesc,
+      mode: editMode,
+      model: editModel || null,
+      daily_action_budget: editBudget,
+    }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["agents"] });
+      setEditOpen(false);
+    },
+  });
+
+  function openEdit() {
+    setEditName(agent.display_name);
+    setEditDesc(agent.description || "");
+    setEditMode(agent.mode);
+    setEditModel(agent.model || "");
+    setEditBudget(agent.daily_action_budget);
+    setEditOpen(true);
+  }
 
   const bind = useMutation({
     mutationFn: () =>
@@ -156,11 +190,19 @@ export default function AgentDetailPage() {
         title={agent.display_name}
         subtitle={agent.description || "No description."}
         actions={
-          agent.is_active
-            ? <button onClick={() => kill.mutate()} className="btn-danger">
-                <ShieldOff className="size-4" /> Kill agent
-              </button>
-            : <span className="pill-danger">Disabled</span>
+          <div className="flex items-center gap-2">
+            <button onClick={openEdit} className="btn-ghost">
+              <Pencil className="size-4" /> Edit
+            </button>
+            {agent.is_active
+              ? <button onClick={() => kill.mutate()} disabled={kill.isPending} className="btn-danger">
+                  <ShieldOff className="size-4" /> Kill agent
+                </button>
+              : <button onClick={() => reactivate.mutate()} disabled={reactivate.isPending} className="btn-primary">
+                  <ShieldOn className="size-4" /> Reactivate
+                </button>
+            }
+          </div>
         }
       />
 
@@ -427,6 +469,65 @@ export default function AgentDetailPage() {
               <button className="btn-primary" disabled={!assignUserId || addAssignment.isPending}
                 onClick={() => addAssignment.mutate()}>
                 {addAssignment.isPending ? "Saving…" : "Add assignment"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit agent modal ── */}
+      {editOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-md rounded-2xl shadow-2xl"
+            style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}>
+            <div className="flex items-center justify-between px-6 py-4"
+              style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
+              <div>
+                <div className="text-base font-semibold text-white">Edit agent</div>
+                <div className="text-xs text-ink-400 mt-0.5">Update identity and operating constraints.</div>
+              </div>
+              <button onClick={() => setEditOpen(false)} className="text-ink-400 hover:text-white">
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <div>
+                <label className="label">Display name <span className="text-danger-400">*</span></label>
+                <input className="input" value={editName} onChange={e => setEditName(e.target.value)} />
+              </div>
+              <div>
+                <label className="label">Description</label>
+                <textarea className="input" rows={2} value={editDesc}
+                  onChange={e => setEditDesc(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label">Mode</label>
+                  <select className="input" value={editMode} onChange={e => setEditMode(e.target.value)}>
+                    <option value="human_supervised">human_supervised</option>
+                    <option value="autonomous">autonomous</option>
+                    <option value="restricted">restricted</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Model</label>
+                  <input className="input" placeholder="e.g. claude-3-5-sonnet"
+                    value={editModel} onChange={e => setEditModel(e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label className="label">Daily action budget</label>
+                <input className="input" type="number" min={1} value={editBudget}
+                  onChange={e => setEditBudget(Number(e.target.value))} />
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 px-6 py-4"
+              style={{ borderTop: "1px solid rgba(148,163,184,0.08)" }}>
+              <button className="btn-ghost" onClick={() => setEditOpen(false)}>Cancel</button>
+              <button className="btn-primary" disabled={!editName || updateAgent.isPending}
+                onClick={() => updateAgent.mutate()}>
+                {updateAgent.isPending ? "Saving…" : "Save changes"}
               </button>
             </div>
           </div>

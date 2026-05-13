@@ -388,3 +388,73 @@ async def get_access_summary(
         "checksum": checksum,
         "issued_at": datetime.now(timezone.utc).isoformat(),
     }
+
+
+# ── Edit agent ────────────────────────────────────────────────────────────────
+
+class AgentUpdate(BaseModel):
+    display_name: str | None = None
+    description: str | None = None
+    mode: str | None = None
+    model: str | None = None
+    daily_action_budget: int | None = None
+
+
+@router.patch("/{agent_id}", response_model=AgentOut)
+async def update_agent(
+    agent_id: str, body: AgentUpdate, request: Request,
+    principal: Principal = Depends(require_seat("owner", "admin", "developer")),
+    session: AsyncSession = Depends(_session),
+):
+    a = await session.get(Agent, uuid.UUID(agent_id))
+    if not a or a.organization_id != uuid.UUID(principal.org_id):
+        raise HTTPException(404, "Agent not found")
+
+    changed: dict = {}
+    for field, value in body.model_dump(exclude_none=True).items():
+        if getattr(a, field) != value:
+            setattr(a, field, value)
+            changed[field] = value
+
+    if changed:
+        await session.commit()
+        await record_admin(
+            session, org_id=principal.org_id,
+            actor=f"user:{principal.user_id}" if principal.user_id else "system",
+            event_type="agent.updated", resource_type="agent", resource_id=str(a.id),
+            payload={"changes": changed},
+            ip_address=request.client.host if request.client else None,
+        )
+        await persist_risk_score(session, a)
+
+    return AgentOut(
+        id=str(a.id), slug=a.slug, display_name=a.display_name,
+        description=a.description, mode=a.mode, model=a.model,
+        daily_action_budget=a.daily_action_budget,
+        is_active=a.is_active, last_action_at=a.last_action_at,
+        created_at=a.created_at,
+    )
+
+
+# ── Reactivate ────────────────────────────────────────────────────────────────
+
+@router.post("/{agent_id}/reactivate", status_code=204)
+async def reactivate_agent(
+    agent_id: str, request: Request,
+    principal: Principal = Depends(require_seat("owner", "admin")),
+    session: AsyncSession = Depends(_session),
+):
+    a = await session.get(Agent, uuid.UUID(agent_id))
+    if not a or a.organization_id != uuid.UUID(principal.org_id):
+        raise HTTPException(404, "Agent not found")
+    if a.is_active:
+        return  # already active — no-op
+    a.is_active = True
+    await session.commit()
+    await record_admin(
+        session, org_id=principal.org_id,
+        actor=f"user:{principal.user_id}" if principal.user_id else "system",
+        event_type="agent.reactivated", resource_type="agent", resource_id=str(a.id),
+        payload={"slug": a.slug},
+        ip_address=request.client.host if request.client else None,
+    )
