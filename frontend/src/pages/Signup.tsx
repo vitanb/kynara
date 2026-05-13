@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Hexagon, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 
@@ -40,10 +40,7 @@ export default function SignupPage() {
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12"
         style={{ background: "#080C14", borderRight: "1px solid rgba(148,163,184,0.06)" }}>
         <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center"
-            style={{ background: "#4F46E5", boxShadow: "0 0 20px rgba(99,102,241,0.4)" }}>
-            <Hexagon className="w-5 h-5 text-white" />
-          </div>
+          <img src="/logo.svg" className="w-9 h-9 rounded-lg" alt="Kynara" />
           <span className="font-semibold text-white text-lg tracking-tight">Kynara</span>
         </Link>
 
@@ -75,10 +72,7 @@ export default function SignupPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <Link to="/" className="flex items-center gap-3 mb-8 lg:hidden hover:opacity-80 transition-opacity">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center"
-              style={{ background: "#4F46E5" }}>
-              <Hexagon className="w-5 h-5 text-white" />
-            </div>
+            <img src="/logo.svg" className="w-9 h-9 rounded-lg" alt="Kynara" />
             <span className="font-semibold text-white text-lg">Kynara</span>
           </Link>
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { KeyRound, Hexagon, ShieldCheck, Activity, FileText, ArrowRight } from "lucide-react";
+import { KeyRound, ShieldCheck, Activity, FileText, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 
@@ -106,15 +106,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <Link to="/" className="relative z-10 flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div
-            className="size-9 rounded-xl flex items-center justify-center"
-            style={{
-              background: "#4F46E5",
-              boxShadow: "0 0 0 1px rgba(99,102,241,0.5), 0 4px 14px rgba(79,70,229,0.4)",
-            }}
-          >
-            <Hexagon className="size-5 text-white" strokeWidth={2} />
-          </div>
+          <img src="/logo.svg" className="size-9 rounded-xl" alt="Kynara" />
           <div>
             <div className="text-base font-bold text-white tracking-tight leading-none">Kynara</div>
             <div className="text-[10px] font-medium mt-0.5" style={{ color: "#818CF8", letterSpacing: "0.06em" }}>
@@ -194,12 +186,11 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <Link to="/" className="flex items-center gap-2.5 mb-8 lg:hidden hover:opacity-80 transition-opacity">
-            <div
-              className="size-8 rounded-lg flex items-center justify-center"
-              style={{ background: "#4F46E5", boxShadow: "0 0 14px rgba(79,70,229,0.4)" }}
-            >
-              <Hexagon className="size-4 text-white" strokeWidth={2} />
-            </div>
+            <img
+              src="/logo.svg"
+              className="size-8 rounded-lg"
+              alt="Kynara"
+            />
             <span className="text-sm font-bold text-white">Kynara</span>
           </Link>
 

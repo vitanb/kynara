@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Hexagon, Check, Zap, Shield, Building2 } from "lucide-react";
+import { Check, Zap, Shield, Building2 } from "lucide-react";
 
 const plans = [
   {
@@ -77,10 +77,7 @@ export default function PricingPage() {
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto">
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: "#4F46E5", boxShadow: "0 0 16px rgba(99,102,241,0.4)" }}>
-            <Hexagon className="w-4 h-4 text-white" />
-          </div>
+          <img src="/logo.svg" className="w-8 h-8 rounded-lg" alt="Kynara" />
           <span className="font-semibold text-white">Kynara</span>
         </Link>
         <div className="flex items-center gap-4">

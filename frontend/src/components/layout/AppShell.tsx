@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard, Bot, Wrench, ShieldCheck, ScrollText,
-  CreditCard, Settings, LogOut, Hexagon, ChevronDown, Check, Building2,
+  CreditCard, Settings, LogOut, ChevronDown, Check, Building2,
   Menu, X, CheckCircle2, Plug, ShieldAlert, KeyRound, BookOpen, UserCircle, Crown,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -77,15 +77,11 @@ export default function AppShell() {
         className="px-4 py-3 flex items-center gap-3 hover:opacity-80 transition-opacity"
         style={{ borderBottom: "1px solid var(--s0-border)" }}
       >
-        <div
-          className="size-8 rounded-lg flex items-center justify-center shrink-0"
-          style={{
-            background: "var(--s0-accent)",
-            boxShadow: "0 0 0 1px var(--s0-accent-ring), 0 2px 8px var(--s0-accent-glow)",
-          }}
-        >
-          <Hexagon className="size-4 text-white" strokeWidth={2} />
-        </div>
+        <img
+          src="/logo.svg"
+          className="size-8 rounded-lg shrink-0"
+          alt="Kynara"
+        />
         <div className="flex-1 min-w-0">
           <div className="text-sm font-bold tracking-tight text-white leading-none">Kynara</div>
           <div className="text-[10px] font-medium mt-0.5" style={{ color: "var(--s0-accent-text)", letterSpacing: "0.06em" }}>
@@ -277,12 +273,11 @@ export default function AppShell() {
             <Menu className="size-5" />
           </button>
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div
-              className="size-6 rounded-md flex items-center justify-center"
-              style={{ background: "var(--s0-accent)" }}
-            >
-              <Hexagon className="size-3.5 text-white" strokeWidth={2} />
-            </div>
+            <img
+              src="/logo.svg"
+              className="size-6 rounded-md"
+              alt="Kynara"
+            />
             <span className="text-sm font-bold text-white">Kynara</span>
           </Link>
         </header>

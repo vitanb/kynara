@@ -6,7 +6,7 @@
  */
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Hexagon, ShieldCheck, Bot, ScrollText } from "lucide-react";
+import { ShieldCheck, Bot, ScrollText } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
@@ -92,12 +92,11 @@ export default function OAuthConsentPage() {
       >
         {/* Header */}
         <div className="flex items-center justify-center gap-3 mb-6">
-          <div
-            className="size-10 rounded-xl flex items-center justify-center"
-            style={{ background: "var(--s0-accent)", boxShadow: "0 0 0 1px var(--s0-accent-ring)" }}
-          >
-            <Hexagon className="size-5 text-white" strokeWidth={2} />
-          </div>
+          <img
+            src="/logo.svg"
+            className="size-10 rounded-xl"
+            alt="Kynara"
+          />
           <div className="text-slate-400 text-lg font-light">+</div>
           <div
             className="size-10 rounded-xl flex items-center justify-center text-sm font-bold text-white"

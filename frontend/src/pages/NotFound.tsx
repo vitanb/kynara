@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Hexagon, ArrowLeft, Home } from "lucide-react";
+import { ArrowLeft, Home } from "lucide-react";
 
 export default function NotFoundPage() {
   const navigate = useNavigate();
@@ -11,15 +11,7 @@ export default function NotFoundPage() {
     >
       {/* Logo */}
       <Link to="/" className="flex items-center gap-3 mb-16 hover:opacity-80 transition-opacity">
-        <div
-          className="size-9 rounded-xl flex items-center justify-center"
-          style={{
-            background: "#4F46E5",
-            boxShadow: "0 0 0 1px rgba(99,102,241,0.5), 0 4px 14px rgba(79,70,229,0.4)",
-          }}
-        >
-          <Hexagon className="size-5 text-white" strokeWidth={2} />
-        </div>
+        <img src="/logo.svg" className="size-9 rounded-xl" alt="Kynara" />
         <div className="text-left">
           <div className="text-base font-bold text-white tracking-tight leading-none">Kynara</div>
           <div className="text-[10px] font-medium mt-0.5" style={{ color: "#818CF8", letterSpacing: "0.06em" }}>

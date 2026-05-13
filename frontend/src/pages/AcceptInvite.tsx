@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { Hexagon, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
@@ -96,10 +96,7 @@ export default function AcceptInvitePage() {
     <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#05080F" }}>
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center gap-3 mb-8 hover:opacity-80 transition-opacity">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center"
-            style={{ background: "#4F46E5", boxShadow: "0 0 20px rgba(99,102,241,0.4)" }}>
-            <Hexagon className="w-5 h-5 text-white" />
-          </div>
+          <img src="/logo.svg" className="w-9 h-9 rounded-lg" alt="Kynara" />
           <span className="font-semibold text-white text-lg">Kynara</span>
         </Link>
 

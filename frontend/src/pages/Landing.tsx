@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import {
-  Hexagon, ShieldCheck, GitBranch, Eye, Zap, ArrowRight, Check, X, Send,
+  ShieldCheck, GitBranch, Eye, Zap, ArrowRight, Check, X, Send,
   Lock, AlertTriangle, LineChart, KeyRound, ChevronRight, Building2, FileText, Bell,
 } from "lucide-react";
 
@@ -74,9 +74,7 @@ export default function LandingPage() {
         {/* Nav */}
         <nav className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)", boxShadow: "0 0 20px rgba(99,102,241,0.4)" }}>
-              <Hexagon className="w-4 h-4 text-white" strokeWidth={2} />
-            </div>
+            <img src="/logo.svg" className="w-8 h-8 rounded-lg" alt="Kynara" />
             <span className="font-bold text-white text-base tracking-tight">Kynara</span>
           </div>
           <div className="hidden md:flex items-center gap-7 text-sm text-slate-400">
@@ -328,9 +326,7 @@ export default function LandingPage() {
         <footer className="border-t px-8 py-8 max-w-6xl mx-auto" style={{ borderColor: "rgba(148,163,184,0.07)" }}>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
             <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}>
-                <Hexagon className="w-3 h-3 text-white" strokeWidth={2.5} />
-              </div>
+              <img src="/logo.svg" className="w-6 h-6 rounded-md" alt="Kynara" />
               <span className="text-slate-500 font-medium">Kynara</span>
               <span className="text-slate-700">·</span>
               <span>© {new Date().getFullYear()}. All rights reserved.</span>
@@ -368,9 +364,7 @@ export default function LandingPage() {
               <>
                 <div className="mb-6">
                   <div className="flex items-center gap-2.5 mb-3">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}>
-                      <Hexagon className="w-3.5 h-3.5 text-white" strokeWidth={2} />
-                    </div>
+                    <img src="/logo.svg" className="w-7 h-7 rounded-lg" alt="Kynara" />
                     <span className="font-bold text-white text-sm">Kynara</span>
                   </div>
                   <h2 className="text-xl font-bold text-white mb-1">Book a demo</h2>
