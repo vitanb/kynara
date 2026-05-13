@@ -10,7 +10,7 @@ Use this document as a ready-to-paste reference when filling out the MCP directo
 ## What Still Needs to Be Done Before Submitting
 
 - [ ] Deploy Kynara to production Railway URL and replace the placeholder server URL below
-- [ ] Finalize `kynara.io` domain and ensure docs, privacy policy, and support email are live
+- [ ] Finalize `kynaraai.com` domain and ensure docs, privacy policy, and support email are live
 - [ ] Create SVG logo asset (square, ideally 256x256 minimum) and favicon (32x32 PNG or ICO)
 - [ ] Take 2 polished screenshots of the Kynara dashboard/connector in use (1280x800 recommended)
 - [ ] Create a dedicated reviewer test account and record credentials in a secure location
@@ -116,10 +116,10 @@ Use this document as a ready-to-paste reference when filling out the MCP directo
 
 | Field | Value |
 |---|---|
-| **Documentation URL** | `https://kynara.io/docs` `[TODO: ensure live before submission]` |
-| **Privacy policy URL** | `https://kynara.io/privacy` |
-| **Support email** | support@kynara.io |
-| **Homepage** | `https://kynara.io` `[TODO: ensure live before submission]` |
+| **Documentation URL** | `https://kynaraai.com/docs` `[TODO: ensure live before submission]` |
+| **Privacy policy URL** | `https://kynaraai.com/privacy` |
+| **Support email** | support@kynaraai.com |
+| **Homepage** | `https://kynaraai.com` `[TODO: ensure live before submission]` |
 
 ---
 
@@ -140,14 +140,14 @@ Provide the following to the Anthropic review team so they can test the connecto
 
 | Field | Value |
 |---|---|
-| **Sign-up URL** | `https://kynara.io` (create a free account) |
-| **Test email** | `[TODO: create reviewer@kynara.io or a dedicated test account]` |
+| **Sign-up URL** | `https://kynaraai.com` (create a free account) |
+| **Test email** | `[TODO: create reviewer@kynaraai.com or a dedicated test account]` |
 | **Test password** | `[TODO: set and record securely]` |
 | **Pre-seeded data** | `[TODO: ensure account has at least 2 agents, 2 roles, and 1 pending approval for reviewer to interact with]` |
 
 ### Reviewer Instructions
 
-1. Navigate to `https://kynara.io` and click **Sign Up** (or use the pre-created credentials above).
+1. Navigate to `https://kynaraai.com` and click **Sign Up** (or use the pre-created credentials above).
 2. Connect Claude to Kynara via the MCP connector using OAuth — authorize with the test account.
 3. Ask Claude to run `kynara_list_agents` to verify the connection.
 4. Try `kynara_check_permission` with a sample agent ID and action.
@@ -169,7 +169,7 @@ Provide the following to the Anthropic review team so they can test the connecto
 - [ ] Logo SVG and favicon assets ready to upload
 - [ ] 2 screenshots captured and ready to upload
 - [ ] Test account created with seeded data for reviewer
-- [ ] support@kynara.io inbox monitored and ready for reviewer follow-up
+- [ ] support@kynaraai.com inbox monitored and ready for reviewer follow-up
 
 ---
 
