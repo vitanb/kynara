@@ -9,8 +9,8 @@ Use this document as a ready-to-paste reference when filling out the MCP directo
 
 ## What Still Needs to Be Done Before Submitting
 
-- [ ] Deploy Kynara to production Railway URL and replace the placeholder server URL below
-- [ ] Finalize `kynaraai.com` domain and ensure docs, privacy policy, and support email are live
+- [x] Deploy Kynara to production Railway URL — https://kynaraai.com
+- [x] Finalize `kynaraai.com` domain and ensure docs, privacy policy, and support email are live
 - [ ] Create SVG logo asset (square, ideally 256x256 minimum) and favicon (32x32 PNG or ICO)
 - [ ] Take 2 polished screenshots of the Kynara dashboard/connector in use (1280x800 recommended)
 - [ ] Create a dedicated reviewer test account and record credentials in a secure location
@@ -23,7 +23,7 @@ Use this document as a ready-to-paste reference when filling out the MCP directo
 | Field | Value |
 |---|---|
 | **Server name** | Kynara |
-| **Server URL** | `https://[RAILWAY-URL].up.railway.app` `[TODO: replace with production URL]` |
+| **Server URL** | `https://kynaraai.com` |
 | **Tagline** | AI agent permission control plane — govern, audit, and approve agent actions |
 | **Category** | Developer Tools / Security & Compliance |
 
@@ -116,10 +116,10 @@ Use this document as a ready-to-paste reference when filling out the MCP directo
 
 | Field | Value |
 |---|---|
-| **Documentation URL** | `https://kynaraai.com/docs` `[TODO: ensure live before submission]` |
+| **Documentation URL** | `https://kynaraai.com/docs` |
 | **Privacy policy URL** | `https://kynaraai.com/privacy` |
 | **Support email** | support@kynaraai.com |
-| **Homepage** | `https://kynaraai.com` `[TODO: ensure live before submission]` |
+| **Homepage** | `https://kynaraai.com` |
 
 ---
 
