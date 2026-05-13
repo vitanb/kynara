@@ -574,21 +574,39 @@ async def _dispatch(
 # FastAPI route handlers
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.api_route("", methods=["GET", "POST", "DELETE"])
-async def mcp_endpoint(
-    request: Request,
-    principal: Principal = Depends(get_principal),
-):
-    """Streamable HTTP endpoint — handles all MCP traffic (MCP 2025 spec).
-
-    Claude sends POST for initialize + tool calls.
-    GET opens a long-lived SSE notification stream (optional, for server push).
-    DELETE terminates a session.
-    Each request is fully stateless — a new server + manager is built per call.
-    """
+async def _handle_mcp(request: Request, principal: Principal) -> None:
+    """Shared Streamable HTTP handler — stateless, one manager per request."""
     srv = _build_server(principal)
     manager = StreamableHTTPSessionManager(app=srv, stateless=True)
     async with manager.run():
         await manager.handle_request(
             request.scope, request.receive, request._send  # type: ignore[attr-defined]
         )
+
+
+@router.api_route("", methods=["GET", "POST", "DELETE"])
+async def mcp_endpoint(
+    request: Request,
+    principal: Principal = Depends(get_principal),
+):
+    """Streamable HTTP endpoint — MCP 2025 spec.
+
+    Claude sends POST for initialize + tool calls.
+    GET opens a long-lived SSE notification stream (optional, for server push).
+    DELETE terminates a session.
+    Each request is fully stateless — a new server + manager is built per call.
+    """
+    await _handle_mcp(request, principal)
+
+
+@router.api_route("/sse", methods=["GET", "POST", "DELETE"])
+async def mcp_endpoint_sse(
+    request: Request,
+    principal: Principal = Depends(get_principal),
+):
+    """Legacy /sse path alias — same Streamable HTTP handler.
+
+    Connectors configured with the old SSE URL (/mcp/v1/sse) are routed here.
+    Both /mcp/v1 and /mcp/v1/sse serve the same Streamable HTTP transport.
+    """
+    await _handle_mcp(request, principal)
