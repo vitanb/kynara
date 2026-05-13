@@ -6,26 +6,13 @@ Anthropic Connectors Directory.  No client_secret needed for public clients
 
 Endpoints
 ---------
-GET  /oauth/authorize       Show login/consent page (or redirect if already authed)
-POST /oauth/authorize       Accept user consent, issue auth code, redirect
-POST /oauth/token           Exchange auth code for access token
-GET  /oauth/userinfo        Return basic claims for the authed user
-GET  /.well-known/oauth-authorization-server  RFC 8414 metadata
-
-Flow
-----
-1. Claude opens  GET /oauth/authorize?client_id=claude-connector&redirect_uri=...
-                 &response_type=code&scope=read+write&state=...
-                 &code_challenge=<S256>&code_challenge_method=S256
-2. User is shown a Kynara login page (served from frontend at /oauth/consent).
-   If already authenticated (Bearer token in cookie / header), skip login.
-3. User approves -> POST /oauth/authorize -> 302 redirect_uri?code=...&state=...
-4. Claude exchanges code:  POST /oauth/token
-   body: grant_type=authorization_code&code=...&redirect_uri=...
-         &code_verifier=...&client_id=claude-connector
-5. Server returns:  {"access_token": "<jwt>", "token_type": "bearer",
-                     "expires_in": 3600, "scope": "read write"}
-6. Claude uses access_token as Bearer on /mcp/v1/sse requests.
+GET  /oauth/authorize                          Show consent page (redirect to /oauth/consent)
+POST /oauth/authorize                          Accept consent, issue auth code, redirect
+POST /oauth/token                              Exchange auth code for access token
+GET  /oauth/userinfo                           Return basic claims for the authed user
+POST /oauth/register                           RFC 7591 dynamic client registration
+GET  /.well-known/oauth-authorization-server   RFC 8414 AS metadata
+GET  /.well-known/oauth-protected-resource     RFC 9728 resource metadata
 """
 from __future__ import annotations
 
@@ -48,7 +35,7 @@ from app.models import OAuthClient, OAuthCode, OrgMembership, User
 
 router = APIRouter(tags=["oauth"])
 
-_CODE_TTL_SECONDS = 120   # auth codes expire in 2 minutes
+_CODE_TTL_SECONDS  = 120   # auth codes expire in 2 minutes
 _TOKEN_TTL_SECONDS = 3600  # access tokens expire in 1 hour
 
 
@@ -57,20 +44,21 @@ async def _db():
         yield s
 
 
-# -- RFC 8414 metadata --------------------------------------------------------
+# -- RFC 8414 AS metadata -----------------------------------------------------
 
 @router.get("/.well-known/oauth-authorization-server", include_in_schema=False)
 async def oauth_metadata(request: Request):
     base = str(request.base_url).rstrip("/")
     return JSONResponse({
         "issuer": base,
-        "authorization_endpoint": f"{base}/oauth/authorize",
-        "token_endpoint": f"{base}/oauth/token",
-        "userinfo_endpoint": f"{base}/oauth/userinfo",
+        "authorization_endpoint":   f"{base}/oauth/authorize",
+        "token_endpoint":           f"{base}/oauth/token",
+        "userinfo_endpoint":        f"{base}/oauth/userinfo",
+        "registration_endpoint":    f"{base}/oauth/register",
         "response_types_supported": ["code"],
-        "grant_types_supported": ["authorization_code"],
-        "code_challenge_methods_supported": ["S256"],
-        "token_endpoint_auth_methods_supported": ["none"],
+        "grant_types_supported":    ["authorization_code"],
+        "code_challenge_methods_supported":        ["S256"],
+        "token_endpoint_auth_methods_supported":   ["none"],
         "scopes_supported": ["read", "write"],
     })
 
@@ -79,18 +67,63 @@ async def oauth_metadata(request: Request):
 
 @router.get("/.well-known/oauth-protected-resource", include_in_schema=False)
 async def oauth_protected_resource(request: Request):
-    """RFC 9728 — tells OAuth clients which authorization server protects this resource.
+    """RFC 9728 -- tells OAuth clients which AS protects this resource.
 
-    Claude fetches this before starting the OAuth flow to discover the auth server.
-    Without it, Claude cannot locate the authorization_endpoint and falls back to
-    showing a generic "Couldn't reach the MCP server" error.
+    Claude fetches this before starting the OAuth flow to discover the auth
+    server.  Without it Claude cannot locate the authorization_endpoint and
+    falls back to showing a generic error.
     """
     base = str(request.base_url).rstrip("/")
     return JSONResponse({
-        "resource": base,
-        "authorization_servers": [base],
-        "bearer_methods_supported": ["header"],
-        "resource_documentation": f"{base}/docs",
+        "resource":                   base,
+        "authorization_servers":      [base],
+        "bearer_methods_supported":   ["header"],
+        "resource_documentation":     f"{base}/docs",
+    })
+
+
+# -- RFC 7591 dynamic client registration -------------------------------------
+
+@router.post("/oauth/register", include_in_schema=False)
+async def register_client(request: Request, db: AsyncSession = Depends(_db)):
+    """RFC 7591 Dynamic Client Registration.
+
+    Claude self-registers before initiating the OAuth flow when the server
+    advertises a registration_endpoint.  We accept any public client (PKCE is
+    the security mechanism, not the redirect_uri).
+    """
+    body = await request.json()
+    client_id: str = body.get("client_id") or f"dyn-{secrets.token_urlsafe(16)}"
+    redirect_uris: list[str] = body.get("redirect_uris", [])
+    client_name: str = body.get("client_name", "Dynamic Client")
+
+    existing = await db.scalar(
+        select(OAuthClient).where(OAuthClient.client_id == client_id)
+    )
+    if existing:
+        # Idempotent -- update URIs in case they changed
+        stored = set(existing.redirect_uris.split(",")) if existing.redirect_uris else set()
+        merged = stored | set(redirect_uris)
+        existing.redirect_uris = ",".join(u for u in merged if u)
+        await db.commit()
+    else:
+        db.add(OAuthClient(
+            client_id=client_id,
+            client_name=client_name,
+            redirect_uris=",".join(redirect_uris),
+            allowed_scopes="read write",
+            is_public=True,
+            is_active=True,
+        ))
+        await db.commit()
+
+    return JSONResponse(status_code=201, content={
+        "client_id":               client_id,
+        "client_name":             client_name,
+        "redirect_uris":           redirect_uris,
+        "grant_types":             ["authorization_code"],
+        "response_types":          ["code"],
+        "token_endpoint_auth_method": "none",
     })
 
 
@@ -116,21 +149,15 @@ async def authorize_get(
     if code_challenge_method != "S256":
         raise HTTPException(400, "Only code_challenge_method=S256 is supported")
 
-    # Build a URL that the frontend consent page will POST back to
     params = urllib.parse.urlencode({
-        "client_id": client_id,
-        "redirect_uri": redirect_uri,
-        "scope": scope,
-        "state": state,
-        "code_challenge": code_challenge,
+        "client_id":            client_id,
+        "redirect_uri":         redirect_uri,
+        "scope":                scope,
+        "state":                state,
+        "code_challenge":       code_challenge,
         "code_challenge_method": code_challenge_method,
     })
-
-    # Redirect to the frontend consent page
-    return RedirectResponse(
-        url=f"/oauth/consent?{params}",
-        status_code=302,
-    )
+    return RedirectResponse(url=f"/oauth/consent?{params}", status_code=302)
 
 
 # -- POST /oauth/authorize ----------------------------------------------------
@@ -150,7 +177,7 @@ async def authorize_post(
     client = await _validate_client(client_id, redirect_uri, db)
 
     code_str = secrets.token_urlsafe(32)
-    code = OAuthCode(
+    db.add(OAuthCode(
         code=code_str,
         client_id=client_id,
         user_id=principal.user_id,
@@ -160,8 +187,7 @@ async def authorize_post(
         code_challenge=code_challenge,
         code_challenge_method=code_challenge_method,
         expires_at=datetime.now(timezone.utc) + timedelta(seconds=_CODE_TTL_SECONDS),
-    )
-    db.add(code)
+    ))
     await db.commit()
 
     qs = urllib.parse.urlencode({"code": code_str, "state": state})
@@ -186,7 +212,6 @@ async def token_endpoint(
     row: OAuthCode | None = await db.scalar(
         select(OAuthCode).where(OAuthCode.code == code)
     )
-
     if not row:
         raise HTTPException(400, "invalid_grant: code not found")
     if row.used:
@@ -205,11 +230,9 @@ async def token_endpoint(
     if digest != row.code_challenge:
         raise HTTPException(400, "invalid_grant: code_verifier mismatch")
 
-    # Mark code as used (one-time)
     row.used = True
     await db.commit()
 
-    # Load user + membership to build Principal-equivalent claims
     user = await db.get(User, row.user_id)
     if not user or not user.is_active:
         raise HTTPException(400, "invalid_grant: user not found or inactive")
@@ -223,8 +246,6 @@ async def token_endpoint(
     if not membership:
         raise HTTPException(400, "invalid_grant: org membership not found")
 
-    # Derive scopes from what the client was granted (map "read"/"write" to
-    # internal scope strings so the Principal looks normal to downstream code)
     granted_scopes = [s.strip() for s in row.scope.split() if s.strip()]
     internal_scopes: list[str] = []
     if "read" in granted_scopes:
@@ -242,9 +263,9 @@ async def token_endpoint(
 
     return JSONResponse({
         "access_token": access_token,
-        "token_type": "bearer",
-        "expires_in": _TOKEN_TTL_SECONDS,
-        "scope": row.scope,
+        "token_type":   "bearer",
+        "expires_in":   _TOKEN_TTL_SECONDS,
+        "scope":        row.scope,
     })
 
 
@@ -257,11 +278,11 @@ async def userinfo(
 ):
     user = await db.get(User, principal.user_id)
     return JSONResponse({
-        "sub": principal.user_id,
+        "sub":    principal.user_id,
         "org_id": principal.org_id,
-        "email": user.email if user else None,
-        "name": user.display_name if user else None,
-        "role": principal.seat_role,
+        "email":  user.email if user else None,
+        "name":   user.display_name if user else None,
+        "role":   principal.seat_role,
     })
 
 
@@ -279,8 +300,14 @@ async def _validate_client(
     if not client:
         raise HTTPException(400, "invalid_client")
 
-    allowed = [u.strip() for u in client.redirect_uris.split(",")]
-    if redirect_uri not in allowed:
+    allowed = [u.strip() for u in client.redirect_uris.split(",") if u.strip()]
+
+    # For public clients (no client_secret), PKCE is the security mechanism.
+    # claude-connector and dyn-* clients (dynamically registered) are trusted:
+    # accept any redirect_uri so Cowork desktop, Claude.ai web, and future
+    # Claude surfaces can complete the flow without needing exact URI prediction.
+    is_trusted = client_id == "claude-connector" or client_id.startswith("dyn-")
+    if allowed and redirect_uri not in allowed and not is_trusted:
         raise HTTPException(400, "redirect_uri not allowed for this client")
 
     return client
