@@ -574,39 +574,59 @@ async def _dispatch(
 # FastAPI route handlers
 # ─────────────────────────────────────────────────────────────────────────────
 
-async def _handle_mcp(request: Request, principal: Principal) -> None:
-    """Shared Streamable HTTP handler — stateless, one manager per request."""
+from fastapi.responses import Response as _Response
+
+
+async def _handle_mcp(request: Request, principal: Principal) -> _Response:
+    """Shared Streamable HTTP handler.
+
+    Captures the MCP response via a buffer send callable and returns it as a
+    proper FastAPI Response.  This avoids the ASGI double-send problem that
+    occurs when request._send is called inside handle_request and then FastAPI
+    also tries to finalise the response.
+
+    For stateless Streamable HTTP each POST is a single JSON round-trip so
+    buffering the full body is fine.  GET (SSE) and DELETE are short too.
+    """
+    status_code: list[int] = []
+    headers_raw: list[tuple[bytes, bytes]] = []
+    body_chunks: list[bytes] = []
+
+    async def _capture_send(message: dict) -> None:
+        if message["type"] == "http.response.start":
+            status_code.append(message.get("status", 200))
+            headers_raw.extend(message.get("headers", []))
+        elif message["type"] == "http.response.body":
+            chunk = message.get("body", b"")
+            if chunk:
+                body_chunks.append(chunk)
+
     srv = _build_server(principal)
     manager = StreamableHTTPSessionManager(app=srv, stateless=True)
     async with manager.run():
-        await manager.handle_request(
-            request.scope, request.receive, request._send  # type: ignore[attr-defined]
-        )
+        await manager.handle_request(request.scope, request.receive, _capture_send)
+
+    resp_headers = {k.decode("latin-1"): v.decode("latin-1") for k, v in headers_raw}
+    return _Response(
+        content=b"".join(body_chunks),
+        status_code=status_code[0] if status_code else 200,
+        headers=resp_headers,
+    )
 
 
 @router.api_route("", methods=["GET", "POST", "DELETE"])
 async def mcp_endpoint(
     request: Request,
     principal: Principal = Depends(get_principal),
-):
-    """Streamable HTTP endpoint — MCP 2025 spec.
-
-    Claude sends POST for initialize + tool calls.
-    GET opens a long-lived SSE notification stream (optional, for server push).
-    DELETE terminates a session.
-    Each request is fully stateless — a new server + manager is built per call.
-    """
-    await _handle_mcp(request, principal)
+) -> _Response:
+    """Streamable HTTP endpoint -- MCP 2025 spec (GET/POST/DELETE)."""
+    return await _handle_mcp(request, principal)
 
 
 @router.api_route("/sse", methods=["GET", "POST", "DELETE"])
 async def mcp_endpoint_sse(
     request: Request,
     principal: Principal = Depends(get_principal),
-):
-    """Legacy /sse path alias — same Streamable HTTP handler.
-
-    Connectors configured with the old SSE URL (/mcp/v1/sse) are routed here.
-    Both /mcp/v1 and /mcp/v1/sse serve the same Streamable HTTP transport.
-    """
-    await _handle_mcp(request, principal)
+) -> _Response:
+    """Legacy /sse path alias -- same Streamable HTTP handler."""
+    return await _handle_mcp(request, principal)
