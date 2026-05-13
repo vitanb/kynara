@@ -83,11 +83,15 @@ def _build_server(principal: Principal) -> Server:
 
     @srv.list_tools()
     async def list_tools() -> list[mct.Tool]:
+        RO  = mct.ToolAnnotations(readOnlyHint=True,  destructiveHint=False)
+        MUT = mct.ToolAnnotations(readOnlyHint=False, destructiveHint=False)
+        DEL = mct.ToolAnnotations(readOnlyHint=False, destructiveHint=True)
         return [
             mct.Tool(
                 name="kynara_list_agents",
                 description="List all AI agents registered in this organisation.",
                 inputSchema={"type": "object", "properties": {}, "required": []},
+                annotations=RO,
             ),
             mct.Tool(
                 name="kynara_get_agent",
@@ -97,6 +101,7 @@ def _build_server(principal: Principal) -> Server:
                     "properties": {"agent_id": {"type": "string", "description": "Agent UUID or slug"}},
                     "required": ["agent_id"],
                 },
+                annotations=RO,
             ),
             mct.Tool(
                 name="kynara_create_agent",
@@ -111,6 +116,7 @@ def _build_server(principal: Principal) -> Server:
                     },
                     "required": ["slug", "display_name"],
                 },
+                annotations=MUT,
             ),
             mct.Tool(
                 name="kynara_kill_agent",
@@ -120,15 +126,17 @@ def _build_server(principal: Principal) -> Server:
                     "properties": {"agent_id": {"type": "string"}},
                     "required": ["agent_id"],
                 },
+                annotations=DEL,
             ),
             mct.Tool(
                 name="kynara_get_agent_access_summary",
-                description="Return the full permission matrix for an agent — all allowed and denied scopes across every policy.",
+                description="Return the full permission matrix for an agent -- all allowed and denied scopes across every policy.",
                 inputSchema={
                     "type": "object",
                     "properties": {"agent_id": {"type": "string"}},
                     "required": ["agent_id"],
                 },
+                annotations=RO,
             ),
             mct.Tool(
                 name="kynara_check_permission",
@@ -146,6 +154,7 @@ def _build_server(principal: Principal) -> Server:
                     },
                     "required": ["agent_id", "tool"],
                 },
+                annotations=RO,
             ),
             mct.Tool(
                 name="kynara_list_approvals",
@@ -158,6 +167,7 @@ def _build_server(principal: Principal) -> Server:
                     },
                     "required": [],
                 },
+                annotations=RO,
             ),
             mct.Tool(
                 name="kynara_approve_request",
@@ -170,6 +180,7 @@ def _build_server(principal: Principal) -> Server:
                     },
                     "required": ["approval_id"],
                 },
+                annotations=MUT,
             ),
             mct.Tool(
                 name="kynara_reject_request",
@@ -182,11 +193,13 @@ def _build_server(principal: Principal) -> Server:
                     },
                     "required": ["approval_id", "reason"],
                 },
+                annotations=MUT,
             ),
             mct.Tool(
                 name="kynara_list_roles",
                 description="List all roles defined in the organisation.",
                 inputSchema={"type": "object", "properties": {}, "required": []},
+                annotations=RO,
             ),
             mct.Tool(
                 name="kynara_create_role",
@@ -201,6 +214,7 @@ def _build_server(principal: Principal) -> Server:
                     },
                     "required": ["slug", "display_name"],
                 },
+                annotations=MUT,
             ),
             mct.Tool(
                 name="kynara_update_role",
@@ -215,6 +229,7 @@ def _build_server(principal: Principal) -> Server:
                     },
                     "required": ["role_id"],
                 },
+                annotations=MUT,
             ),
             mct.Tool(
                 name="kynara_delete_role",
@@ -224,6 +239,7 @@ def _build_server(principal: Principal) -> Server:
                     "properties": {"role_id": {"type": "string"}},
                     "required": ["role_id"],
                 },
+                annotations=DEL,
             ),
             mct.Tool(
                 name="kynara_assign_role",
@@ -236,6 +252,7 @@ def _build_server(principal: Principal) -> Server:
                     },
                     "required": ["agent_id", "role_id"],
                 },
+                annotations=MUT,
             ),
             mct.Tool(
                 name="kynara_list_audit_logs",
@@ -250,6 +267,7 @@ def _build_server(principal: Principal) -> Server:
                     },
                     "required": [],
                 },
+                annotations=RO,
             ),
         ]
 

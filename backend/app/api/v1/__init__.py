@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.api.v1 import (
     admin, agents, api_keys, approvals, audit, auth, billing, contact,
-    decisions, guardrails, health, invites, org, policies, roles,
+    decisions, guardrails, health, invites, oauth, org, policies, roles,
     sso, sso_connections, tools, webhooks,
 )
 
@@ -26,3 +26,5 @@ v1.include_router(contact.router)
 v1.include_router(api_keys.router)
 v1.include_router(guardrails.router)
 v1.include_router(webhooks.router)
+# OAuth 2.0 — mounted at root (not /api/v1) so URLs match RFC 8414 conventions
+# Registered separately in main.py via oauth.router

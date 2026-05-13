@@ -33,6 +33,7 @@ import HowItWorksPage from "./pages/HowItWorks";
 import ProfilePage from "./pages/Profile";
 import SuperAdminPage from "./pages/SuperAdmin";
 import SsoCallbackPage from "./pages/SsoCallback";
+import OAuthConsentPage from "./pages/OAuthConsent";
 import RequireAuth from "./components/layout/RequireAuth";
 
 const qc = new QueryClient({
@@ -55,6 +56,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             {/* SSO callback — must be outside RequireAuth, user has no token yet */}
             <Route path="/app/sso-callback" element={<SsoCallbackPage />} />
+            {/* OAuth consent — shown when Claude initiates the connector auth flow */}
+            <Route path="/oauth/consent" element={<OAuthConsentPage />} />
             <Route
               path="/app"
               element={

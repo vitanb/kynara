@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Kynara</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #05080F;
+      --surface: #080C14;
+      --surface2: #0D1421;
+      --border: rgba(148,163,184,0.1);
+      --accent: #6366F1;
+      --accent-light: #818CF8;
+      --text: #CBD5E1;
+      --text-muted: #64748B;
+      --text-strong: #F1F5F9;
+      --ok: #10B981;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.75;
+    }
+
+    a { color: var(--accent-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Top nav ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5,8,15,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-icon svg { width: 16px; height: 16px; color: #fff; }
+    .logo-text { font-size: 15px; font-weight: 600; color: var(--text-strong); letter-spacing: -0.02em; }
+    .topbar-spacer { flex: 1; }
+    .topbar-back { font-size: 13px; color: var(--text-muted); }
+    .topbar-back:hover { color: var(--text); text-decoration: none; }
+
+    /* ── Page layout ── */
+    .page {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 56px 32px 96px;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 4px;
+      padding: 3px 10px;
+      margin-bottom: 16px;
+    }
+
+    .page-header h1 {
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--text-strong);
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .page-header .meta {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 48px;
+    }
+
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .toc ol {
+      padding-left: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 24px;
+    }
+
+    .toc li {
+      font-size: 13px;
+    }
+
+    .toc a {
+      color: var(--text);
+    }
+
+    .toc a:hover {
+      color: var(--accent-light);
+    }
+
+    @media (max-width: 540px) {
+      .toc ol { grid-template-columns: 1fr; }
+    }
+
+    /* ── Sections ── */
+    .section {
+      margin-bottom: 48px;
+      scroll-margin-top: 72px;
+    }
+
+    .section h2 {
+      font-size: 19px;
+      font-weight: 600;
+      color: var(--text-strong);
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: rgba(99,102,241,0.15);
+      border: 1px solid rgba(99,102,241,0.3);
+      color: var(--accent-light);
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .section p {
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+
+    .section p:last-child { margin-bottom: 0; }
+
+    .section ul, .section ol {
+      padding-left: 22px;
+      margin-bottom: 14px;
+    }
+
+    .section li {
+      margin-bottom: 6px;
+    }
+
+    .section h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-strong);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 20px 0 8px;
+    }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 20px 0;
+      font-size: 14px;
+      line-height: 1.6;
+      border-left: 3px solid;
+    }
+
+    .callout-accent {
+      background: rgba(99,102,241,0.08);
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .callout-green {
+      background: rgba(16,185,129,0.07);
+      border-color: var(--ok);
+      color: var(--text);
+    }
+
+    .callout strong {
+      color: var(--text-strong);
+      font-weight: 600;
+    }
+
+    /* ── Data table ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      margin: 16px 0 20px;
+    }
+
+    .data-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      color: var(--text);
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+
+    .data-table td:first-child { color: var(--text-strong); font-weight: 500; }
+
+    /* ── Contact card ── */
+    .contact-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .contact-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: rgba(99,102,241,0.15);
+      border: 1px solid rgba(99,102,241,0.25);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .contact-icon svg { width: 20px; height: 20px; color: var(--accent-light); }
+
+    .contact-body p { font-size: 14px; margin-bottom: 4px; }
+    .contact-body a { font-weight: 500; }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer a { color: var(--text-muted); }
+    .footer a:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      .page { padding: 40px 20px 72px; }
+      .topbar { padding: 0 20px; }
+      .page-header h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top navigation -->
+  <nav class="topbar" aria-label="Site navigation">
+    <div class="logo-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    </div>
+    <span class="logo-text">Kynara</span>
+    <div class="topbar-spacer"></div>
+    <a href="/" class="topbar-back">← Back to app</a>
+  </nav>
+
+  <main class="page">
+
+    <!-- Page header -->
+    <header class="page-header">
+      <div class="badge">Legal</div>
+      <h1>Privacy Policy</h1>
+      <p class="meta">Effective date: May 12, 2026 &nbsp;·&nbsp; Applies to kynara.io and all Kynara services</p>
+    </header>
+
+    <!-- Intro -->
+    <div class="section">
+      <p>Kynara is a permission and governance platform for AI agents. This policy explains what data we collect when you use our service, how we use and protect it, and what choices you have. We've tried to write this in plain English — if something is unclear, reach out to <a href="mailto:privacy@kynara.io">privacy@kynara.io</a>.</p>
+    </div>
+
+    <!-- Table of contents -->
+    <nav class="toc" aria-label="Table of contents">
+      <p class="toc-title">Contents</p>
+      <ol>
+        <li><a href="#data-we-collect">Data we collect</a></li>
+        <li><a href="#mcp-connector">MCP connector data</a></li>
+        <li><a href="#how-we-use-data">How we use your data</a></li>
+        <li><a href="#storage-security">Storage &amp; security</a></li>
+        <li><a href="#oauth-tokens">OAuth tokens</a></li>
+        <li><a href="#third-party-sharing">Third-party sharing</a></li>
+        <li><a href="#data-retention">Data retention</a></li>
+        <li><a href="#your-rights">Your rights</a></li>
+        <li><a href="#children">Children's privacy</a></li>
+        <li><a href="#changes">Changes to this policy</a></li>
+        <li><a href="#contact">Contact us</a></li>
+      </ol>
+    </nav>
+
+    <!-- 1. Data we collect -->
+    <section class="section" id="data-we-collect">
+      <h2><span class="section-num">1</span> Data we collect</h2>
+
+      <p>We collect the minimum data needed to run the service. Here's what that looks like in practice:</p>
+
+      <h3>Account data</h3>
+      <p>When you sign up, we collect your name, email address, and a hashed password (or your OAuth provider identity if you use single sign-on). For organization accounts, we also store the organization name and any team member email addresses you invite.</p>
+
+      <h3>Usage data</h3>
+      <p>We log actions taken inside the platform — role assignments, policy changes, approval decisions, and agent activity — to power the audit log feature. These records form the core of the product.</p>
+
+      <h3>Technical data</h3>
+      <p>Standard server logs include IP addresses, browser type, and timestamps. These are used for debugging and security monitoring and are not linked to your profile for advertising purposes.</p>
+
+      <h3>Billing data</h3>
+      <p>Payment details (card number, billing address) are handled entirely by our payment processor, Stripe. We store only a non-sensitive token reference and your plan tier — we never see or store raw card data.</p>
+
+      <table class="data-table" aria-label="Summary of data collected">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Examples</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Account</td>
+            <td>Name, email, org name</td>
+            <td>Authentication, notifications</td>
+          </tr>
+          <tr>
+            <td>Governance activity</td>
+            <td>Policy changes, approvals, role edits</td>
+            <td>Audit trail, core product features</td>
+          </tr>
+          <tr>
+            <td>Agent metadata</td>
+            <td>Agent names, assigned roles, status</td>
+            <td>Permission enforcement</td>
+          </tr>
+          <tr>
+            <td>Technical</td>
+            <td>IP address, timestamps, browser</td>
+            <td>Security, debugging</td>
+          </tr>
+          <tr>
+            <td>Billing</td>
+            <td>Plan tier, Stripe customer token</td>
+            <td>Subscription management</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 2. MCP connector data -->
+    <section class="section" id="mcp-connector">
+      <h2><span class="section-num">2</span> MCP connector data</h2>
+
+      <p>Kynara provides a Model Context Protocol (MCP) connector that allows AI agents and MCP-compatible tools to interact with the platform. When an agent or client connects via the MCP interface, the following information may be accessed or generated:</p>
+
+      <ul>
+        <li><strong>Agent identifiers:</strong> names or IDs used to look up an agent's assigned roles and permissions.</li>
+        <li><strong>Permission check results:</strong> whether a given action is allowed or denied for a specific agent and resource.</li>
+        <li><strong>Audit log entries:</strong> records of actions taken (or attempted) by agents, including timestamps and outcomes.</li>
+        <li><strong>Approval decisions:</strong> records of requests that required human approval, including the decision and any reviewer notes.</li>
+        <li><strong>Role and policy data:</strong> the permission rules that govern what agents can do.</li>
+      </ul>
+
+      <div class="callout callout-green">
+        <strong>No training on your data.</strong> Kynara does not use any data transmitted through the MCP connector — or any other part of the platform — to train, fine-tune, or improve machine learning models. Your governance data belongs to you.
+      </div>
+
+      <p>Data accessed via the MCP connector is scoped to the authenticated organization's workspace. Connectors authenticate with a short-lived token bound to a specific organization; they cannot read data belonging to other organizations.</p>
+    </section>
+
+    <!-- 3. How we use data -->
+    <section class="section" id="how-we-use-data">
+      <h2><span class="section-num">3</span> How we use your data</h2>
+
+      <p>We use the data we collect to:</p>
+
+      <ul>
+        <li>Provide and operate the Kynara platform, including enforcing permissions and generating audit logs.</li>
+        <li>Send transactional emails — account verification, password reset, approval notifications, and billing receipts.</li>
+        <li>Respond to support requests and diagnose bugs.</li>
+        <li>Monitor for security threats and prevent abuse.</li>
+        <li>Improve the product through aggregate, anonymized usage analytics (e.g., which features are most used). These analytics cannot be traced back to individuals.</li>
+        <li>Comply with legal obligations when required.</li>
+      </ul>
+
+      <p>We do not use your data for behavioral advertising, and we do not sell your data to third parties.</p>
+    </section>
+
+    <!-- 4. Storage & security -->
+    <section class="section" id="storage-security">
+      <h2><span class="section-num">4</span> Storage &amp; security</h2>
+
+      <p>Kynara's infrastructure is hosted on Railway, with primary data stored in PostgreSQL databases in the United States. All data is encrypted at rest using AES-256 and in transit using TLS 1.2 or higher.</p>
+
+      <p>We apply the following security practices:</p>
+
+      <ul>
+        <li>Passwords are hashed using bcrypt before storage — we cannot recover your plaintext password.</li>
+        <li>Database access is restricted to application servers through private networking; no public database endpoints are exposed.</li>
+        <li>Secrets and credentials are managed via environment variables and are not committed to source control.</li>
+        <li>Access to production systems is limited to authorized personnel on a need-to-know basis.</li>
+      </ul>
+
+      <p>No system is perfectly secure. If you discover a vulnerability, please report it to <a href="mailto:privacy@kynara.io">privacy@kynara.io</a> and we'll respond promptly.</p>
+    </section>
+
+    <!-- 5. OAuth tokens -->
+    <section class="section" id="oauth-tokens">
+      <h2><span class="section-num">5</span> OAuth tokens</h2>
+
+      <p>If you sign in using an external OAuth provider (such as Google or GitHub), or if you connect third-party services to Kynara, we receive and store OAuth access tokens and refresh tokens. Here's how we handle them:</p>
+
+      <ul>
+        <li>Tokens are stored encrypted in the database — they are never stored in plaintext.</li>
+        <li>Tokens are only used to perform actions explicitly authorized by you (e.g., reading your profile to create an account).</li>
+        <li>We request only the minimum OAuth scopes needed for the requested functionality.</li>
+        <li>When you disconnect an integration or delete your account, associated OAuth tokens are revoked and deleted.</li>
+      </ul>
+
+      <div class="callout callout-accent">
+        You can revoke Kynara's access at any time from your OAuth provider's connected-apps settings (e.g., Google Account &gt; Security &gt; Third-party access). Revoking access there will also cause Kynara to de-authorize the connection.
+      </div>
+    </section>
+
+    <!-- 6. Third-party sharing -->
+    <section class="section" id="third-party-sharing">
+      <h2><span class="section-num">6</span> Third-party sharing</h2>
+
+      <p>We share data only with the sub-processors necessary to operate the service. We do not sell data, and we do not share data with advertising networks.</p>
+
+      <table class="data-table" aria-label="Third-party sub-processors">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Purpose</th>
+            <th>Data shared</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Railway</td>
+            <td>Cloud hosting</td>
+            <td>All application data (stored on Railway infrastructure)</td>
+          </tr>
+          <tr>
+            <td>Stripe</td>
+            <td>Payment processing</td>
+            <td>Billing contact info, payment method details</td>
+          </tr>
+          <tr>
+            <td>Resend / SendGrid</td>
+            <td>Transactional email</td>
+            <td>Recipient email address, email content</td>
+          </tr>
+          <tr>
+            <td>Sentry (optional)</td>
+            <td>Error monitoring</td>
+            <td>Stack traces, anonymized request context</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>We may also disclose data if required by law, court order, or government authority, or when necessary to protect the rights, property, or safety of Kynara, our users, or the public.</p>
+
+      <p>If we are acquired or merge with another company, your data may be transferred as part of that transaction. We will notify you before your data becomes subject to a different privacy policy.</p>
+    </section>
+
+    <!-- 7. Data retention -->
+    <section class="section" id="data-retention">
+      <h2><span class="section-num">7</span> Data retention</h2>
+
+      <p>We keep data for as long as your account is active or as needed to provide the service. More specifically:</p>
+
+      <table class="data-table" aria-label="Data retention periods">
+        <thead>
+          <tr>
+            <th>Data type</th>
+            <th>Retention period</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Account information</td>
+            <td>Until account deletion, then 30 days before permanent removal</td>
+          </tr>
+          <tr>
+            <td>Audit logs</td>
+            <td>90 days on free plans; 1 year on paid plans; configurable for enterprise</td>
+          </tr>
+          <tr>
+            <td>Approval records</td>
+            <td>Same as audit logs</td>
+          </tr>
+          <tr>
+            <td>Server / access logs</td>
+            <td>30 days, then automatically purged</td>
+          </tr>
+          <tr>
+            <td>Billing records</td>
+            <td>7 years (legal requirement)</td>
+          </tr>
+          <tr>
+            <td>Backups</td>
+            <td>Retained for up to 30 days, then overwritten</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>When you delete your account, we begin a 30-day deactivation window during which the account can be restored if the deletion was accidental. After that window, all personal data associated with your account is permanently deleted, with the exception of billing records required for legal compliance.</p>
+    </section>
+
+    <!-- 8. Your rights -->
+    <section class="section" id="your-rights">
+      <h2><span class="section-num">8</span> Your rights</h2>
+
+      <p>Depending on your location, you may have the following rights regarding your personal data:</p>
+
+      <ul>
+        <li><strong>Access:</strong> Request a copy of the personal data we hold about you.</li>
+        <li><strong>Correction:</strong> Ask us to correct inaccurate or incomplete data.</li>
+        <li><strong>Deletion:</strong> Request that we delete your account and associated personal data.</li>
+        <li><strong>Portability:</strong> Receive your data in a machine-readable format.</li>
+        <li><strong>Restriction:</strong> Ask us to limit how we process your data in certain circumstances.</li>
+        <li><strong>Objection:</strong> Object to processing based on legitimate interests.</li>
+      </ul>
+
+      <p>To exercise any of these rights, email <a href="mailto:privacy@kynara.io">privacy@kynara.io</a>. We will respond within 30 days. We may need to verify your identity before fulfilling a request.</p>
+
+      <p>If you are located in the European Economic Area or the United Kingdom, you also have the right to lodge a complaint with your local data protection authority.</p>
+    </section>
+
+    <!-- 9. Children -->
+    <section class="section" id="children">
+      <h2><span class="section-num">9</span> Children's privacy</h2>
+
+      <p>Kynara is a business-facing tool and is not intended for use by anyone under the age of 16. We do not knowingly collect personal data from children. If you believe a child has provided us with personal data, please contact us at <a href="mailto:privacy@kynara.io">privacy@kynara.io</a> and we will promptly delete it.</p>
+    </section>
+
+    <!-- 10. Changes -->
+    <section class="section" id="changes">
+      <h2><span class="section-num">10</span> Changes to this policy</h2>
+
+      <p>We may update this policy from time to time. When we make material changes, we will update the effective date at the top of this page and, where appropriate, notify account holders by email. Continuing to use Kynara after a policy update constitutes acceptance of the revised policy.</p>
+
+      <p>We encourage you to review this page periodically. The current version is always available at <a href="https://kynara.io/privacy">kynara.io/privacy</a>.</p>
+    </section>
+
+    <!-- 11. Contact -->
+    <section class="section" id="contact">
+      <h2><span class="section-num">11</span> Contact us</h2>
+
+      <p>If you have questions about this policy or want to exercise your data rights, get in touch:</p>
+
+      <div class="contact-card">
+        <div class="contact-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="contact-body">
+          <p><strong style="color: var(--text-strong);">Kynara Privacy Team</strong></p>
+          <p>Email: <a href="mailto:privacy@kynara.io">privacy@kynara.io</a></p>
+          <p style="font-size:13px; color: var(--text-muted); margin-top: 4px;">We aim to respond within 2 business days for general inquiries, and within 30 days for formal data subject requests.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>&copy; 2026 Kynara. All rights reserved.</span>
+      <span>
+        <a href="/terms">Terms of Service</a>
+        &nbsp;&middot;&nbsp;
+        <a href="/privacy">Privacy Policy</a>
+        &nbsp;&middot;&nbsp;
+        <a href="/docs">Documentation</a>
+      </span>
+    </footer>
+
+  </main>
+
+</body>
+</html>

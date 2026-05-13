@@ -9,6 +9,7 @@ from app.models.password_reset import PasswordResetToken
 from app.models.policy import Policy, PolicyBinding, Role, RolePermission
 from app.models.session import RefreshSession
 from app.models.sso import SsoConnection, ScimSync
+from app.models.oauth import OAuthClient, OAuthCode
 from app.models.tool import Tool, ToolScope
 from app.models.user import User
 from app.models.webhook import WebhookEndpoint, WebhookOutbox
@@ -33,6 +34,8 @@ __all__ = [
     "RefreshSession",
     "SsoConnection",
     "ScimSync",
+    "OAuthClient",
+    "OAuthCode",
     "Tool",
     "ToolScope",
     "User",
