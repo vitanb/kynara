@@ -246,7 +246,15 @@ async def authorize_post(
     await db.commit()
 
     qs = urllib.parse.urlencode({"code": code_str, "state": state})
-    return RedirectResponse(url=f"{redirect_uri}?{qs}", status_code=302)
+    callback_url = f"{redirect_uri}?{qs}"
+
+    # The frontend POSTs via fetch() — fetch with redirect:"manual" cannot
+    # read the Location header from a 302 (opaque redirect), so the browser
+    # would navigate nowhere.  Return JSON 200 instead; the frontend reads
+    # redirect_uri and does window.location.href = ... manually.
+    # Direct browser form submissions (non-XHR) will also work because they
+    # look for res.ok + data.redirect_uri in the existing frontend code.
+    return JSONResponse({"redirect_uri": callback_url})
 
 
 # -- POST /oauth/token --------------------------------------------------------
