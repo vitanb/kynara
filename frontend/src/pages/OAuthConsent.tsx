@@ -31,12 +31,13 @@ export default function OAuthConsentPage() {
     write: { label: "Approve/reject requests and manage agents",    icon: Bot },
   };
 
-  // If not logged in, redirect to login first and come back here afterwards.
-  // Return a loading indicator while the navigation is in-flight so the
-  // page is never just blank.
+  // If not logged in, do a hard redirect to the login page so the user can
+  // authenticate and come back here. React Router's navigate() is unreliable
+  // in a new tab opened by an OAuth client, so we use window.location.replace
+  // which always works regardless of router state.
   if (!me) {
     const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
-    navigate(`/login?next=${returnTo}`, { replace: true });
+    window.location.replace(`/login?next=${returnTo}`);
     return (
       <div
         className="min-h-screen flex items-center justify-center"
