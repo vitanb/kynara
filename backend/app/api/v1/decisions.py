@@ -111,4 +111,5 @@ async def check(
         obligations=d.obligations,
         approval_id=getattr(d, "approval_id", None),
         granted_scopes=d.granted_scopes,
-   
+        rbac_pass=d.rbac_pass,
+    )

@@ -126,4 +126,5 @@ async def export_csv(
     return StreamingResponse(
         iter([buf.read()]),
         media_type="text/csv",
-        headers={"Content-Di
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

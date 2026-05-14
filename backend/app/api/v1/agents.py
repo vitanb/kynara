@@ -455,4 +455,6 @@ async def reactivate_agent(
         session, org_id=principal.org_id,
         actor=f"user:{principal.user_id}" if principal.user_id else "system",
         event_type="agent.reactivated", resource_type="agent", resource_id=str(a.id),
-        payload={"
+        payload={"slug": a.slug},
+        ip_address=request.client.host if request.client else None,
+    )
