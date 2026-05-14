@@ -15,6 +15,7 @@ const allNav = [
   { to: "dashboard",  label: "Dashboard",    icon: LayoutDashboard, roles: ["owner","admin","developer","auditor","member"] },
   { to: "agents",     label: "Agents",       icon: Bot,             roles: ["owner","admin","developer","auditor","member"] },
   { to: "tools",      label: "Scope Catalog",icon: Wrench,          roles: ["owner","admin","developer","auditor","member"] },
+  { to: "catalog",    label: "Library",      icon: BookOpen,        roles: ["owner","admin","developer","auditor","member"] },
   { to: "roles",      label: "Roles",        icon: KeyRound,        roles: ["owner","admin","auditor"] },
   { to: "policies",   label: "Policies",     icon: ShieldCheck,     roles: ["owner","admin","auditor"] },
   { to: "approvals",  label: "Approvals",    icon: CheckCircle2,    roles: ["owner","admin"], badge: true },

@@ -17,6 +17,7 @@ import DashboardPage from "./pages/Dashboard";
 import AgentsPage from "./pages/Agents";
 import AgentDetailPage from "./pages/AgentDetail";
 import ToolsPage from "./pages/Tools";
+import CatalogPage from "./pages/Catalog";
 import PoliciesPage from "./pages/Policies";
 import PolicyEditorPage from "./pages/PolicyEditor";
 import AuditPage from "./pages/Audit";
@@ -71,6 +72,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <Route path="agents" element={<AgentsPage />} />
               <Route path="agents/:id" element={<AgentDetailPage />} />
               <Route path="tools" element={<ToolsPage />} />
+              <Route path="catalog" element={<CatalogPage />} />
               <Route path="policies" element={<PoliciesPage />} />
               <Route path="policies/:id" element={<PolicyEditorPage />} />
               <Route path="policies/new" element={<PolicyEditorPage />} />
