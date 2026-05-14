@@ -13,7 +13,7 @@ from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.audit.service import verify_chain
-from app.auth.dependencies import Principal, get_principal
+from app.auth.dependencies import Principal, get_principal, require_scope
 from app.db.session import SessionLocal
 from app.models import AuditEvent
 
@@ -44,7 +44,7 @@ class AuditEventOut(BaseModel):
 
 @router.get("/events", response_model=list[AuditEventOut])
 async def list_events(
-    principal: Principal = Depends(get_principal),
+    principal: Principal = Depends(require_scope("audit.read")),
     session: AsyncSession = Depends(_session),
     actor: str | None = None,
     event_type: str | None = None,
@@ -81,13 +81,13 @@ async def list_events(
 
 
 @router.post("/verify")
-async def verify(principal: Principal = Depends(get_principal), session: AsyncSession = Depends(_session)):
+async def verify(principal: Principal = Depends(require_scope("audit.read")), session: AsyncSession = Depends(_session)):
     return await verify_chain(session, principal.org_id)
 
 
 @router.get("/export")
 async def export_csv(
-    principal: Principal = Depends(get_principal),
+    principal: Principal = Depends(require_scope("audit.read")),
     session: AsyncSession = Depends(_session),
     actor: str | None = None,
     event_type: str | None = None,
@@ -126,5 +126,4 @@ async def export_csv(
     return StreamingResponse(
         iter([buf.read()]),
         media_type="text/csv",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-    )
+        headers={"Content-Di

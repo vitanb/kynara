@@ -141,3 +141,24 @@ def require_superadmin(principal: Principal = Depends(get_principal)) -> Princip
     if not principal.is_superadmin:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Super admin access required")
     return principal
+
+
+def require_scope(scope: str):
+    """Enforce that API-key principals hold the required scope.
+
+    JWT-authenticated users (human sessions and OAuth connector tokens) bypass
+    this check — their access is already governed by seat role + policy engine.
+    API keys are purpose-scoped and must explicitly declare each scope they need.
+    """
+    async def _dep(principal: Principal = Depends(get_principal)) -> Principal:
+        if principal.auth_method == "api_key" and scope not in principal.scopes:
+            log.warning(
+                "API key %s missing scope %r (has %s)",
+                principal.api_key_id, scope, list(principal.scopes),
+            )
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                f"API key is missing required scope: {scope}",
+            )
+        return principal
+    return _dep

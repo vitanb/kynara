@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.dependencies import Principal, get_principal
+from app.auth.dependencies import Principal, get_principal, require_scope
 from app.billing.quota import enforce_decision_quota, record_decision
 from app.core.geoip import resolve_country
 from app.db.session import SessionLocal
@@ -72,7 +72,7 @@ class DecisionOut(BaseModel):
 @router.post("/check", response_model=DecisionOut)
 async def check(
     body: DecisionIn, request: Request,
-    principal: Principal = Depends(get_principal),
+    principal: Principal = Depends(require_scope("decisions.check")),
     session: AsyncSession = Depends(_session),
 ):
     # Enforce monthly quota before processing — returns 402 when exhausted
@@ -111,5 +111,4 @@ async def check(
         obligations=d.obligations,
         approval_id=getattr(d, "approval_id", None),
         granted_scopes=d.granted_scopes,
-        rbac_pass=d.rbac_pass,
-    )
+   

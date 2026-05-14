@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.anomaly.risk import persist_risk_score
 from app.audit.service import record_admin
-from app.auth.dependencies import Principal, get_principal, require_seat
+from app.auth.dependencies import Principal, get_principal, require_scope, require_seat
 from app.db.session import SessionLocal
 from app.models import Agent, AgentAssignment, Policy, PolicyBinding, Role, RolePermission, User
 from app.webhooks.service import emit as emit_webhook
@@ -50,7 +50,7 @@ class AssignmentIn(BaseModel):
 
 @router.get("", response_model=list[AgentOut])
 async def list_agents(
-    principal: Principal = Depends(get_principal),
+    principal: Principal = Depends(require_scope("agents.read")),
     session: AsyncSession = Depends(_session),
 ):
     rows = (await session.scalars(
@@ -102,7 +102,7 @@ async def create_agent(
 @router.get("/{agent_id}/policies")
 async def list_agent_policies(
     agent_id: str,
-    principal: Principal = Depends(get_principal),
+    principal: Principal = Depends(require_scope("agents.read")),
     session: AsyncSession = Depends(_session),
 ):
     a = await session.get(Agent, uuid.UUID(agent_id))
@@ -204,7 +204,7 @@ async def assign_agent(
 @router.get("/{agent_id}/assignments")
 async def list_assignments(
     agent_id: str,
-    principal: Principal = Depends(get_principal),
+    principal: Principal = Depends(require_scope("agents.read")),
     session: AsyncSession = Depends(_session),
 ):
     a = await session.get(Agent, uuid.UUID(agent_id))
@@ -258,7 +258,7 @@ async def remove_assignment(
 
 @router.get("/roles")
 async def list_roles_alias(
-    principal: Principal = Depends(get_principal),
+    principal: Principal = Depends(require_scope("agents.read")),
     session: AsyncSession = Depends(_session),
 ):
     """Alias: returns org roles so the assignment form can populate a dropdown."""
@@ -287,7 +287,7 @@ async def list_roles_alias(
 @router.get("/{agent_id}/access-summary")
 async def get_access_summary(
     agent_id: str,
-    principal: Principal = Depends(get_principal),
+    principal: Principal = Depends(require_scope("agents.read")),
     session: AsyncSession = Depends(_session),
 ):
     """Return the complete, denormalised access picture for a single agent.
@@ -455,6 +455,4 @@ async def reactivate_agent(
         session, org_id=principal.org_id,
         actor=f"user:{principal.user_id}" if principal.user_id else "system",
         event_type="agent.reactivated", resource_type="agent", resource_id=str(a.id),
-        payload={"slug": a.slug},
-        ip_address=request.client.host if request.client else None,
-    )
+        payload={"
