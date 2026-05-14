@@ -7,7 +7,7 @@ import {
 } from "recharts";
 import {
   Bot, CheckCircle2, XCircle, AlertTriangle, TrendingUp,
-  ArrowRight, ShieldCheck, FileText, Plus, Zap,
+  ArrowRight, ShieldCheck, FileText, Plus, Zap, Download, BarChart2,
 } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 import { api } from "@/lib/api";
@@ -201,6 +201,51 @@ export default function DashboardPage() {
       .sort((a, b) => b.total - a.total)
       .slice(0, 8);
   }, [events30d, agents]);
+
+  // ── Agent decision report ──────────────────────────────────────────────
+  const agentReport = useMemo(() => {
+    const counts: Record<string, {
+      allow: number; require_approval: number; deny: number; total: number;
+    }> = {};
+    for (const e of events30d) {
+      if (e.event_type !== "policy.decision") continue;
+      const actor: string = e.actor || "";
+      if (!actor.startsWith("agent:")) continue;
+      const id = actor.replace("agent:", "");
+      if (!counts[id]) counts[id] = { allow: 0, require_approval: 0, deny: 0, total: 0 };
+      counts[id].total++;
+      if (e.outcome === "allow")            counts[id].allow++;
+      if (e.outcome === "require_approval") counts[id].require_approval++;
+      if (e.outcome === "deny")             counts[id].deny++;
+    }
+    return Object.entries(counts)
+      .map(([id, c]) => {
+        const agent = agents.find((a: any) => a.id === id);
+        return {
+          id,
+          name: agent?.display_name ?? agent?.slug ?? id,
+          ...c,
+          autonomous_pct: c.total ? +(c.allow / c.total * 100).toFixed(1) : 0,
+          approval_pct:   c.total ? +(c.require_approval / c.total * 100).toFixed(1) : 0,
+        };
+      })
+      .sort((a, b) => b.total - a.total);
+  }, [events30d, agents]);
+
+  function downloadReportCSV() {
+    const header = ["agent_id", "agent_name", "autonomous", "require_approval", "denied", "total", "autonomous_%", "approval_%"];
+    const rows = agentReport.map(r => [
+      r.id, r.name, r.allow, r.require_approval, r.deny, r.total, r.autonomous_pct, r.approval_pct,
+    ]);
+    const csv = [header, ...rows].map(row => row.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `kynara-agent-report-30d-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   const chartData  = chartWindow === "24h" ? buckets24h : buckets30d;
   const chartXKey  = "label";
@@ -402,6 +447,90 @@ export default function DashboardPage() {
               Billing →
             </Link>
           </div>
+        </div>
+      </div>
+
+      {/* ── Agent decisions report ───────────────────────────────────────── */}
+      <div className="px-6 pb-4">
+        <div className="card p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <BarChart2 className="size-4 text-ink-300" />
+              <span className="text-sm font-semibold text-white">Agent decisions report</span>
+              <span className="text-xs text-ink-500 ml-1">autonomous vs human approval · 30d</span>
+            </div>
+            {agentReport.length > 0 && (
+              <button
+                onClick={downloadReportCSV}
+                className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors"
+                style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.2)" }}
+              >
+                <Download className="size-3" /> Export CSV
+              </button>
+            )}
+          </div>
+
+          {agentReport.length === 0 ? (
+            <div className="py-6 text-center">
+              <p className="text-xs text-ink-400">No agent decision data for the last 30 days.</p>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-lg border border-ink-700/60">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-ink-700/60">
+                    <th className="text-left px-3 py-2.5 text-ink-400 font-medium">Agent</th>
+                    <th className="text-right px-3 py-2.5 text-ink-400 font-medium">
+                      <span style={{ color: C.allow }}>Autonomous</span>
+                    </th>
+                    <th className="text-right px-3 py-2.5 text-ink-400 font-medium">
+                      <span style={{ color: C.approve }}>Approval</span>
+                    </th>
+                    <th className="text-right px-3 py-2.5 text-ink-400 font-medium">
+                      <span style={{ color: C.deny }}>Denied</span>
+                    </th>
+                    <th className="text-right px-3 py-2.5 text-ink-400 font-medium">Total</th>
+                    <th className="text-right px-3 py-2.5 text-ink-400 font-medium w-40">Autonomy rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {agentReport.map((a, i) => (
+                    <tr key={a.id} className={i % 2 === 0 ? "" : "bg-ink-800/30"}>
+                      <td className="px-3 py-2 font-medium text-ink-100 truncate max-w-[140px]">{a.name}</td>
+                      <td className="px-3 py-2 tabular-nums text-right" style={{ color: C.allow }}>
+                        {fmtN(a.allow)}
+                      </td>
+                      <td className="px-3 py-2 tabular-nums text-right" style={{ color: C.approve }}>
+                        {fmtN(a.require_approval)}
+                      </td>
+                      <td className="px-3 py-2 tabular-nums text-right" style={{ color: C.deny }}>
+                        {fmtN(a.deny)}
+                      </td>
+                      <td className="px-3 py-2 tabular-nums text-right text-ink-300">
+                        {fmtN(a.total)}
+                      </td>
+                      <td className="px-3 py-2">
+                        {/* Stacked bar: autonomous (green) + approval (orange) + deny (red) */}
+                        <div className="flex items-center gap-1.5">
+                          <div className="flex-1 h-2 rounded-full overflow-hidden flex bg-ink-700">
+                            <div style={{ width: `${a.autonomous_pct}%`, background: C.allow }}   className="h-full" />
+                            <div style={{ width: `${a.approval_pct}%`,   background: C.approve }} className="h-full" />
+                            <div style={{
+                              width: `${a.total ? +(a.deny / a.total * 100).toFixed(1) : 0}%`,
+                              background: C.deny
+                            }} className="h-full" />
+                          </div>
+                          <span className="tabular-nums text-[10px] text-ink-300 w-9 text-right">
+                            {a.autonomous_pct}%
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 

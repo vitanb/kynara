@@ -5,6 +5,7 @@ app/anomaly/__init__.py
 app/anomaly/detector.py
 app/anomaly/risk.py
 app/api/__init__.py
+app/api/mcp_server.py
 app/api/v1/__init__.py
 app/api/v1/admin.py
 app/api/v1/agents.py
@@ -19,6 +20,7 @@ app/api/v1/guardrails.py
 app/api/v1/health.py
 app/api/v1/invites.py
 app/api/v1/jit_grants.py
+app/api/v1/oauth.py
 app/api/v1/org.py
 app/api/v1/policies.py
 app/api/v1/policy_bundle.py
@@ -43,6 +45,7 @@ app/core/config.py
 app/core/email.py
 app/core/geoip.py
 app/core/logging.py
+app/core/ssrf.py
 app/core/telemetry.py
 app/db/__init__.py
 app/db/base.py
@@ -60,6 +63,9 @@ app/db/migrations/versions/20260501_0009_guardrails.py
 app/db/migrations/versions/20260502_0010_guardrail_rules.py
 app/db/migrations/versions/20260504_0011_user_profile.py
 app/db/migrations/versions/20260505_0012_superadmin.py
+app/db/migrations/versions/20260506_0013_scim_tokens.py
+app/db/migrations/versions/20260512_0014_oauth_clients.py
+app/db/migrations/versions/20260513_0015_oauth_client_redirects.py
 app/middleware/__init__.py
 app/middleware/residency.py
 app/middleware/security.py
@@ -72,6 +78,7 @@ app/models/billing.py
 app/models/guardrail.py
 app/models/invite.py
 app/models/jit_grant.py
+app/models/oauth.py
 app/models/org.py
 app/models/password_reset.py
 app/models/policy.py
@@ -96,7 +103,11 @@ app/sso/okta_oidc.py
 app/sso/saml.py
 app/sso/scim.py
 app/tests/__init__.py
+app/tests/test_approvals.py
+app/tests/test_billing.py
+app/tests/test_guardrails.py
 app/tests/test_policy_engine.py
+app/tests/test_scim.py
 app/tests/integration/test_decisions_flow.py
 app/webhooks/__init__.py
 app/webhooks/service.py

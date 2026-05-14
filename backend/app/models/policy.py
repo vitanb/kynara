@@ -77,6 +77,10 @@ class Policy(Base, UUIDPkMixin, TimestampMixin):
 
     is_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
+    # Optional email address to notify when effect == "require_approval" fires.
+    # NULL → no email sent.
+    approval_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
 
 class PolicyBinding(Base, UUIDPkMixin, TimestampMixin):
     """Links a policy to a subject scope (agent, user, role, or ``*`` for org-wide)."""

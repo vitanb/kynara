@@ -195,6 +195,71 @@ def reset_email_content(reset_url: str, display_name: str | None) -> tuple[str, 
     return _base_html(body), plain
 
 
+def approval_request_email_content(
+    agent_id: str,
+    action: str,
+    resource_type: str | None,
+    approval_id: str,
+    app_url: str,
+    agent_name: str | None = None,
+) -> tuple[str, str]:
+    """Email sent to the policy's approval_email when a require_approval decision fires."""
+    review_url = f"{app_url.rstrip('/')}/app/approvals"
+    display_name = agent_name or agent_id
+    resource_row = (
+        f'<div style="margin-top:10px">'
+        f'  <span style="color:#94A3B8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Resource type</span>'
+        f'  <div style="color:#fff;font-size:13px;font-family:monospace;margin-top:2px">{resource_type}</div>'
+        f'</div>'
+        if resource_type else ""
+    )
+    body = f"""
+      <h2 style="margin:0 0 8px;color:#fff;font-size:20px;font-weight:700">⚠ Approval required</h2>
+      <p style="margin:0 0 20px;color:#CBD5E1;font-size:14px;line-height:1.6">
+        An AI agent is requesting access that requires your review before it can proceed.
+      </p>
+      <div style="background:#121D30;border:1px solid rgba(245,158,11,0.25);border-radius:10px;
+                  padding:16px 20px;margin-bottom:24px">
+        <div>
+          <span style="color:#94A3B8;font-size:11px;font-weight:600;text-transform:uppercase;
+                       letter-spacing:0.5px">Agent</span>
+          <div style="color:#fff;font-size:13px;font-weight:600;font-family:monospace;
+                      margin-top:2px">{display_name}</div>
+        </div>
+        <div style="margin-top:10px">
+          <span style="color:#94A3B8;font-size:11px;font-weight:600;text-transform:uppercase;
+                       letter-spacing:0.5px">Requested action</span>
+          <div style="color:#FBBF24;font-size:14px;font-weight:700;font-family:monospace;
+                      margin-top:2px">{action}</div>
+        </div>
+        {resource_row}
+      </div>
+      <table cellpadding="0" cellspacing="0" style="margin-bottom:20px">
+        <tr><td style="background:#D97706;border-radius:8px">
+          <a href="{review_url}"
+             style="display:inline-block;padding:13px 28px;color:#fff;
+                    font-size:14px;font-weight:600;text-decoration:none">
+            Review request →
+          </a>
+        </td></tr>
+      </table>
+      <p style="margin:0;color:#475569;font-size:12px">
+        Approval ID: <code style="font-family:monospace;color:#94A3B8">{approval_id}</code>
+        · This request expires in <strong style="color:#CBD5E1">24 hours</strong>.
+      </p>"""
+    plain = (
+        f"An AI agent requires your approval.\n\n"
+        f"Agent:         {display_name}\n"
+        f"Action:        {action}\n"
+        f"Resource type: {resource_type or 'N/A'}\n"
+        f"Approval ID:   {approval_id}\n\n"
+        f"Review the request here:\n{review_url}\n\n"
+        "This request expires in 24 hours.\n"
+        "If you did not expect this, contact your security team."
+    )
+    return _base_html(body), plain
+
+
 def invite_email_content(
     invite_url: str, org_name: str, seat_role: str, inviter_name: str | None,
 ) -> tuple[str, str]:

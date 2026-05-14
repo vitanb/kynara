@@ -31,6 +31,8 @@ class PolicyIn(BaseModel):
     resource_types: list[str] = Field(default_factory=list)
     condition: dict = Field(default_factory=dict)
     is_enabled: bool = True
+    # Email to notify when effect == "require_approval" fires. Optional.
+    approval_email: str | None = None
 
 
 class PolicyOut(PolicyIn):
@@ -52,7 +54,8 @@ async def list_policies(principal: Principal = Depends(get_principal), session: 
                       effect=r.effect, priority=r.priority,
                       actions=list(r.actions or []),
                       resource_types=list(r.resource_types or []),
-                      condition=r.condition or {}, is_enabled=r.is_enabled)
+                      condition=r.condition or {}, is_enabled=r.is_enabled,
+                      approval_email=r.approval_email)
             for r in rows]
 
 
@@ -68,6 +71,7 @@ async def create_policy(
         effect=body.effect, priority=body.priority,
         actions=body.actions, resource_types=body.resource_types,
         condition=body.condition, is_enabled=body.is_enabled,
+        approval_email=body.approval_email,
     )
     session.add(p)
     await session.flush()

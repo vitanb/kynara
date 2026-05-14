@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import {
   PlayCircle, Save, CheckCircle2, XCircle, AlertTriangle,
   ChevronDown, ChevronUp, Info, Plus, Trash2, Link2, X,
+  BookOpen, Layers, Mail,
 } from "lucide-react";
 
 const DEFAULT_POLICY = {
@@ -23,6 +24,15 @@ const DEFAULT_POLICY = {
     ],
   },
   is_enabled: true,
+  approval_email: "" as string,
+};
+
+// ── Risk colour helper ────────────────────────────────────────────────────────
+const RISK_COLORS: Record<string, { bg: string; text: string }> = {
+  low:      { bg: "rgba(16,185,129,0.12)",  text: "#34D399" },
+  medium:   { bg: "rgba(245,158,11,0.12)",  text: "#FBBF24" },
+  high:     { bg: "rgba(244,63,94,0.12)",   text: "#F87171" },
+  critical: { bg: "rgba(168,85,247,0.12)",  text: "#C084FC" },
 };
 
 export default function PolicyEditorPage() {
@@ -32,6 +42,11 @@ export default function PolicyEditorPage() {
   const isNew = !id || id === "new";
   const [bindingOpen, setBindingOpen] = useState(false);
   const [newSelector, setNewSelector] = useState("*");
+
+  // ── Catalog / template modal state ────────────────────────────────────────
+  const [templateOpen, setTemplateOpen]   = useState(false);
+  const [catalogOpen, setCatalogOpen]     = useState(false);
+  const [catalogDomain, setCatalogDomain] = useState<string | null>(null);
 
   const { data: existing } = useQuery({
     queryKey: ["policy", id],
@@ -92,6 +107,16 @@ export default function PolicyEditorPage() {
   const { data: simApiKeys = [] } = useQuery({
     queryKey: ["api-keys"],
     queryFn: () => api.get<any[]>("/api/v1/api-keys"),
+  });
+
+  const { data: templates = [] } = useQuery({
+    queryKey: ["catalog", "policy-templates"],
+    queryFn: () => api.get<any[]>("/api/v1/catalog/policy-templates"),
+  });
+
+  const { data: scopeDomains = [] } = useQuery({
+    queryKey: ["catalog", "scope-domains"],
+    queryFn: () => api.get<any[]>("/api/v1/catalog/scope-domains"),
   });
 
   const { data: bindings = [], refetch: refetchBindings } = useQuery({
@@ -200,12 +225,43 @@ export default function PolicyEditorPage() {
                      onChange={(e) => updateForm({ priority: +e.target.value })} />
             </Field>
           </div>
+
+          {/* Approval email — shown only when effect is require_approval */}
+          {form.effect === "require_approval" && (
+            <Field label="Notify email (sent when approval is triggered)">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-ink-500 pointer-events-none" />
+                <input
+                  type="email"
+                  className="input pl-8"
+                  placeholder="approver@example.com"
+                  value={form.approval_email || ""}
+                  onChange={(e) => updateForm({ approval_email: e.target.value || null })}
+                />
+              </div>
+              <p className="text-[10px] text-ink-500 mt-1">
+                An alert email is sent to this address each time this policy triggers a human approval request.
+              </p>
+            </Field>
+          )}
+
           <Field label="Scopes (comma-separated, supports globs)">
-            <input className="input font-mono"
-                   value={(form.actions || []).join(",")}
-                   onChange={(e) => updateForm({
-                     actions: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean),
-                   })} />
+            <div className="flex gap-2 items-start">
+              <input className="input font-mono flex-1"
+                     value={(form.actions || []).join(",")}
+                     onChange={(e) => updateForm({
+                       actions: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean),
+                     })} />
+              <button
+                type="button"
+                title="Browse scope catalog"
+                onClick={() => { setCatalogDomain(null); setCatalogOpen(true); }}
+                className="shrink-0 flex items-center gap-1.5 text-xs font-medium px-2.5 py-2 rounded-lg transition-colors"
+                style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.2)" }}
+              >
+                <Layers className="size-3.5" /> Catalog
+              </button>
+            </div>
           </Field>
           <Field label="Resource types (comma-separated)">
             <input className="input font-mono"
@@ -215,6 +271,18 @@ export default function PolicyEditorPage() {
                    })} />
           </Field>
           <Field label="Condition (JSON AST)">
+            {/* Template picker button */}
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] text-ink-500">Define the ABAC condition expression</span>
+              <button
+                type="button"
+                onClick={() => setTemplateOpen(true)}
+                className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-md transition-colors"
+                style={{ background: "rgba(99,102,241,0.08)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.18)" }}
+              >
+                <BookOpen className="size-3" /> Load example
+              </button>
+            </div>
             <textarea
               className={`input font-mono text-xs min-h-[220px] ${conditionError ? "border-danger-500" : ""}`}
               value={JSON.stringify(form.condition || {}, null, 2)}
@@ -469,6 +537,165 @@ export default function PolicyEditorPage() {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Condition template modal ── */}
+      {templateOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[80vh]"
+            style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}>
+            <div className="flex items-center justify-between px-6 py-4"
+              style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
+              <div>
+                <div className="text-base font-semibold text-white">Condition templates</div>
+                <div className="text-xs text-ink-400 mt-0.5">Pick a template to load into the editor — then customise it.</div>
+              </div>
+              <button onClick={() => setTemplateOpen(false)} className="text-ink-400 hover:text-white">
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 px-4 py-3 space-y-2">
+              {(templates as any[]).map((t: any) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  className="w-full text-left rounded-xl px-4 py-3 transition-colors group"
+                  style={{ background: "rgba(148,163,184,0.04)", border: "1px solid rgba(148,163,184,0.08)" }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.3)")}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(148,163,184,0.08)")}
+                  onClick={() => {
+                    updateForm({ condition: t.condition });
+                    setConditionError(validateConditionNode(t.condition));
+                    setTemplateOpen(false);
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <span className="text-sm font-medium text-white">{t.label}</span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
+                      style={{
+                        background: t.suggested_effect === "allow"
+                          ? "rgba(16,185,129,0.12)" : t.suggested_effect === "deny"
+                          ? "rgba(244,63,94,0.12)" : "rgba(245,158,11,0.12)",
+                        color: t.suggested_effect === "allow"
+                          ? "#34D399" : t.suggested_effect === "deny"
+                          ? "#F87171" : "#FBBF24",
+                      }}>
+                      {t.suggested_effect}
+                    </span>
+                  </div>
+                  <div className="text-xs text-ink-400">{t.description}</div>
+                  <pre className="mt-2 text-[10px] font-mono text-ink-500 truncate">
+                    {JSON.stringify(t.condition)}
+                  </pre>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Scope catalog modal ── */}
+      {catalogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[85vh]"
+            style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}>
+            <div className="flex items-center justify-between px-6 py-4"
+              style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
+              <div>
+                <div className="text-base font-semibold text-white">Scope catalog</div>
+                <div className="text-xs text-ink-400 mt-0.5">
+                  {catalogDomain
+                    ? "Click a scope to add it to this policy's scope list."
+                    : "Choose an industry domain to browse pre-built scopes."}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {catalogDomain && (
+                  <button
+                    type="button"
+                    onClick={() => setCatalogDomain(null)}
+                    className="text-xs text-ink-400 hover:text-white flex items-center gap-1 transition-colors"
+                  >
+                    ← Back
+                  </button>
+                )}
+                <button onClick={() => { setCatalogOpen(false); setCatalogDomain(null); }}
+                  className="text-ink-400 hover:text-white ml-2">
+                  <X className="size-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-y-auto flex-1 px-4 py-3">
+              {!catalogDomain ? (
+                /* Domain list */
+                <div className="grid grid-cols-2 gap-2">
+                  {(scopeDomains as any[]).map((d: any) => (
+                    <button key={d.domain} type="button"
+                      onClick={() => setCatalogDomain(d.domain)}
+                      className="text-left rounded-xl px-4 py-3 transition-colors"
+                      style={{ background: "rgba(148,163,184,0.04)", border: "1px solid rgba(148,163,184,0.08)" }}
+                      onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.3)")}
+                      onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(148,163,184,0.08)")}
+                    >
+                      <div className="text-sm font-medium text-white mb-0.5">{d.label}</div>
+                      <div className="text-xs text-ink-400">{d.description}</div>
+                      <div className="text-[10px] text-ink-600 mt-1">{d.scopes.length} scopes</div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                /* Scope list for selected domain */
+                (() => {
+                  const dom = (scopeDomains as any[]).find((d: any) => d.domain === catalogDomain);
+                  if (!dom) return null;
+                  return (
+                    <div className="space-y-1.5">
+                      <div className="text-xs font-semibold text-white mb-3">{dom.label}</div>
+                      {dom.scopes.map((s: any) => {
+                        const rc = RISK_COLORS[s.risk] ?? RISK_COLORS.low;
+                        const alreadyAdded = (form.actions || []).includes(s.scope);
+                        return (
+                          <div key={s.scope}
+                            className="flex items-center justify-between gap-3 rounded-lg px-3 py-2.5"
+                            style={{ background: "rgba(148,163,184,0.04)", border: "1px solid rgba(148,163,184,0.08)" }}>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-xs font-mono font-medium text-ink-100">{s.scope}</span>
+                              <span className="text-[10px] text-ink-500 ml-2">{s.description}</span>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
+                                style={{ background: rc.bg, color: rc.text }}>
+                                {s.risk}
+                              </span>
+                              <button
+                                type="button"
+                                disabled={alreadyAdded}
+                                onClick={() => {
+                                  if (!alreadyAdded) {
+                                    updateForm({ actions: [...(form.actions || []), s.scope] });
+                                  }
+                                }}
+                                className="text-[10px] font-semibold px-2 py-1 rounded transition-colors"
+                                style={alreadyAdded
+                                  ? { background: "rgba(16,185,129,0.1)", color: "#34D399", cursor: "default" }
+                                  : { background: "rgba(99,102,241,0.12)", color: "#818CF8" }}
+                              >
+                                {alreadyAdded ? "Added ✓" : "+ Add"}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()
+              )}
+            </div>
           </div>
         </div>
       )}

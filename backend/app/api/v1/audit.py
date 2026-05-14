@@ -9,7 +9,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.audit.service import verify_chain
@@ -128,3 +128,63 @@ async def export_csv(
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@router.get("/agent-report")
+async def agent_decisions_report(
+    principal: Principal = Depends(require_scope("audit.read")),
+    session: AsyncSession = Depends(_session),
+    since: datetime | None = None,
+    until: datetime | None = None,
+):
+    """Per-agent decision breakdown: autonomous (allow) vs human approval vs deny.
+
+    Groups all ``policy.decision`` audit events by agent actor and outcome,
+    returning counts for allow / require_approval / deny alongside totals
+    and an autonomous percentage.  Useful for governance reporting.
+    """
+    q = (
+        select(
+            AuditEvent.actor,
+            AuditEvent.outcome,
+            func.count(AuditEvent.id).label("cnt"),
+        )
+        .where(
+            AuditEvent.organization_id == uuid.UUID(principal.org_id),
+            AuditEvent.event_type == "policy.decision",
+        )
+    )
+    if since:
+        q = q.where(AuditEvent.ts >= since)
+    if until:
+        q = q.where(AuditEvent.ts <= until)
+    q = q.group_by(AuditEvent.actor, AuditEvent.outcome)
+
+    rows = (await session.execute(q)).all()
+
+    agents: dict[str, dict] = {}
+    for actor, outcome, cnt in rows:
+        # Only include agent actors; skip user/api_key actors
+        if not (actor or "").startswith("agent:"):
+            continue
+        agent_id = actor.replace("agent:", "")
+        if agent_id not in agents:
+            agents[agent_id] = {
+                "agent_id": agent_id,
+                "allow": 0,
+                "require_approval": 0,
+                "deny": 0,
+                "total": 0,
+            }
+        if outcome in ("allow", "require_approval", "deny"):
+            agents[agent_id][outcome] += cnt
+        agents[agent_id]["total"] += cnt
+
+    result = []
+    for entry in agents.values():
+        total = entry["total"]
+        entry["autonomous_pct"] = round(entry["allow"] / total * 100, 1) if total else 0.0
+        entry["approval_pct"] = round(entry["require_approval"] / total * 100, 1) if total else 0.0
+        result.append(entry)
+
+    return sorted(result, key=lambda x: -x["total"])

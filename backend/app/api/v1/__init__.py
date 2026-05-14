@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1 import (
-    admin, agents, api_keys, approvals, audit, auth, billing, contact,
+    admin, agents, api_keys, approvals, audit, auth, billing, catalog, contact,
     decisions, guardrails, health, invites, oauth, org, policies, roles,
     sso, sso_connections, tools, webhooks,
 )
@@ -16,6 +16,7 @@ v1.include_router(sso_connections.router)
 v1.include_router(org.router)
 v1.include_router(agents.router)
 v1.include_router(tools.router)
+v1.include_router(catalog.router)
 v1.include_router(roles.router)
 v1.include_router(policies.router)
 v1.include_router(decisions.router)

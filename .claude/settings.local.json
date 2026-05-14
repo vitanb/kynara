@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(ls \"$env:USERPROFILE\\\\.claude\\\\\")",
+      "PowerShell(ls \"$env:USERPROFILE\\\\.claude\\\\plugins\\\\\")",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 *)",
+      "PowerShell(ls \"$env:USERPROFILE\\\\.claude\\\\\" -Recurse -Depth 2 | Select-Object FullName)",
+      "PowerShell(Get-ChildItem *)",
+      "Bash(claude plugin *)",
+      "Bash(claude auth *)",
+      "Bash(claude skill *)",
+      "Bash(python -c \"import zipfile; z=zipfile.ZipFile\\('permission-check.skill'\\); print\\('\\\\n'.join\\(z.namelist\\(\\)\\)\\)\")",
+      "Bash(python -c \"import zipfile; z=zipfile.ZipFile\\('permission-check.skill'\\); print\\(z.read\\('SKILL.md'\\).decode\\('utf-8'\\)\\)\")",
+      "Bash(python -c \"import zipfile,sys; z=zipfile.ZipFile\\('permission-check.skill'\\); sys.stdout.buffer.write\\(z.read\\('SKILL.md'\\)\\)\")",
+      "Bash(python -c \"import sys; data=sys.stdin.buffer.read\\(\\); print\\(data.decode\\('utf-8', errors='replace'\\)\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(Remove-Item *)",
+      "Bash(del *)"
+    ]
+  }
+}

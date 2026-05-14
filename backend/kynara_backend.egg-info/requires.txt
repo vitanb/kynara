@@ -21,6 +21,8 @@ opentelemetry-exporter-otlp>=1.24
 prometheus-client>=0.20
 slowapi>=0.1.9
 email-validator>=2.1
+mcp>=1.0
+anyio>=4.0
 
 [aws]
 boto3>=1.34

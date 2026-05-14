@@ -190,6 +190,35 @@ async def _emit_decision(
         # Attach the approval_id to the decision so the caller can surface it.
         decision.approval_id = str(approval.id)  # type: ignore[attr-defined]
 
+        # Fire an email alert if the matched policy has an approval_email set.
+        if decision.matched_policy_id:
+            try:
+                from app.models import Policy as _Policy
+                from app.core.email import send_email, approval_request_email_content
+                policy_row = await session.get(_Policy, uuid.UUID(decision.matched_policy_id))
+                if policy_row and policy_row.approval_email:
+                    html, plain = approval_request_email_content(
+                        agent_id=subject_id,
+                        action=action,
+                        resource_type=resource.get("type"),
+                        approval_id=str(approval.id),
+                        app_url=settings.app_url,
+                    )
+                    await send_email(
+                        to=policy_row.approval_email,
+                        subject=f"[Kynara] Approval required: {action}",
+                        html_body=html,
+                        text_body=plain,
+                    )
+                    log.info(
+                        "approval_email_sent",
+                        approval_id=str(approval.id),
+                        to=policy_row.approval_email,
+                    )
+            except Exception as _email_err:
+                # Non-fatal — the approval request is already persisted.
+                log.warning("approval_email_send_failed", err=str(_email_err))
+
     _record_metrics(org_id, decision.effect, time.perf_counter() - t0)
     return decision
 
