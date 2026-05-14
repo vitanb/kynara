@@ -269,6 +269,10 @@ async def token_endpoint(
     db: AsyncSession = Depends(_db),
 ):
     """Exchange authorization code for an access token."""
+    log.info(
+        "POST /oauth/token grant_type=%s client_id=%s redirect_uri=%s code_len=%d",
+        grant_type, client_id, redirect_uri, len(code),
+    )
     if grant_type != "authorization_code":
         raise HTTPException(400, "unsupported_grant_type")
 
@@ -276,21 +280,32 @@ async def token_endpoint(
         select(OAuthCode).where(OAuthCode.code == code)
     )
     if not row:
+        log.warning("POST /oauth/token: code not found")
         raise HTTPException(400, "invalid_grant: code not found")
+    log.info(
+        "POST /oauth/token row: client_id=%s redirect_uri=%s used=%s expires_at=%s challenge=%s",
+        row.client_id, row.redirect_uri, row.used, row.expires_at, row.code_challenge,
+    )
     if row.used:
+        log.warning("POST /oauth/token: code already used")
         raise HTTPException(400, "invalid_grant: code already used")
     if row.client_id != client_id:
+        log.warning("POST /oauth/token: client_id mismatch row=%s req=%s", row.client_id, client_id)
         raise HTTPException(400, "invalid_grant: client_id mismatch")
     if row.redirect_uri != redirect_uri:
+        log.warning("POST /oauth/token: redirect_uri mismatch row=%r req=%r", row.redirect_uri, redirect_uri)
         raise HTTPException(400, "invalid_grant: redirect_uri mismatch")
     if row.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        log.warning("POST /oauth/token: code expired at %s", row.expires_at)
         raise HTTPException(400, "invalid_grant: code expired")
 
     # Verify PKCE S256
     digest = base64.urlsafe_b64encode(
         hashlib.sha256(code_verifier.encode()).digest()
     ).rstrip(b"=").decode()
+    log.info("POST /oauth/token PKCE: computed=%s stored=%s match=%s", digest, row.code_challenge, digest == row.code_challenge)
     if digest != row.code_challenge:
+        log.warning("POST /oauth/token: PKCE mismatch computed=%s stored=%s", digest, row.code_challenge)
         raise HTTPException(400, "invalid_grant: code_verifier mismatch")
 
     row.used = True
