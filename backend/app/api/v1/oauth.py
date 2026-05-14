@@ -99,15 +99,12 @@ async def oauth_protected_resource_path(request: Request, path: str):
 
 @router.get("/oauth/register", include_in_schema=False)
 async def register_client_get(request: Request):
-    """GET /oauth/register — not defined by RFC 7591 but Anthropic's MCP client
-    probes this with GET before POSTing.  Return 200 so it proceeds to register.
+    """GET /oauth/register — RFC 7591 only defines POST, but some clients probe
+    with GET first.  Return 404 so the client knows it must POST to register
+    (a 200 without a client_id confuses clients into thinking registration
+    is not needed or already complete).
     """
-    base = str(request.base_url).rstrip("/")
-    return JSONResponse({
-        "registration_endpoint":               f"{base}/oauth/register",
-        "grant_types_supported":               ["authorization_code"],
-        "token_endpoint_auth_methods_supported": ["none"],
-    })
+    raise HTTPException(status_code=404, detail="not_found: use POST to register")
 
 
 @router.post("/oauth/register", include_in_schema=False)
