@@ -102,14 +102,36 @@ async def oauth_protected_resource_path(request: Request, path: str):
 # -- RFC 7591 dynamic client registration -------------------------------------
 
 @router.get("/oauth/register", include_in_schema=False)
-async def register_client_get(request: Request):
-    """GET /oauth/register — RFC 7591 only defines POST, but some clients probe
-    with GET first.  Return 404 so the client knows it must POST to register
-    (a 200 without a client_id confuses clients into thinking registration
-    is not needed or already complete).
+async def register_client_get(request: Request, db: AsyncSession = Depends(_db)):
+    """GET /oauth/register — Claude.ai uses this to retrieve an existing client
+    registration before starting the authorization flow.  We return the
+    pre-seeded 'claude-connector' record so Claude gets a valid client_id and
+    can proceed to GET /oauth/authorize.
+
+    If somehow the seeded client is missing, return 404 so the caller can POST
+    to create a fresh registration.
     """
-    log.info("GET /oauth/register probe — headers: %s", dict(request.headers))
-    raise HTTPException(status_code=404, detail="not_found: use POST to register")
+    log.info("GET /oauth/register — headers: %s", dict(request.headers))
+    client = await db.scalar(
+        select(OAuthClient).where(
+            OAuthClient.client_id == "claude-connector",
+            OAuthClient.is_active.is_(True),
+        )
+    )
+    if not client:
+        log.warning("GET /oauth/register: claude-connector not found in DB — returning 404")
+        raise HTTPException(status_code=404, detail="client not found")
+
+    redirect_uris = [u.strip() for u in client.redirect_uris.split(",") if u.strip()]
+    log.info("GET /oauth/register → 200 client_id=claude-connector redirect_uris=%s", redirect_uris)
+    return JSONResponse({
+        "client_id":                  client.client_id,
+        "client_name":                client.client_name,
+        "redirect_uris":              redirect_uris,
+        "grant_types":                ["authorization_code"],
+        "response_types":             ["code"],
+        "token_endpoint_auth_method": "none",
+    })
 
 
 @router.post("/oauth/register", include_in_schema=False)
