@@ -34,6 +34,9 @@ from app.auth.tokens import mint_access_token
 from app.db.session import SessionLocal
 from app.models import OAuthClient, OAuthCode, OrgMembership, User
 
+import logging
+log = logging.getLogger("kynara.oauth")
+
 router = APIRouter(tags=["oauth"])
 
 _CODE_TTL_SECONDS  = 120   # auth codes expire in 2 minutes
@@ -50,6 +53,7 @@ async def _db():
 @router.get("/.well-known/oauth-authorization-server", include_in_schema=False)
 async def oauth_metadata(request: Request):
     base = str(request.base_url).rstrip("/")
+    log.info("GET /.well-known/oauth-authorization-server — base=%s headers=%s", base, dict(request.headers))
     return JSONResponse({
         "issuer": base,
         "authorization_endpoint":   f"{base}/oauth/authorize",
@@ -104,6 +108,7 @@ async def register_client_get(request: Request):
     (a 200 without a client_id confuses clients into thinking registration
     is not needed or already complete).
     """
+    log.info("GET /oauth/register probe — headers: %s", dict(request.headers))
     raise HTTPException(status_code=404, detail="not_found: use POST to register")
 
 
@@ -116,6 +121,7 @@ async def register_client(request: Request, db: AsyncSession = Depends(_db)):
     the security mechanism, not the redirect_uri).
     """
     body = await request.json()
+    log.info("POST /oauth/register body=%s headers=%s", body, dict(request.headers))
     client_id: str = body.get("client_id") or f"dyn-{secrets.token_urlsafe(16)}"
     redirect_uris: list[str] = body.get("redirect_uris", [])
     client_name: str = body.get("client_name", "Dynamic Client")
@@ -165,6 +171,10 @@ async def authorize_get(
     db: AsyncSession = Depends(_db),
 ):
     """Validate params and serve the consent/login page."""
+    log.info(
+        "GET /oauth/authorize client_id=%s redirect_uri=%s scope=%s headers=%s",
+        client_id, redirect_uri, scope, dict(request.headers),
+    )
     await _validate_client(client_id, redirect_uri, db)
 
     if response_type != "code":

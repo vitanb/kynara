@@ -15,6 +15,9 @@ from app.core.config import get_settings
 from app.db.session import SessionLocal
 from app.models import ApiKey, OrgMembership, User
 
+import logging
+log = logging.getLogger("kynara.auth")
+
 
 def _www_authenticate() -> dict[str, str]:
     """RFC 6750 WWW-Authenticate header for 401 responses.
@@ -25,12 +28,12 @@ def _www_authenticate() -> dict[str, str]:
     """
     settings = get_settings()
     base = settings.app_url.rstrip("/")
-    return {
-        "WWW-Authenticate": (
-            'Bearer realm="Kynara",'
-            f' resource_metadata="{base}/.well-known/oauth-protected-resource"'
-        )
-    }
+    header_val = (
+        'Bearer realm="Kynara",'
+        f' resource_metadata="{base}/.well-known/oauth-protected-resource"'
+    )
+    log.info("WWW-Authenticate: %s", header_val)
+    return {"WWW-Authenticate": header_val}
 
 
 @dataclass(frozen=True)
@@ -55,6 +58,12 @@ async def get_principal(
 ) -> Principal:
     www_auth = _www_authenticate()
     if not authorization or not authorization.lower().startswith("bearer "):
+        log.info(
+            "401 missing-bearer path=%s method=%s headers=%s www_auth=%s",
+            getattr(getattr(session, "info", {}), "get", lambda k, d=None: d)("path", "?"),
+            authorization,
+            www_auth,
+        )
         raise HTTPException(
             status.HTTP_401_UNAUTHORIZED,
             "Missing bearer credential",
