@@ -63,7 +63,7 @@ export default function OAuthConsentPage() {
       // POST to the backend — it will return a redirect response
       const res = await fetch("/oauth/authorize", {
         method: "POST",
-        headers: { Authorization: `Bearer ${localStorage.getItem("kynara_access_token")}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem("kynara_access")}` },
         body: form,
         redirect: "manual",
       });
