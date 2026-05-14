@@ -48,42 +48,40 @@ export default function OAuthConsentPage() {
     );
   }
 
-  async function handleApprove() {
+  function handleApprove() {
     setLoading(true);
     setError(null);
-    try {
-      const form = new FormData();
-      form.append("client_id", clientId);
-      form.append("redirect_uri", redirectUri);
-      form.append("scope", scope);
-      form.append("state", state);
-      form.append("code_challenge", codeChallenge);
-      form.append("code_challenge_method", codeChallengeMethod);
 
-      // POST to the backend — it will return a redirect response
-      const res = await fetch("/oauth/authorize", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${localStorage.getItem("kynara_access")}` },
-        body: form,
-        redirect: "manual",
-      });
+    // Submit as a native HTML form so the browser follows the 302 redirect
+    // to Claude's callback URL naturally.  fetch() with redirect:"manual"
+    // returns an opaque response and can't read the Location header, which
+    // means the code never reaches Claude's callback listener.
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "/oauth/authorize";
 
-      // The backend issues a 302 — follow the redirect URL manually
-      if (res.type === "opaqueredirect" || res.status === 302) {
-        const location = res.headers.get("location") || res.url;
-        window.location.href = location;
-      } else if (res.ok) {
-        const data = await res.json();
-        if (data.redirect_uri) window.location.href = data.redirect_uri;
-      } else {
-        const data = await res.json().catch(() => ({}));
-        setError(data.detail || "Authorization failed");
-      }
-    } catch (e: any) {
-      setError(e.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+    const fields: Record<string, string> = {
+      client_id:             clientId,
+      redirect_uri:          redirectUri,
+      scope,
+      state,
+      code_challenge:        codeChallenge,
+      code_challenge_method: codeChallengeMethod,
+      // Token embedded as hidden field — backend accepts it from form body
+      // when there is no Authorization header (native form submit).
+      access_token:          localStorage.getItem("kynara_access") ?? "",
+    };
+
+    for (const [name, value] of Object.entries(fields)) {
+      const input = document.createElement("input");
+      input.type  = "hidden";
+      input.name  = name;
+      input.value = value;
+      form.appendChild(input);
     }
+
+    document.body.appendChild(form);
+    form.submit();
   }
 
   function handleDeny() {

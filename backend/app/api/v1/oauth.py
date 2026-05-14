@@ -219,24 +219,51 @@ async def authorize_get(
 
 @router.post("/oauth/authorize")
 async def authorize_post(
+    request: Request,
     client_id: str = Form(...),
     redirect_uri: str = Form(...),
     scope: str = Form("read"),
     state: str = Form(""),
     code_challenge: str = Form(...),
     code_challenge_method: str = Form("S256"),
+    access_token: str = Form(None),  # embedded by native form submit
     db: AsyncSession = Depends(_db),
-    principal: Principal = Depends(get_principal),
 ):
-    """User approved — mint an auth code and redirect."""
+    """User approved — mint an auth code and redirect.
+
+    Accepts the Kynara access token either from the Authorization header
+    (fetch-based submit) or as a hidden form field (native form submit).
+    Returns a proper 302 redirect so Claude's callback listener fires.
+    """
+    from app.auth.tokens import decode_access_token as _decode
+    auth_header = request.headers.get("authorization", "")
+    raw_token = None
+    if auth_header.lower().startswith("bearer "):
+        raw_token = auth_header.split(" ", 1)[1].strip()
+    elif access_token:
+        raw_token = access_token.strip()
+
+    if not raw_token or raw_token == "null":
+        log.warning("POST /oauth/authorize: no valid token provided")
+        raise HTTPException(401, "Authentication required",
+                            headers={"WWW-Authenticate": "Bearer"})
+    try:
+        claims = _decode(raw_token)
+    except Exception as exc:
+        log.warning("POST /oauth/authorize: invalid token — %s", exc)
+        raise HTTPException(401, "Invalid token",
+                            headers={"WWW-Authenticate": "Bearer"})
+
+    log.info("POST /oauth/authorize user=%s org=%s client_id=%s redirect_uri=%s",
+             claims.sub, claims.org, client_id, redirect_uri)
     await _validate_client(client_id, redirect_uri, db)
 
     code_str = secrets.token_urlsafe(32)
     db.add(OAuthCode(
         code=code_str,
         client_id=client_id,
-        user_id=principal.user_id,
-        org_id=principal.org_id,
+        user_id=claims.sub,
+        org_id=claims.org,
         redirect_uri=redirect_uri,
         scope=scope,
         code_challenge=code_challenge,
@@ -247,17 +274,27 @@ async def authorize_post(
 
     qs = urllib.parse.urlencode({"code": code_str, "state": state})
     callback_url = f"{redirect_uri}?{qs}"
-
-    # The frontend POSTs via fetch() — fetch with redirect:"manual" cannot
-    # read the Location header from a 302 (opaque redirect), so the browser
-    # would navigate nowhere.  Return JSON 200 instead; the frontend reads
-    # redirect_uri and does window.location.href = ... manually.
-    # Direct browser form submissions (non-XHR) will also work because they
-    # look for res.ok + data.redirect_uri in the existing frontend code.
-    return JSONResponse({"redirect_uri": callback_url})
+    log.info("POST /oauth/authorize: issuing code, redirecting to %s", callback_url)
+    # Return a proper 302 so Claude's callback listener intercepts the
+    # navigation and can exchange the code for a token.
+    return RedirectResponse(url=callback_url, status_code=302)
 
 
 # -- POST /oauth/token --------------------------------------------------------
+
+@router.get("/oauth/token", include_in_schema=False)
+async def token_endpoint_get(request: Request):
+    """GET /oauth/token probe — Claude probes this before POSTing to exchange the
+    auth code.  Return 200 with endpoint metadata so Claude proceeds to POST.
+    """
+    log.info("GET /oauth/token probe — headers: %s", dict(request.headers))
+    base = str(request.base_url).rstrip("/")
+    return JSONResponse({
+        "token_endpoint":                        f"{base}/oauth/token",
+        "grant_types_supported":                 ["authorization_code"],
+        "token_endpoint_auth_methods_supported": ["none"],
+    })
+
 
 @router.post("/oauth/token")
 async def token_endpoint(
