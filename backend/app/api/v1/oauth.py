@@ -33,6 +33,7 @@ from app.auth.dependencies import Principal, get_principal
 from app.auth.tokens import mint_access_token
 from app.db.session import SessionLocal
 from app.models import OAuthClient, OAuthCode, OrgMembership, User
+from app.core.config import get_settings
 
 import logging
 log = logging.getLogger("kynara.oauth")
@@ -52,7 +53,7 @@ async def _db():
 
 @router.get("/.well-known/oauth-authorization-server", include_in_schema=False)
 async def oauth_metadata(request: Request):
-    base = str(request.base_url).rstrip("/")
+    base = get_settings().app_url.rstrip("/")
     log.info("GET /.well-known/oauth-authorization-server — base=%s headers=%s", base, dict(request.headers))
     return JSONResponse({
         "issuer": base,
@@ -82,7 +83,7 @@ def _protected_resource_response(base: str) -> JSONResponse:
 @router.get("/.well-known/oauth-protected-resource", include_in_schema=False)
 async def oauth_protected_resource(request: Request):
     """RFC 9728 root form."""
-    base = str(request.base_url).rstrip("/")
+    base = get_settings().app_url.rstrip("/")
     return _protected_resource_response(base)
 
 
@@ -95,7 +96,7 @@ async def oauth_protected_resource_path(request: Request, path: str):
       /.well-known/oauth-protected-resource/mcp/v1/sse
     Return the same metadata as the root form.
     """
-    base = str(request.base_url).rstrip("/")
+    base = get_settings().app_url.rstrip("/")
     return _protected_resource_response(base)
 
 
@@ -288,7 +289,7 @@ async def token_endpoint_get(request: Request):
     auth code.  Return 200 with endpoint metadata so Claude proceeds to POST.
     """
     log.info("GET /oauth/token probe — headers: %s", dict(request.headers))
-    base = str(request.base_url).rstrip("/")
+    base = get_settings().app_url.rstrip("/")
     return JSONResponse({
         "token_endpoint":                        f"{base}/oauth/token",
         "grant_types_supported":                 ["authorization_code"],
