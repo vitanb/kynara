@@ -31,11 +31,20 @@ export default function OAuthConsentPage() {
     write: { label: "Approve/reject requests and manage agents",    icon: Bot },
   };
 
-  // If not logged in, redirect to login first
+  // If not logged in, redirect to login first and come back here afterwards.
+  // Return a loading indicator while the navigation is in-flight so the
+  // page is never just blank.
   if (!me) {
     const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
-    navigate(`/login?next=${returnTo}`);
-    return null;
+    navigate(`/login?next=${returnTo}`, { replace: true });
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "var(--s0-page)" }}
+      >
+        <p className="text-sm text-slate-400">Redirecting to sign-in…</p>
+      </div>
+    );
   }
 
   async function handleApprove() {

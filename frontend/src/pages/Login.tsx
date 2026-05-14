@@ -54,7 +54,9 @@ export default function LoginPage() {
     setBusy(true); setErr(null);
     try {
       await login(email, password);
-      nav("/app/dashboard");
+      // If redirected here from OAuth consent (or any protected page), go back.
+      const next = searchParams.get("next");
+      nav(next ? decodeURIComponent(next) : "/app/dashboard");
     } catch {
       setErr("Invalid email or password.");
     } finally { setBusy(false); }
