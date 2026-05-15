@@ -232,8 +232,8 @@ function CreateModal({ onClose }: { onClose: () => void }) {
     mutationFn: (data: typeof form) => api.post("/api/v1/guardrails", data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["guardrails"] }); onClose(); },
   });
-  const inp = "w-full rounded-lg px-3 py-2 text-sm text-white bg-transparent border outline-none focus:border-indigo-500 transition-colors";
-  const bdr = { border: "1px solid rgba(148,163,184,0.15)" };
+  const inp = "w-full rounded-lg px-3 py-2 text-sm text-white border outline-none focus:border-indigo-500 transition-colors";
+  const bdr = { border: "1px solid rgba(148,163,184,0.15)", background: "#0D1421", color: "#F1F5F9" };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -252,9 +252,11 @@ function CreateModal({ onClose }: { onClose: () => void }) {
             <select className={inp} style={bdr} value={form.provider}
               onChange={e => setForm(f => ({ ...f, provider: e.target.value }))}>
               {PROVIDER_GROUPS.map(g => (
-                <optgroup key={g.label} label={g.label}>
+                <optgroup key={g.label} label={g.label} style={{ background: "#0D1421", color: "#94A3B8" }}>
                   {g.providers.map(p => (
-                    <option key={p} value={p}>{PROVIDER_LABELS[p as Provider]}</option>
+                    <option key={p} value={p} style={{ background: "#0D1421", color: "#F1F5F9" }}>
+                      {PROVIDER_LABELS[p as Provider]}
+                    </option>
                   ))}
                 </optgroup>
               ))}
@@ -266,7 +268,7 @@ function CreateModal({ onClose }: { onClose: () => void }) {
               onChange={e => setForm(f => ({ ...f, default_action: e.target.value }))}>
               {Object.entries(ACTION_LABELS)
                 .filter(([v]) => v !== "suspend_agent")
-                .map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                .map(([v, l]) => <option key={v} value={v} style={{ background: "#0D1421", color: "#F1F5F9" }}>{l}</option>)}
             </select>
           </div>
           <div>
@@ -489,8 +491,8 @@ function RuleModal({ onClose }: { onClose: () => void }) {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["guardrail-rules"] }); onClose(); },
   });
 
-  const inp = "w-full rounded-lg px-3 py-2 text-sm text-white bg-transparent border outline-none focus:border-indigo-500 transition-colors";
-  const bdr = { border: "1px solid rgba(148,163,184,0.15)" };
+  const inp = "w-full rounded-lg px-3 py-2 text-sm text-white border outline-none focus:border-indigo-500 transition-colors";
+  const bdr = { border: "1px solid rgba(148,163,184,0.15)", background: "#0D1421", color: "#F1F5F9" };
 
   function toggleSev(s: string) {
     setForm(f => ({
@@ -608,7 +610,7 @@ function RuleModal({ onClose }: { onClose: () => void }) {
               onChange={e => setForm(f => ({ ...f, action: e.target.value as Action }))}>
               {Object.entries(ACTION_LABELS)
                 .filter(([v]) => v !== "suspend_agent")
-                .map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                .map(([v, l]) => <option key={v} value={v} style={{ background: "#0D1421", color: "#F1F5F9" }}>{l}</option>)}
             </select>
             {form.action === "disable_agent" && (
               <p className="text-[10px] text-orange-400 mt-1 flex items-center gap-1">
