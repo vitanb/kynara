@@ -16,12 +16,12 @@ const allNav = [
   { to: "agents",     label: "Agents",       icon: Bot,             roles: ["owner","admin","developer","auditor","member"] },
   { to: "tools",      label: "Scope Catalog",icon: Wrench,          roles: ["owner","admin","developer","auditor","member"] },
   { to: "catalog",    label: "Library",      icon: BookOpen,        roles: ["owner","admin","developer","auditor","member"] },
-  { to: "roles",      label: "Roles",        icon: KeyRound,        roles: ["owner","admin","auditor"] },
-  { to: "policies",   label: "Policies",     icon: ShieldCheck,     roles: ["owner","admin","auditor"] },
-  { to: "approvals",  label: "Approvals",    icon: CheckCircle2,    roles: ["owner","admin"], badge: true },
+  { to: "roles",      label: "Roles",        icon: KeyRound,        roles: ["owner","admin","auditor","developer","member"] },
+  { to: "policies",   label: "Policies",     icon: ShieldCheck,     roles: ["owner","admin","auditor","developer","member"] },
+  { to: "approvals",  label: "Approvals",    icon: CheckCircle2,    roles: ["owner","admin","auditor","developer","member"], badge: true },
   { to: "webhooks",   label: "Webhooks",     icon: Plug,            roles: ["owner","admin"] },
   { to: "guardrails", label: "Guardrails",   icon: ShieldAlert,     roles: ["owner","admin"] },
-  { to: "audit",      label: "Audit log",    icon: ScrollText,      roles: ["owner","admin","auditor"] },
+  { to: "audit",      label: "Audit log",    icon: ScrollText,      roles: ["owner","admin","auditor","developer","member"] },
   { to: "billing",    label: "Billing",      icon: CreditCard,      roles: ["owner","admin"] },
   { to: "settings",   label: "Settings",     icon: Settings,        roles: ["owner","admin"] },
   { to: "superadmin", label: "Super Admin",  icon: Crown,           roles: ["owner","admin","developer","auditor","member"], superadminOnly: true },
@@ -44,7 +44,7 @@ export default function AppShell() {
   const { data: approvalCountData } = useQuery<{ pending_count: number }>({
     queryKey: ["approvals-count"],
     queryFn: () => api.get("/api/v1/approvals/pending-count"),
-    enabled: role === "owner" || role === "admin",
+    enabled: ["owner","admin","auditor","developer","member"].includes(role),
     refetchInterval: 30_000,
   });
   const pendingApprovals = approvalCountData?.pending_count ?? 0;
