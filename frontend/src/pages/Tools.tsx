@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Wrench, AlertTriangle, Plus, X, Pencil } from "lucide-react";
+import { Wrench, AlertTriangle, Plus, X, Pencil, BookOpen } from "lucide-react";
+import { Link } from "react-router-dom";
 import PageHeader from "@/components/layout/PageHeader";
 import { api } from "@/lib/api";
 
@@ -116,7 +117,14 @@ export default function ToolsPage() {
         subtitle="Registry of callable actions agents may invoke. Each entry defines a scope string, risk level, and parameters. Add scopes to Roles to grant agents access."
       />
       <div className="px-8 py-6 space-y-6">
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between">
+          <Link
+            to="/app/catalog"
+            className="flex items-center gap-1.5 text-sm font-medium transition-colors"
+            style={{ color: "#818CF8" }}
+          >
+            <BookOpen className="size-4" /> Browse Library
+          </Link>
           <button className="btn-primary" onClick={openCreate}>
             <Plus className="size-4" /> New Tool
           </button>
