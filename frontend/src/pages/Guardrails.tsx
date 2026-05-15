@@ -8,8 +8,9 @@ import {
 import { api } from "@/lib/api";
 
 // ── Types ───────────────────────────────────────────────────────────────────────
-type Provider = "arize" | "langfuse" | "whylabs" | "fiddler" | "custom";
-type Action = "alert_only" | "suspend_agent" | "revoke_jit_grants" | "deny_all_policy" | "reduce_to_readonly";
+type Provider = "arize" | "langfuse" | "whylabs" | "fiddler" | "custom"
+  | "grafana" | "datadog" | "pagerduty" | "newrelic" | "prometheus";
+type Action = "alert_only" | "disable_agent" | "suspend_agent" | "revoke_jit_grants" | "deny_all_policy" | "reduce_to_readonly";
 
 interface GuardrailIntegration {
   id: string;
@@ -49,13 +50,23 @@ interface GuardrailRule {
 
 // ── Helpers ─────────────────────────────────────────────────────────────────────
 const PROVIDER_LABELS: Record<Provider, string> = {
+  grafana: "Grafana", datadog: "Datadog", pagerduty: "PagerDuty",
+  newrelic: "New Relic", prometheus: "Prometheus / Alertmanager",
   arize: "Arize AI", langfuse: "Langfuse", whylabs: "WhyLabs",
   fiddler: "Fiddler AI", custom: "Custom",
 };
 
+// Providers grouped for display
+const PROVIDER_GROUPS = [
+  { label: "Monitoring & Alerting", providers: ["grafana", "datadog", "pagerduty", "newrelic", "prometheus"] },
+  { label: "AI / LLM Observability", providers: ["arize", "langfuse", "whylabs", "fiddler"] },
+  { label: "Other", providers: ["custom"] },
+] as const;
+
 const ACTION_LABELS: Record<Action, string> = {
   alert_only: "Alert only",
-  suspend_agent: "Suspend agent",
+  disable_agent: "Disable agent",
+  suspend_agent: "Disable agent (legacy)",
   revoke_jit_grants: "Revoke JIT grants",
   deny_all_policy: "Deny all (policy)",
   reduce_to_readonly: "Reduce to read-only",
@@ -66,7 +77,115 @@ const ACTION_SEVERITY: Record<Action, "info" | "warn" | "critical"> = {
   revoke_jit_grants: "warn",
   reduce_to_readonly: "warn",
   deny_all_policy: "critical",
+  disable_agent: "critical",
   suspend_agent: "critical",
+};
+
+// Kynara's stable inbound event format — every provider must send this shape
+const KYNARA_PAYLOAD_SCHEMA = `{
+  "agent_id":  "<agent UUID or slug>",  // required — which agent to act on
+  "rule_name": "high_error_rate",       // required — the alert / check name
+  "severity":  "critical",             // required — critical | warning | info
+  "score":     0.95,                    // optional — numeric score 0–1
+  "trace_id":  "trace-abc123",          // optional — for cross-referencing
+  "message":   "Error rate exceeded…"  // optional — human-readable detail
+}`;
+
+// Per-provider webhook payload template — users paste this into their platform
+const PROVIDER_TEMPLATES: Partial<Record<Provider, {
+  label: string;
+  where: string;
+  template: string;
+  templateLabel: string;
+  note?: string;
+}>> = {
+  grafana: {
+    label: "Grafana Alerting",
+    where: "Alerting → Notification templates → New template, then set the Webhook contact point Message field to: {{ template \"kynara\" . }}",
+    templateLabel: "Notification template (Go template syntax)",
+    template: `{{ define "kynara" -}}
+{
+  "agent_id":  "{{ .CommonLabels.kynara_agent_id }}",
+  "rule_name": "{{ .CommonLabels.alertname }}",
+  "severity":  "{{ if .CommonLabels.severity }}{{ .CommonLabels.severity }}{{ else }}critical{{ end }}",
+  "message":   "{{ .CommonAnnotations.summary }}"
+}
+{{- end }}`,
+    note: "Add labels kynara_agent_id=<agent-uuid> and severity=critical|warning|info to each alert rule.",
+  },
+  datadog: {
+    label: "Datadog Webhooks",
+    where: "Integrations → Webhooks → New Webhook → Custom Payload",
+    templateLabel: "Custom Payload JSON",
+    template: `{
+  "agent_id":  "$kynara_agent_id",
+  "rule_name": "$alert_title",
+  "severity":  "$alert_type",
+  "score":     "$alert_metric",
+  "trace_id":  "$id",
+  "message":   "$text_only_msg"
+}`,
+    note: "Tag your monitor with kynara_agent_id:<agent-uuid>. Trigger with @webhook-<name> in the monitor message.",
+  },
+  newrelic: {
+    label: "New Relic Alerts",
+    where: "Alerts → Notification channels → Webhook → Custom Payload",
+    templateLabel: "Custom Payload JSON",
+    template: `{
+  "agent_id":  "{{ $labels.kynara_agent_id }}",
+  "rule_name": "{{ $labels.conditionName }}",
+  "severity":  "{{ $labels.priority }}",
+  "score":     {{ $value }},
+  "trace_id":  "{{ $labels.incidentId }}",
+  "message":   "{{ $labels.conditionDescription }}"
+}`,
+    note: "Add a tag kynara_agent_id=<agent-uuid> to the monitored entity or condition.",
+  },
+  prometheus: {
+    label: "Prometheus / Alertmanager",
+    where: "alertmanager.yml → receivers — add a webhook_configs entry pointing to the Inbound URL",
+    templateLabel: "alertmanager.yml snippet",
+    template: `receivers:
+  - name: kynara
+    webhook_configs:
+      - url: '<paste Inbound URL here>'
+        send_resolved: false
+
+# In your Prometheus alert rule, add these labels:
+# kynara_agent_id: "<agent-uuid>"
+# severity: "critical"   # or warning | info
+#
+# Then run a small adapter sidecar that maps:
+#   labels.kynara_agent_id → agent_id
+#   labels.alertname       → rule_name
+#   labels.severity        → severity`,
+    note: "Alertmanager doesn't support custom webhook bodies natively. A minimal adapter (e.g. a 10-line AWS Lambda or Cloud Function) reshapes the payload before forwarding to Kynara.",
+  },
+  pagerduty: {
+    label: "PagerDuty",
+    where: "Event Orchestration → Webhook endpoint, or use a small Lambda/Cloud Function as a bridge",
+    templateLabel: "Bridge function (Python)",
+    template: `import json, urllib.request
+
+KYNARA_URL = "<paste Inbound URL here>"
+
+def handler(event, context):
+    pd = json.loads(event["body"])
+    incident = pd["messages"][0]["incident"]
+    payload = {
+        "agent_id":  incident.get("custom_fields", {}).get("kynara_agent_id"),
+        "rule_name": incident.get("title", "unknown"),
+        "severity":  "critical" if incident.get("urgency") == "high" else "warning",
+        "trace_id":  incident.get("id"),
+        "message":   incident.get("summary"),
+    }
+    req = urllib.request.Request(
+        KYNARA_URL, json.dumps(payload).encode(),
+        {"Content-Type": "application/json"}, method="POST")
+    urllib.request.urlopen(req)
+    return {"statusCode": 200}`,
+    note: "Add a custom field kynara_agent_id on PagerDuty incidents to route events to a specific agent.",
+  },
 };
 
 const SEV_COLORS = {
@@ -106,7 +225,7 @@ function CopyButton({ text }: { text: string }) {
 function CreateModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
   const [form, setForm] = useState({
-    name: "", provider: "arize", default_action: "alert_only", is_enabled: true,
+    name: "", provider: "grafana", default_action: "alert_only", is_enabled: true,
     webhook_secret: "", api_endpoint: "",
   });
   const mut = useMutation({
@@ -115,29 +234,58 @@ function CreateModal({ onClose }: { onClose: () => void }) {
   });
   const inp = "w-full rounded-lg px-3 py-2 text-sm text-white bg-transparent border outline-none focus:border-indigo-500 transition-colors";
   const bdr = { border: "1px solid rgba(148,163,184,0.15)" };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
-      <div className="w-full max-w-md rounded-2xl p-6 space-y-4"
+      <div className="w-full max-w-lg rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto"
         style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}>
         <h2 className="text-base font-bold text-white">Add Integration</h2>
         <div className="space-y-3">
-          <input className={inp} style={bdr} placeholder="Name" value={form.name}
-            onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-          <select className={inp} style={bdr} value={form.provider}
-            onChange={e => setForm(f => ({ ...f, provider: e.target.value }))}>
-            {Object.entries(PROVIDER_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-          </select>
-          <select className={inp} style={bdr} value={form.default_action}
-            onChange={e => setForm(f => ({ ...f, default_action: e.target.value }))}>
-            {Object.entries(ACTION_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-          </select>
-          <input className={inp} style={bdr} placeholder="Webhook secret (optional)"
-            value={form.webhook_secret}
-            onChange={e => setForm(f => ({ ...f, webhook_secret: e.target.value }))} />
-          <input className={inp} style={bdr} placeholder="API endpoint (optional)"
-            value={form.api_endpoint}
-            onChange={e => setForm(f => ({ ...f, api_endpoint: e.target.value }))} />
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Name</label>
+            <input className={inp} style={bdr} placeholder="e.g. Grafana Production Alerts" value={form.name}
+              onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Platform</label>
+            <select className={inp} style={bdr} value={form.provider}
+              onChange={e => setForm(f => ({ ...f, provider: e.target.value }))}>
+              {PROVIDER_GROUPS.map(g => (
+                <optgroup key={g.label} label={g.label}>
+                  {g.providers.map(p => (
+                    <option key={p} value={p}>{PROVIDER_LABELS[p as Provider]}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Default action (when no rule matches)</label>
+            <select className={inp} style={bdr} value={form.default_action}
+              onChange={e => setForm(f => ({ ...f, default_action: e.target.value }))}>
+              {Object.entries(ACTION_LABELS)
+                .filter(([v]) => v !== "suspend_agent")
+                .map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Webhook secret <span className="text-slate-600">(optional — used to verify requests)</span></label>
+            <input className={inp} style={bdr} placeholder="Shared secret for HMAC verification"
+              value={form.webhook_secret}
+              onChange={e => setForm(f => ({ ...f, webhook_secret: e.target.value }))} />
+          </div>
+
+          {/* Format reminder */}
+          <div className="rounded-xl p-3 space-y-1"
+            style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.18)" }}>
+            <p className="text-xs font-semibold text-indigo-300">After creating, expand the integration card to get:</p>
+            <ul className="text-xs text-slate-400 space-y-0.5 pl-3">
+              <li>• The inbound URL to paste into {PROVIDER_TEMPLATES[form.provider as Provider]?.label ?? form.provider}</li>
+              <li>• The Kynara JSON payload format your platform must send</li>
+              <li>• A copy-paste webhook template for {PROVIDER_TEMPLATES[form.provider as Provider]?.label ?? form.provider}</li>
+            </ul>
+          </div>
         </div>
         {mut.isError && (
           <p className="text-xs text-red-400">Failed to create integration.</p>
@@ -202,18 +350,79 @@ function IntegrationCard({ item }: { item: GuardrailIntegration }) {
         </div>
       </div>
       {open && (
-        <div className="px-4 pb-4 pt-1 space-y-2"
+        <div className="px-4 pb-4 pt-3 space-y-4"
           style={{ borderTop: "1px solid rgba(148,163,184,0.07)" }}>
-          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Inbound URL</p>
-          <div className="flex items-center gap-2 rounded-lg px-3 py-2"
-            style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}>
-            <code className="text-[11px] text-indigo-300 flex-1 truncate">{item.webhook_inbound_url}</code>
-            <CopyButton text={item.webhook_inbound_url} />
+
+          {/* Step 1 — Inbound URL */}
+          <div>
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+              Step 1 — Paste this URL into {PROVIDER_TEMPLATES[item.provider]?.label ?? PROVIDER_LABELS[item.provider]}
+            </p>
+            <div className="flex items-center gap-2 rounded-lg px-3 py-2"
+              style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}>
+              <code className="text-[11px] text-indigo-300 flex-1 truncate">{item.webhook_inbound_url}</code>
+              <CopyButton text={item.webhook_inbound_url} />
+            </div>
+            {PROVIDER_TEMPLATES[item.provider] && (
+              <p className="text-[10px] text-slate-500 mt-1.5">
+                Where: <span className="text-slate-400">{PROVIDER_TEMPLATES[item.provider]!.where}</span>
+              </p>
+            )}
           </div>
-          <p className="text-xs text-slate-500 pt-1">
-            Paste this URL into your guardrail platform as the webhook destination.
-            Kynara will receive events and enforce actions automatically.
-          </p>
+
+          {/* Step 2 — Kynara payload format */}
+          <div>
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+              Step 2 — Kynara inbound format <span className="normal-case font-normal text-slate-600">(stable — never changes)</span>
+            </p>
+            <div className="rounded-lg overflow-hidden" style={{ border: "1px solid rgba(148,163,184,0.1)" }}>
+              <div className="flex items-center justify-between px-3 py-1.5"
+                style={{ background: "rgba(148,163,184,0.05)", borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
+                <span className="text-[10px] font-mono text-slate-500">application/json</span>
+                <CopyButton text={KYNARA_PAYLOAD_SCHEMA} />
+              </div>
+              <pre className="text-[10px] font-mono text-slate-300 px-3 py-2.5 overflow-x-auto leading-relaxed"
+                style={{ background: "#080E1A" }}>
+                {KYNARA_PAYLOAD_SCHEMA}
+              </pre>
+            </div>
+          </div>
+
+          {/* Step 3 — Provider-specific template */}
+          {PROVIDER_TEMPLATES[item.provider] && (
+            <div>
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                Step 3 — Configure {PROVIDER_TEMPLATES[item.provider]!.label} to send in Kynara format
+              </p>
+              <div className="rounded-lg overflow-hidden" style={{ border: "1px solid rgba(99,102,241,0.2)" }}>
+                <div className="flex items-center justify-between px-3 py-1.5"
+                  style={{ background: "rgba(99,102,241,0.06)", borderBottom: "1px solid rgba(99,102,241,0.12)" }}>
+                  <span className="text-[10px] font-medium text-indigo-300">
+                    {PROVIDER_TEMPLATES[item.provider]!.templateLabel}
+                  </span>
+                  <CopyButton text={PROVIDER_TEMPLATES[item.provider]!.template} />
+                </div>
+                <pre className="text-[10px] font-mono text-indigo-200 px-3 py-2.5 overflow-x-auto leading-relaxed"
+                  style={{ background: "#080E1A" }}>
+                  {PROVIDER_TEMPLATES[item.provider]!.template}
+                </pre>
+              </div>
+              {PROVIDER_TEMPLATES[item.provider]!.note && (
+                <p className="text-[10px] text-slate-500 mt-1.5 flex items-start gap-1">
+                  <span className="shrink-0 mt-px">💡</span>
+                  {PROVIDER_TEMPLATES[item.provider]!.note}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Generic fallback for providers without a template */}
+          {!PROVIDER_TEMPLATES[item.provider] && (
+            <p className="text-[10px] text-slate-500">
+              Configure your platform's webhook to POST the Kynara format above to the inbound URL.
+              The format is stable — Kynara will never change it to match provider-specific schemas.
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -223,15 +432,43 @@ function IntegrationCard({ item }: { item: GuardrailIntegration }) {
 // ── Create Rule Modal ────────────────────────────────────────────────────────────
 const SEVERITIES = ["critical", "warning", "info"];
 
+// Quick-setup presets
+const RULE_PRESETS = [
+  {
+    label: "Disable agent immediately",
+    description: "Disable the agent the moment a single critical event arrives.",
+    icon: "🚫",
+    patch: { action: "disable_agent" as Action, event_count_threshold: 1, time_window_seconds: 60, filter_severities: ["critical"] },
+  },
+  {
+    label: "Disable after repeated violations",
+    description: "Disable after 5 critical events in 5 minutes.",
+    icon: "⚡",
+    patch: { action: "disable_agent" as Action, event_count_threshold: 5, time_window_seconds: 300, filter_severities: ["critical"] },
+  },
+  {
+    label: "Revoke JIT on warning",
+    description: "Strip JIT grants when 3 warnings arrive in 10 minutes.",
+    icon: "🔑",
+    patch: { action: "revoke_jit_grants" as Action, event_count_threshold: 3, time_window_seconds: 600, filter_severities: ["critical", "warning"] },
+  },
+  {
+    label: "Read-only on anomaly",
+    description: "Reduce to read-only when any event fires.",
+    icon: "👁",
+    patch: { action: "reduce_to_readonly" as Action, event_count_threshold: 1, time_window_seconds: 300, filter_severities: [] },
+  },
+];
+
 function RuleModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
   const [form, setForm] = useState({
     name: "",
     description: "",
-    event_count_threshold: 5,
-    time_window_seconds: 300,
-    action: "revoke_jit_grants" as Action,
-    filter_severities: [] as string[],
+    event_count_threshold: 1,
+    time_window_seconds: 60,
+    action: "disable_agent" as Action,
+    filter_severities: ["critical"] as string[],
     filter_rule_names_raw: "",   // comma-separated input
     is_enabled: true,
   });
@@ -277,17 +514,36 @@ function RuleModal({ onClose }: { onClose: () => void }) {
       <div className="w-full max-w-lg rounded-2xl p-6 space-y-5"
         style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}>
         <div>
-          <h2 className="text-base font-bold text-white">New Threshold Rule</h2>
+          <h2 className="text-base font-bold text-white">New Rule</h2>
           <p className="text-xs text-slate-400 mt-0.5">
             Define when Kynara should act — only after enough events accumulate in a time window.
           </p>
+        </div>
+
+        {/* Quick presets */}
+        <div>
+          <p className="text-xs text-slate-500 mb-2">Quick setup</p>
+          <div className="grid grid-cols-2 gap-2">
+            {RULE_PRESETS.map(preset => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => setForm(f => ({ ...f, ...preset.patch, name: f.name || preset.label }))}
+                className="text-left rounded-xl px-3 py-2.5 transition-colors hover:bg-white/5"
+                style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.15)" }}
+              >
+                <div className="text-sm mb-0.5">{preset.icon} <span className="text-xs font-semibold text-slate-200">{preset.label}</span></div>
+                <p className="text-[10px] text-slate-500 leading-snug">{preset.description}</p>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="space-y-3">
           {/* Name */}
           <div>
             <label className="block text-xs text-slate-400 mb-1">Rule name</label>
-            <input className={inp} style={bdr} placeholder="e.g. High-frequency toxicity block"
+            <input className={inp} style={bdr} placeholder="e.g. Disable agent on critical alert"
               value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
           </div>
 
@@ -347,11 +603,19 @@ function RuleModal({ onClose }: { onClose: () => void }) {
 
           {/* Action */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Action to take</label>
+            <label className="block text-xs text-slate-400 mb-1">Action to take when rule fires</label>
             <select className={inp} style={bdr} value={form.action}
               onChange={e => setForm(f => ({ ...f, action: e.target.value as Action }))}>
-              {Object.entries(ACTION_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              {Object.entries(ACTION_LABELS)
+                .filter(([v]) => v !== "suspend_agent")
+                .map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
+            {form.action === "disable_agent" && (
+              <p className="text-[10px] text-orange-400 mt-1 flex items-center gap-1">
+                <AlertTriangle className="size-3 shrink-0" />
+                Agent will be set to inactive — it won't be able to make policy decisions until re-enabled manually.
+              </p>
+            )}
           </div>
 
           {/* Severity filter */}
@@ -586,8 +850,8 @@ export default function GuardrailsPage() {
             Guardrail Integrations
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Connect Arize AI, Langfuse, WhyLabs, Fiddler, or custom platforms.
-            Define threshold rules to automatically revoke agent access when violations accumulate.
+            Connect Grafana, Datadog, PagerDuty, Prometheus, Arize AI, Langfuse, and more.
+            Define threshold rules to automatically disable agents or revoke access when alerts fire.
           </p>
         </div>
         <button onClick={() => setShowCreate(true)}
@@ -603,11 +867,11 @@ export default function GuardrailsPage() {
         <div className="space-y-1">
           <p className="text-xs font-semibold text-indigo-300">Threshold-based enforcement</p>
           <p className="text-xs text-slate-400">
-            Events flow in from your guardrail platform via webhook. Kynara evaluates your{" "}
-            <strong className="text-slate-200">threshold rules</strong> — acting only when the event count
-            within a time window reaches your configured limit.
-            This prevents false positives from single-event noise while still catching real patterns.
-            Every enforcement is recorded in the tamper-evident audit log.
+            Events flow in from Grafana, Datadog, PagerDuty, or any monitoring platform via webhook.
+            Kynara evaluates your <strong className="text-slate-200">threshold rules</strong> — acting only
+            when the event count within a time window reaches your limit. You can{" "}
+            <strong className="text-slate-200">disable an agent instantly</strong> on a single critical alert,
+            or only after repeated violations. Every enforcement is recorded in the tamper-evident audit log.
           </p>
         </div>
       </div>

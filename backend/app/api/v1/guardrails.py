@@ -43,10 +43,13 @@ from app.webhooks.service import emit
 router = APIRouter(prefix="/guardrails", tags=["guardrails"])
 
 VALID_ACTIONS = {
-    "alert_only", "suspend_agent", "revoke_jit_grants",
+    "alert_only", "disable_agent", "suspend_agent", "revoke_jit_grants",
     "deny_all_policy", "reduce_to_readonly",
 }
-VALID_PROVIDERS = {"arize", "custom", "langfuse", "whylabs", "fiddler"}
+VALID_PROVIDERS = {
+    "arize", "custom", "langfuse", "whylabs", "fiddler",
+    "grafana", "datadog", "pagerduty", "newrelic", "prometheus",
+}
 
 
 async def _db():
@@ -378,6 +381,176 @@ async def delete_rule(
     await session.commit()
 
 
+# ── Inbound event schema (stable API contract) ────────────────────────────────
+
+@router.get("/event-schema")
+async def get_event_schema(_: Principal = Depends(get_principal)):
+    """
+    Return the stable Kynara inbound event API contract.
+
+    Configure your monitoring platform's webhook to POST this JSON to
+    /api/v1/guardrails/inbound/{integration_id}.
+
+    Kynara's format never changes to match provider-specific formats —
+    instead each platform uses its own webhook templating to produce this
+    shape. Provider-specific template snippets are returned alongside the schema.
+    """
+    return {
+        "schema": {
+            "agent_id": {
+                "type": "string",
+                "required": True,
+                "description": "Kynara agent UUID or slug. Identifies which agent this event targets.",
+                "example": "3f8a2b1c-0000-0000-0000-000000000001",
+            },
+            "rule_name": {
+                "type": "string",
+                "required": True,
+                "description": "Name of the alert / check that fired.",
+                "example": "high_error_rate",
+            },
+            "severity": {
+                "type": "string",
+                "required": True,
+                "enum": ["critical", "warning", "info"],
+                "description": "Severity level of the event.",
+                "example": "critical",
+            },
+            "score": {
+                "type": "number",
+                "required": False,
+                "description": "Optional numeric score (0–1) from the monitoring platform.",
+                "example": 0.95,
+            },
+            "trace_id": {
+                "type": "string",
+                "required": False,
+                "description": "Optional trace or incident ID for cross-referencing.",
+                "example": "trace-abc123",
+            },
+            "message": {
+                "type": "string",
+                "required": False,
+                "description": "Human-readable description of the event.",
+                "example": "Error rate exceeded 5% threshold for 3 consecutive minutes.",
+            },
+        },
+        "example_payload": {
+            "agent_id": "3f8a2b1c-0000-0000-0000-000000000001",
+            "rule_name": "high_error_rate",
+            "severity": "critical",
+            "score": 0.95,
+            "trace_id": "trace-abc123",
+            "message": "Error rate exceeded 5% threshold for 3 consecutive minutes.",
+        },
+        "provider_templates": {
+            "grafana": {
+                "description": (
+                    "In Grafana → Alerting → Notification templates, create a template named 'kynara'. "
+                    "Then in your Webhook contact point set Message to: {{ template \"kynara\" . }}"
+                ),
+                "notification_template": (
+                    "{{ define \"kynara\" -}}\n"
+                    "{\n"
+                    "  \"agent_id\": \"{{ .CommonLabels.kynara_agent_id }}\",\n"
+                    "  \"rule_name\": \"{{ .CommonLabels.alertname }}\",\n"
+                    "  \"severity\": \"{{ if .CommonLabels.severity }}{{ .CommonLabels.severity }}{{ else }}critical{{ end }}\",\n"
+                    "  \"message\": \"{{ .CommonAnnotations.summary }}\"\n"
+                    "}\n"
+                    "{{- end }}"
+                ),
+                "alert_label_instructions": (
+                    "Add the label kynara_agent_id=<agent-uuid> and severity=critical|warning|info "
+                    "to each Grafana alert rule that should target a Kynara agent."
+                ),
+            },
+            "datadog": {
+                "description": (
+                    "In Datadog → Integrations → Webhooks, create a webhook and set the custom payload below."
+                ),
+                "custom_payload": (
+                    "{\n"
+                    "  \"agent_id\": \"$kynara_agent_id\",\n"
+                    "  \"rule_name\": \"$alert_title\",\n"
+                    "  \"severity\": \"$alert_type\",\n"
+                    "  \"score\": \"$alert_metric\",\n"
+                    "  \"trace_id\": \"$id\",\n"
+                    "  \"message\": \"$text_only_msg\"\n"
+                    "}"
+                ),
+                "tag_instructions": (
+                    "Tag your Datadog monitor with kynara_agent_id:<agent-uuid> so the $kynara_agent_id "
+                    "variable is populated. Use @webhook-<name> in the monitor message to trigger it."
+                ),
+            },
+            "pagerduty": {
+                "description": (
+                    "PagerDuty supports outbound webhooks via Event Orchestration or generic v3 webhooks. "
+                    "Use a middleware (e.g. AWS Lambda or a small Cloud Function) to translate "
+                    "PagerDuty's incident payload to Kynara's format and forward it."
+                ),
+                "suggested_lambda": (
+                    "import json, urllib.request\n\n"
+                    "KYNARA_URL = 'https://app.kynara.com/api/v1/guardrails/inbound/<integration_id>'\n\n"
+                    "def handler(event, context):\n"
+                    "    pd = json.loads(event['body'])\n"
+                    "    incident = pd['messages'][0]['incident']\n"
+                    "    payload = {\n"
+                    "        'agent_id': incident.get('custom_fields', {}).get('kynara_agent_id'),\n"
+                    "        'rule_name': incident.get('title', 'unknown'),\n"
+                    "        'severity': 'critical' if incident.get('urgency') == 'high' else 'warning',\n"
+                    "        'trace_id': incident.get('id'),\n"
+                    "        'message': incident.get('summary'),\n"
+                    "    }\n"
+                    "    req = urllib.request.Request(KYNARA_URL, json.dumps(payload).encode(), \n"
+                    "        {'Content-Type': 'application/json'}, method='POST')\n"
+                    "    urllib.request.urlopen(req)\n"
+                    "    return {'statusCode': 200}"
+                ),
+            },
+            "prometheus": {
+                "description": (
+                    "Prometheus Alertmanager does not support custom webhook bodies natively. "
+                    "Run a small alertmanager-webhook-adapter sidecar, or use the template below "
+                    "with alertmanager's webhook_configs and a reverse proxy that reshapes the body."
+                ),
+                "alertmanager_yaml": (
+                    "receivers:\n"
+                    "  - name: kynara\n"
+                    "    webhook_configs:\n"
+                    "      - url: 'https://app.kynara.com/api/v1/guardrails/inbound/<integration_id>'\n"
+                    "        send_resolved: false\n"
+                    "        http_config:\n"
+                    "          headers:\n"
+                    "            Content-Type: application/json\n"
+                    "        # Use a proxy/adapter to reshape Alertmanager's payload to Kynara's format\n"
+                    "        # Required fields: agent_id, rule_name, severity"
+                ),
+                "adapter_note": (
+                    "A minimal adapter maps: labels.kynara_agent_id → agent_id, "
+                    "labels.alertname → rule_name, labels.severity → severity."
+                ),
+            },
+            "newrelic": {
+                "description": (
+                    "In New Relic → Alerts → Notification channels, add a Webhook channel. "
+                    "Set the custom payload JSON below under 'Custom Headers / Payload'."
+                ),
+                "custom_payload": (
+                    "{\n"
+                    "  \"agent_id\": \"{{ $labels.kynara_agent_id }}\",\n"
+                    "  \"rule_name\": \"{{ $labels.conditionName }}\",\n"
+                    "  \"severity\": \"{{ $labels.priority }}\",\n"
+                    "  \"score\": {{ $value }},\n"
+                    "  \"trace_id\": \"{{ $labels.incidentId }}\",\n"
+                    "  \"message\": \"{{ $labels.conditionDescription }}\"\n"
+                    "}"
+                ),
+            },
+        },
+    }
+
+
 # ── Events list ───────────────────────────────────────────────────────────────
 
 @router.get("/events", response_model=list[GuardrailEventOut])
@@ -411,11 +584,11 @@ async def _enforce_action(
     if action == "alert_only" or agent is None:
         return detail
 
-    if action == "suspend_agent":
+    if action in ("suspend_agent", "disable_agent"):
         agent.is_active = False
-        detail["suspended"] = True
+        detail["disabled"] = True
         await record_admin(session, org_id=org_id, actor="system:guardrail",
-                           event_type="guardrail.agent.suspended",
+                           event_type="guardrail.agent.disabled",
                            resource_type="agent", resource_id=str(agent.id),
                            payload={"rule": event.rule_name, "severity": event.severity,
                                     "triggered_by": triggered_by})
@@ -663,7 +836,7 @@ async def inbound_guardrail_event(
     if fired_rules:
         # Use the most severe action taken across all fired rules
         ACTION_RANK = ["alert_only", "reduce_to_readonly",
-                       "revoke_jit_grants", "deny_all_policy", "suspend_agent"]
+                       "revoke_jit_grants", "deny_all_policy", "disable_agent", "suspend_agent"]
         top_action = max(
             (d["action"] for d in fired_rules),
             key=lambda a: ACTION_RANK.index(a) if a in ACTION_RANK else -1,
