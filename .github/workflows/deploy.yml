@@ -1,0 +1,82 @@
+name: Deploy
+
+on:
+  # Manual trigger only — nothing deploys without a human clicking the button.
+  # Actions tab → Deploy → Run workflow → pick environment + optional SHA.
+  # Replaces workflow_run (auto-deploy on CI pass) so no GitHub Team plan needed.
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      sha:
+        description: "Git SHA or branch to deploy (leave blank for default branch)"
+        required: false
+        default: ""
+
+jobs:
+  deploy-staging:
+    name: Deploy → Staging
+    runs-on: ubuntu-latest
+    environment: staging
+    if: github.event.inputs.environment == 'staging'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.sha || 'develop' }}
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy backend to staging
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+        run: |
+          railway up \
+            --service backend \
+            --environment staging \
+            --detach
+
+      - name: Deploy frontend to staging
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+        run: |
+          railway up \
+            --service frontend \
+            --environment staging \
+            --detach
+
+  deploy-production:
+    name: Deploy → Production
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.event.inputs.environment == 'production'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.sha || 'main' }}
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy backend to production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PRODUCTION }}
+        run: |
+          railway up \
+            --service backend \
+            --environment production \
+            --detach
+
+      - name: Deploy frontend to production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PRODUCTION }}
+        run: |
+          railway up \
+            --service frontend \
+            --environment production \
+            --detach
