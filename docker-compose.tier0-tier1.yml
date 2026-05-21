@@ -1,0 +1,114 @@
+# ── Kynara — Tier 0 + Tier 1 zero-code-change enforcement stack ──────────
+#
+# Services
+# ────────
+#   kynara-sidecar      Local policy engine (Go). Fetches policy bundle from
+#                       Kynara central API and evaluates decisions in <1ms.
+#
+#   kynara-proxy        Tier 0 — transparent HTTP reverse proxy.
+#                       Point any agent's base URL here instead of the real API.
+#                       e.g. OPENAI_BASE_URL=http://kynara-proxy:8080/v1
+#
+#   kynara-mcp-wrapper  Tier 1 — MCP server wrapper.
+#                       Point any MCP client's server URL here.
+#                       e.g. "url": "http://kynara-mcp-wrapper:9090/sse"
+#
+# Usage
+# ─────
+#   1. Copy .env.example files to .env in each service directory and fill values
+#   2. docker compose -f docker-compose.tier0-tier1.yml up
+#   3. Agents need zero code changes — just swap the URL they point at
+#
+# ─────────────────────────────────────────────────────────────────────────
+
+version: "3.9"
+
+networks:
+  kynara-net:
+    driver: bridge
+
+volumes:
+  kynara-audit-logs:
+
+services:
+
+  # ── Kynara Policy Sidecar ───────────────────────────────────────────────
+  kynara-sidecar:
+    build:
+      context: ./sidecar
+      dockerfile: Dockerfile
+    environment:
+      KYNARA_BASE_URL: ${KYNARA_API_BASE_URL:-https://app.kynara.io}
+      KYNARA_API_KEY: ${KYNARA_API_KEY:?KYNARA_API_KEY is required}
+      SIDECAR_ADDR: ":7070"
+      BUNDLE_REFRESH_SECONDS: "30"
+    ports:
+      - "7070:7070"
+    networks:
+      - kynara-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:7070/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+
+  # ── Tier 0: Transparent HTTP Proxy ─────────────────────────────────────
+  kynara-proxy:
+    build:
+      context: ./kynara-proxy
+      dockerfile: Dockerfile
+    environment:
+      # ↓ Where to forward allowed requests — change to your actual API
+      KYNARA_UPSTREAM_URL: ${PROXY_UPSTREAM_URL:-https://api.openai.com}
+      KYNARA_SIDECAR_URL: http://kynara-sidecar:7070
+      KYNARA_API_BASE_URL: ${KYNARA_API_BASE_URL:-https://app.kynara.io}
+      KYNARA_API_KEY: ${KYNARA_API_KEY}
+      KYNARA_FAIL_OPEN: ${KYNARA_FAIL_OPEN:-false}
+      KYNARA_PROXY_PORT: "8080"
+      KYNARA_AUDIT_LOG: /var/log/kynara/proxy-audit.jsonl
+    ports:
+      - "8080:8080"
+    volumes:
+      - kynara-audit-logs:/var/log/kynara
+    networks:
+      - kynara-net
+    depends_on:
+      kynara-sidecar:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/_kynara/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ── Tier 1: MCP Server Wrapper ─────────────────────────────────────────
+  kynara-mcp-wrapper:
+    build:
+      context: ./kynara-mcp-wrapper
+      dockerfile: Dockerfile
+    environment:
+      # ↓ The upstream MCP server this wrapper sits in front of
+      KYNARA_UPSTREAM_MCP_URL: ${MCP_UPSTREAM_URL:-http://your-mcp-server:8000/sse}
+      KYNARA_UPSTREAM_HEADERS: ${MCP_UPSTREAM_HEADERS:-}
+      KYNARA_SIDECAR_URL: http://kynara-sidecar:7070
+      KYNARA_API_BASE_URL: ${KYNARA_API_BASE_URL:-https://app.kynara.io}
+      KYNARA_API_KEY: ${KYNARA_API_KEY}
+      KYNARA_FAIL_OPEN: ${KYNARA_FAIL_OPEN:-false}
+      KYNARA_MCP_WRAPPER_PORT: "9090"
+      KYNARA_TOOL_CACHE_TTL: "60"
+    ports:
+      - "9090:9090"
+    networks:
+      - kynara-net
+    depends_on:
+      kynara-sidecar:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
