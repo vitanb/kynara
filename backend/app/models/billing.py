@@ -5,7 +5,7 @@ from datetime import datetime
 
 from sqlalchemy import BigInteger, DateTime, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDPkMixin
 
@@ -19,6 +19,9 @@ class Subscription(Base, UUIDPkMixin, TimestampMixin):
     )
     stripe_customer_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     stripe_subscription_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # The Stripe Subscription Item ID (si_xxxx) for the decisions metered price;
+    # required for stripe.SubscriptionItem.create_usage_record() in the nightly reporter.
+    stripe_subscription_item_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     plan: Mapped[str] = mapped_column(String(32), nullable=False, default="trial")
     # trialing | active | past_due | canceled | incomplete | paused
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="trialing")
@@ -31,6 +34,9 @@ class Subscription(Base, UUIDPkMixin, TimestampMixin):
     current_period_start: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     current_period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     cancel_at_period_end: Mapped[bool] = mapped_column(default=False, nullable=False)
+    # Stamped when a subscription first becomes past_due; cleared on successful payment.
+    # enforce_active_subscription() uses this to apply a 7-day grace period before hard-blocking.
+    past_due_since: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class UsageRecord(Base, UUIDPkMixin):

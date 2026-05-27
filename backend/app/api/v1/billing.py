@@ -231,18 +231,35 @@ async def stripe_webhook(
             )
 
     elif etype.startswith("customer.subscription."):
-        sub.status = data.get("status", sub.status)
+        new_status = data.get("status", sub.status)
+        sub.status = new_status
         sub.stripe_subscription_id = data.get("id")
         sub.current_period_start = datetime.fromtimestamp(data["current_period_start"], tz=timezone.utc) \
             if data.get("current_period_start") else None
         sub.current_period_end = datetime.fromtimestamp(data["current_period_end"], tz=timezone.utc) \
             if data.get("current_period_end") else None
         sub.cancel_at_period_end = bool(data.get("cancel_at_period_end"))
+        # Capture the Stripe Subscription Item ID (si_xxxx) from the first line item.
+        # This is required for the nightly usage reporter to call create_usage_record().
+        items = data.get("items", {}).get("data", [])
+        if items and not sub.stripe_subscription_item_id:
+            sub.stripe_subscription_item_id = items[0].get("id")
+        # Sync past_due_since: stamp on first transition to past_due; clear when recovered.
+        if new_status == "past_due" and sub.past_due_since is None:
+            sub.past_due_since = datetime.now(tz=timezone.utc)
+            logger.warning(
+                "customer.subscription status=past_due org=%s — grace period starts now",
+                org_id,
+            )
+        elif new_status != "past_due":
+            sub.past_due_since = None
 
     elif etype == "invoice.paid":
         # Reset to active on successful payment (recovers from past_due)
         if sub.status == "past_due":
             sub.status = "active"
+            sub.past_due_since = None  # clear grace-period stamp
+            logger.info("invoice.paid org=%s — subscription recovered from past_due", org_id)
         session.add(Invoice(
             organization_id=uuid.UUID(org_id),
             stripe_invoice_id=data["id"],
@@ -255,9 +272,14 @@ async def stripe_webhook(
             period_end=datetime.fromtimestamp(data["period_end"], tz=timezone.utc),
         ))
     elif etype == "invoice.payment_failed":
-        # Flip to past_due — policy engine will start denying decisions for this org
+        # Flip to past_due — grace period begins; policy engine enforces after 7 days
         sub.status = "past_due"
-        logger.warning("invoice.payment_failed org=%s — subscription marked past_due", org_id)
+        if sub.past_due_since is None:
+            sub.past_due_since = datetime.now(tz=timezone.utc)
+        logger.warning(
+            "invoice.payment_failed org=%s — subscription marked past_due (grace period starts %s)",
+            org_id, sub.past_due_since.isoformat(),
+        )
 
     await session.commit()
     await record_admin(

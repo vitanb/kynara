@@ -70,3 +70,61 @@ spec:
               command: ["python", "-m", "app.scripts.verify_audit_chain"]
               envFrom:
                 - secretRef: { name: {{ .Values.backend.envFromSecret }} }
+---
+# Nightly Stripe metered usage reporter — runs at 02:00 UTC.
+# Sums decisions per paid org and calls stripe.SubscriptionItem.create_usage_record()
+# for any net-new usage not yet reported.  Requires STRIPE_SECRET_KEY in the secret.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "kynara.fullname" . }}-billing-reporter
+  labels:
+    {{- include "kynara.labels" . | nindent 4 }}
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ .Values.serviceAccount.name }}
+          restartPolicy: OnFailure
+          containers:
+            - name: reporter
+              image: {{ include "kynara.backend.image" . }}
+              command: ["python", "-m", "app.scripts.report_billing_usage"]
+              envFrom:
+                - secretRef: { name: {{ .Values.backend.envFromSecret }} }
+              securityContext:
+                {{- toYaml .Values.containerSecurityContext | nindent 16 }}
+---
+# Daily usage warning mailer — runs at 08:00 UTC.
+# Sends 80% and 100% quota warning emails to org owners.
+# Uses UsageRecord sentinel rows for deduplication so re-runs are safe.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "kynara.fullname" . }}-usage-warnings
+  labels:
+    {{- include "kynara.labels" . | nindent 4 }}
+spec:
+  schedule: "0 8 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ .Values.serviceAccount.name }}
+          restartPolicy: OnFailure
+          containers:
+            - name: mailer
+              image: {{ include "kynara.backend.image" . }}
+              command: ["python", "-m", "app.scripts.send_usage_warnings"]
+              envFrom:
+                - secretRef: { name: {{ .Values.backend.envFromSecret }} }
+              securityContext:
+                {{- toYaml .Values.containerSecurityContext | nindent 16 }}

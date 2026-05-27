@@ -7,7 +7,7 @@ exceeded so the frontend can surface a clear upgrade prompt.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
@@ -93,8 +93,19 @@ async def enforce_decision_quota(session: AsyncSession, org_id: str) -> None:
         )
 
 
+_PAST_DUE_GRACE_DAYS = 7
+
+
 async def enforce_active_subscription(session: AsyncSession, org_id: str) -> None:
-    """Raise 402 if the org's subscription is in a blocked state (canceled, expired)."""
+    """Raise 402 if the org's subscription is in a blocked state.
+
+    States handled:
+    - ``canceled`` / ``incomplete_expired`` → hard block immediately.
+    - ``past_due`` → apply a 7-day grace period from ``past_due_since`` before
+      blocking, giving the customer time to fix their payment method without an
+      immediate service outage.  If ``past_due_since`` is not stamped (legacy row)
+      we treat the subscription as blocked to be safe.
+    """
     sub = await get_subscription(session, org_id)
     if not sub:
         return
@@ -103,6 +114,28 @@ async def enforce_active_subscription(session: AsyncSession, org_id: str) -> Non
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail="Your subscription has ended. Please renew to continue using Kynara.",
         )
+    if sub.status == "past_due":
+        now = datetime.now(tz=timezone.utc)
+        if sub.past_due_since is None:
+            # No grace-period timestamp → block immediately (safe default for legacy rows)
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail=(
+                    "Your payment is past due. Please update your payment method "
+                    "in the billing portal to continue using Kynara."
+                ),
+            )
+        grace_expires = sub.past_due_since + timedelta(days=_PAST_DUE_GRACE_DAYS)
+        if now >= grace_expires:
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail=(
+                    f"Your payment has been past due since "
+                    f"{sub.past_due_since.strftime('%Y-%m-%d')} "
+                    f"({_PAST_DUE_GRACE_DAYS}-day grace period has elapsed). "
+                    "Please update your payment method in the billing portal."
+                ),
+            )
 
 
 # ----------------------------------------------------------------- recording --

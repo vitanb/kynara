@@ -36,7 +36,7 @@ import os
 import sys
 import time
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, AsyncGenerator
 
 import httpx
 import uvicorn
@@ -275,8 +275,14 @@ async def on_startup() -> None:
         logger.warning("startup.tool_cache.failed: %s — will retry on first request", e)
 
 
+@asynccontextmanager
+async def lifespan(app) -> AsyncGenerator:
+    await on_startup()
+    yield
+
+
 starlette_app = Starlette(
-    on_startup=[on_startup],
+    lifespan=lifespan,
     routes=[
         Route("/sse", endpoint=handle_sse),
         Route("/health", endpoint=handle_health),
