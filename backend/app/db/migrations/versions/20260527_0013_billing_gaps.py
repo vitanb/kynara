@@ -1,7 +1,7 @@
 """Billing gaps: past_due_since grace period + Stripe subscription item tracking.
 
 Revision ID: 20260527_0013
-Revises: 20260505_0012
+Revises: 20260514_0017
 Create Date: 2026-05-27
 """
 from __future__ import annotations
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision = "20260527_0013"
-down_revision = "20260505_0012"
+down_revision = "20260514_0017"
 branch_labels = None
 depends_on = None
 
