@@ -50,7 +50,8 @@ def upgrade() -> None:
             nullable=False,
         ),
     )
-    op.create_index("ix_git_connections_organization_id", "git_connections", ["organization_id"])
+    # Index on organization_id is created automatically by index=True on the column above.
+    # No separate op.create_index() call needed — adding one would duplicate it and crash PostgreSQL.
 
 
 def downgrade() -> None:
