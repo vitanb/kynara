@@ -156,4 +156,175 @@ class GcpKmsBackend:
         plaintext = secrets.token_bytes(32)
         # Encode the encryption context as additional authenticated data (AAD).
         aad = json.dumps(encryption_context, sort_keys=True).encode()
-        r
+        resp = self._client.encrypt(
+            request={
+                "name": key_id or self._key_name,
+                "plaintext": plaintext,
+                "additional_authenticated_data": aad,
+            }
+        )
+        log.debug("kms.gcp.generate_data_key", key_name=key_id or self._key_name)
+        # Pack the GCP ciphertext alongside the AAD so decrypt can reconstruct it.
+        import struct
+        aad_len = struct.pack(">I", len(aad))
+        ciphertext_blob = aad_len + aad + resp.ciphertext
+        return DataKey(plaintext=plaintext, ciphertext_blob=ciphertext_blob)
+
+    def decrypt(self, ciphertext_blob: bytes, *, encryption_context: dict[str, str]) -> bytes:
+        """Unwrap a GCP KMS-wrapped data key."""
+        import json
+        import struct
+        from google.cloud import kms as gcp_kms  # type: ignore
+
+        aad_len = struct.unpack(">I", ciphertext_blob[:4])[0]
+        aad = ciphertext_blob[4: 4 + aad_len]
+        gcp_ciphertext = ciphertext_blob[4 + aad_len:]
+        resp = self._client.decrypt(
+            request={
+                "name": self._key_name,
+                "ciphertext": gcp_ciphertext,
+                "additional_authenticated_data": aad,
+            }
+        )
+        log.debug("kms.gcp.decrypt")
+        return resp.plaintext
+
+
+class AzureKmsBackend:
+    """Azure Key Vault backend using azure-keyvault-keys + azure-identity.
+
+    The managed identity / service principal must have Key Vault access policy
+    permissions: get, wrapKey, unwrapKey  (or Key Vault Crypto User RBAC role).
+
+    We use RSA-OAEP-256 wrap/unwrap semantics: generate a random AES-256 data
+    key locally, then wrap it with the vault key using wrapKey.  This mirrors
+    the AWS/GCP "generate data key" pattern without requiring a symmetric key
+    in Azure (RSA keys are more common in Key Vault BYOK scenarios).
+    """
+
+    def __init__(self, vault_url: str | None = None, key_name: str | None = None):
+        try:
+            from azure.identity import DefaultAzureCredential  # type: ignore
+            from azure.keyvault.keys.crypto import CryptographyClient, KeyWrapAlgorithm  # type: ignore
+            from azure.keyvault.keys import KeyClient  # type: ignore
+        except ImportError as exc:
+            raise RuntimeError(
+                "azure-keyvault-keys and azure-identity are required for the Azure KMS backend. "
+                "Add 'azure-keyvault-keys>=4.9' and 'azure-identity>=1.16' to pyproject.toml."
+            ) from exc
+        self._vault_url = vault_url or os.environ.get("AZURE_KEYVAULT_URL", "")
+        self._key_name = key_name or os.environ.get("AZURE_KEY_NAME", "")
+        if not self._vault_url or not self._key_name:
+            raise RuntimeError(
+                "AZURE_KEYVAULT_URL and AZURE_KEY_NAME must both be set for the Azure KMS backend."
+            )
+        from azure.identity import DefaultAzureCredential  # type: ignore
+        from azure.keyvault.keys import KeyClient  # type: ignore
+        self._credential = DefaultAzureCredential()
+        self._key_client = KeyClient(vault_url=self._vault_url, credential=self._credential)
+
+    def _crypto_client(self, key_id: str):
+        from azure.keyvault.keys.crypto import CryptographyClient  # type: ignore
+        key = self._key_client.get_key(key_id or self._key_name)
+        return CryptographyClient(key, credential=self._credential)
+
+    def generate_data_key(self, key_id: str, *, encryption_context: dict[str, str]) -> DataKey:
+        """Generate a random AES-256 data key and wrap it using the vault key."""
+        import json
+        from azure.keyvault.keys.crypto import KeyWrapAlgorithm  # type: ignore
+
+        plaintext = secrets.token_bytes(32)
+        client = self._crypto_client(key_id)
+        result = client.wrap_key(KeyWrapAlgorithm.rsa_oaep_256, plaintext)
+        # Embed the encryption context in the blob so decrypt can verify it.
+        ctx_bytes = json.dumps(encryption_context, sort_keys=True).encode()
+        import struct
+        ctx_len = struct.pack(">I", len(ctx_bytes))
+        ciphertext_blob = ctx_len + ctx_bytes + result.encrypted_key
+        log.debug("kms.azure.generate_data_key", key_name=key_id or self._key_name)
+        return DataKey(plaintext=plaintext, ciphertext_blob=ciphertext_blob)
+
+    def decrypt(self, ciphertext_blob: bytes, *, encryption_context: dict[str, str]) -> bytes:
+        """Unwrap an Azure Key Vault-wrapped data key."""
+        import json
+        import struct
+        from azure.keyvault.keys.crypto import KeyWrapAlgorithm  # type: ignore
+
+        ctx_len = struct.unpack(">I", ciphertext_blob[:4])[0]
+        ctx_bytes = ciphertext_blob[4: 4 + ctx_len]
+        wrapped_key = ciphertext_blob[4 + ctx_len:]
+        stored_ctx = json.loads(ctx_bytes)
+        if stored_ctx != encryption_context:
+            raise PermissionError("encryption_context mismatch")
+        client = self._crypto_client(self._key_name)
+        result = client.unwrap_key(KeyWrapAlgorithm.rsa_oaep_256, wrapped_key)
+        log.debug("kms.azure.decrypt")
+        return result.key
+
+
+_backend: KmsBackend | None = None
+
+
+def get_backend() -> KmsBackend:
+    global _backend
+    if _backend is None:
+        backend_name = os.environ.get("KYNARA_KMS_BACKEND", "local")
+        if backend_name == "local":
+            seed = os.environ.get("KYNARA_KMS_LOCAL_KEY", "")
+            if not seed:
+                seed = secrets.token_hex(32)
+                log.warning(
+                    "kms.using_ephemeral_local_key — set KYNARA_KMS_LOCAL_KEY for persistence"
+                )
+            _backend = LocalKmsBackend(bytes.fromhex(seed))
+        elif backend_name == "aws":
+            region = os.environ.get("AWS_REGION")
+            _backend = AwsKmsBackend(region=region)
+            log.info("kms.backend_aws", region=region)
+        elif backend_name == "gcp":
+            key_name = os.environ.get("GCP_KMS_KEY_NAME")
+            _backend = GcpKmsBackend(key_name=key_name)
+            log.info("kms.backend_gcp", key_name=key_name)
+        elif backend_name == "azure":
+            vault_url = os.environ.get("AZURE_KEYVAULT_URL")
+            key_name = os.environ.get("AZURE_KEY_NAME")
+            _backend = AzureKmsBackend(vault_url=vault_url, key_name=key_name)
+            log.info("kms.backend_azure", vault_url=vault_url, key_name=key_name)
+        else:
+            raise NotImplementedError(
+                f"Unknown KMS backend: {backend_name!r}. "
+                "Valid values: 'local', 'aws', 'gcp', 'azure'."
+            )
+    return _backend
+
+
+def encrypt_for_tenant(plaintext: bytes, *, org_id: str, kms_key_id: str | None = None) -> dict:
+    """Generate a data key, encrypt plaintext under it, return the bundle."""
+    backend = get_backend()
+    key_id = kms_key_id or f"alias/kynara-tenant-{org_id}"
+    dk = backend.generate_data_key(key_id, encryption_context={"org_id": org_id})
+
+    # AES-256-GCM
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    nonce = secrets.token_bytes(12)
+    aes = AESGCM(dk.plaintext)
+    ct = aes.encrypt(nonce, plaintext, associated_data=org_id.encode())
+    return {
+        "v": 1,
+        "kms_key_id": key_id,
+        "ciphertext_blob": base64.b64encode(dk.ciphertext_blob).decode(),
+        "nonce": base64.b64encode(nonce).decode(),
+        "ciphertext": base64.b64encode(ct).decode(),
+    }
+
+
+def decrypt_for_tenant(bundle: dict, *, org_id: str) -> bytes:
+    backend = get_backend()
+    cb = base64.b64decode(bundle["ciphertext_blob"])
+    nonce = base64.b64decode(bundle["nonce"])
+    ct = base64.b64decode(bundle["ciphertext"])
+    pt_key = backend.decrypt(cb, encryption_context={"org_id": org_id})
+
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    aes = AESGCM(pt_key)
+    return aes.decrypt(nonce, ct, associated_data=org_id.encode())

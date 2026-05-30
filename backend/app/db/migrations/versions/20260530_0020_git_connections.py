@@ -57,3 +57,5 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_index("ix_git_connections_organization_id", table_name="git_connections")
     op.drop_table("git_connections")
+connections_organization_id", table_name="git_connections")
+    op.drop_table("git_connections")

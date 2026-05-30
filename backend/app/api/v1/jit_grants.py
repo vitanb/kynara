@@ -178,4 +178,219 @@ async def revoke_grant(
 class ElevationRequestIn(BaseModel):
     scopes: list[str] = Field(..., min_length=1)
     duration_minutes: int = Field(60, ge=5, le=480)
-  
+    justification: str = Field(..., min_length=10, max_length=2048)
+    ticket_url: str | None = None
+
+
+class ElevationRequestOut(BaseModel):
+    approval_request_id: str
+    status: str
+    message: str
+
+
+class MyRequestOut(BaseModel):
+    approval_request_id: str
+    status: str
+    scopes: list[str]
+    duration_minutes: int
+    justification: str
+    ticket_url: str | None
+    created_at: str
+    expires_at: str
+    reviewed_at: str | None
+    review_note: str | None
+
+
+@router.post("/request", response_model=ElevationRequestOut, status_code=202)
+async def request_elevation(
+    body: ElevationRequestIn,
+    principal: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(_session),
+):
+    """Self-service JIT elevation request — any authenticated user.
+
+    Creates a pending ApprovalRequest with request_type="jit_elevation".  An
+    admin reviews it via the normal approvals queue; on approval the JitGrant
+    is auto-created by ``auto_fulfill_jit_elevation``.
+    """
+    if not principal.user_id:
+        raise HTTPException(403, "JIT elevation requests must come from a human user session")
+
+    metadata: dict[str, Any] = {
+        "request_type": "jit_elevation",
+        "requested_scopes": body.scopes,
+        "duration_minutes": body.duration_minutes,
+        "justification": body.justification,
+        "ticket_url": body.ticket_url,
+        "requester_user_id": principal.user_id,
+    }
+
+    approval = ApprovalRequest(
+        organization_id=uuid.UUID(principal.org_id),
+        subject_type="user",
+        subject_id=principal.user_id,
+        on_behalf_of_user_id=None,
+        action="jit.elevation.request",
+        resource_type="jit_grant",
+        resource_id=None,
+        resource_attrs={},
+        context=metadata,
+        matched_policy_id=None,
+        status="pending",
+        expires_at=datetime.now(tz=timezone.utc) + timedelta(hours=24),
+    )
+    session.add(approval)
+    await session.flush()
+
+    await record_admin(
+        session,
+        org_id=principal.org_id,
+        actor=f"user:{principal.user_id}",
+        event_type="access.elevation.requested",
+        resource_type="approval_request",
+        resource_id=str(approval.id),
+        payload=metadata,
+    )
+    await session.commit()
+
+    return ElevationRequestOut(
+        approval_request_id=str(approval.id),
+        status="pending",
+        message="Elevation request submitted. An admin will review it shortly.",
+    )
+
+
+@router.get("/my-requests", response_model=list[MyRequestOut])
+async def my_requests(
+    status: str | None = None,
+    limit: int = 50,
+    principal: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(_session),
+):
+    """List the calling user's own JIT elevation requests (pending and recent)."""
+    if not principal.user_id:
+        raise HTTPException(403, "Requires a user session")
+
+    q = (
+        select(ApprovalRequest)
+        .where(
+            ApprovalRequest.organization_id == uuid.UUID(principal.org_id),
+            ApprovalRequest.subject_type == "user",
+            ApprovalRequest.subject_id == principal.user_id,
+            ApprovalRequest.action == "jit.elevation.request",
+        )
+        .order_by(ApprovalRequest.created_at.desc())
+        .limit(limit)
+    )
+    if status:
+        q = q.where(ApprovalRequest.status == status)
+
+    rows = (await session.scalars(q)).all()
+    result = []
+    for r in rows:
+        ctx = r.context or {}
+        result.append(MyRequestOut(
+            approval_request_id=str(r.id),
+            status=r.status,
+            scopes=ctx.get("requested_scopes", []),
+            duration_minutes=ctx.get("duration_minutes", 60),
+            justification=ctx.get("justification", ""),
+            ticket_url=ctx.get("ticket_url"),
+            created_at=r.created_at.isoformat(),
+            expires_at=r.expires_at.isoformat(),
+            reviewed_at=r.reviewed_at.isoformat() if r.reviewed_at else None,
+            review_note=r.review_note,
+        ))
+    return result
+
+
+# ── Auto-fulfill hook (called by approvals.py on approve) ────────────────────
+
+async def auto_fulfill_jit_elevation(
+    session: AsyncSession,
+    approval: ApprovalRequest,
+    reviewer_user_id: str,
+) -> JitGrant | None:
+    """If the approval is for a jit_elevation, create the JitGrant automatically.
+
+    Called server-side from approvals.py immediately after the approval row is
+    persisted.  Returns the new JitGrant or None if not applicable.
+    """
+    ctx = approval.context or {}
+    if ctx.get("request_type") != "jit_elevation":
+        return None
+
+    requester_user_id = ctx.get("requester_user_id") or approval.subject_id
+    scopes = ctx.get("requested_scopes") or []
+    duration_minutes = int(ctx.get("duration_minutes") or 60)
+    justification = ctx.get("justification") or "Approved via self-service JIT request"
+    ticket_url = ctx.get("ticket_url")
+
+    expires = datetime.now(timezone.utc) + timedelta(minutes=duration_minutes)
+    g = JitGrant(
+        organization_id=approval.organization_id,
+        user_id=uuid.UUID(requester_user_id),
+        granted_by_user_id=uuid.UUID(reviewer_user_id),
+        scopes=scopes,
+        justification=justification,
+        ticket_url=ticket_url,
+        expires_at=expires,
+        is_active=True,
+    )
+    session.add(g)
+    await session.flush()
+
+    await record_admin(
+        session,
+        org_id=str(approval.organization_id),
+        actor=f"user:{reviewer_user_id}",
+        event_type="access.elevation.granted",
+        resource_type="user",
+        resource_id=requester_user_id,
+        payload={
+            "grant_id": str(g.id),
+            "approval_request_id": str(approval.id),
+            "scopes": scopes,
+            "duration_minutes": duration_minutes,
+            "justification": justification,
+            "ticket_url": ticket_url,
+        },
+    )
+    await emit(session, str(approval.organization_id), "access.elevation.granted", {
+        "grant_id": str(g.id),
+        "user_id": requester_user_id,
+        "scopes": scopes,
+        "expires_at": expires.isoformat(),
+        "via": "self_service_jit",
+    })
+    return g
+
+
+# ── Expire due ────────────────────────────────────────────────────────────────
+
+@router.post("/expire-due", include_in_schema=False)
+async def expire_due(
+    principal: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(_session),
+):
+    """Cron-callable: deactivate grants whose expiry has passed."""
+    _admin(principal)
+    now = datetime.now(timezone.utc)
+    rows = (await session.scalars(
+        select(JitGrant).where(
+            JitGrant.organization_id == uuid.UUID(principal.org_id),
+            JitGrant.is_active.is_(True),
+            JitGrant.expires_at <= now,
+        )
+    )).all()
+    for g in rows:
+        g.is_active = False
+        await record_admin(
+            session,
+            org_id=principal.org_id, actor="system:jit-expirer",
+            event_type="access.elevation.expired",
+            resource_type="jit_grant", resource_id=str(g.id),
+            payload={"scopes": list(g.scopes or [])},
+        )
+    await session.commit()
+    return {"expired": len(rows)}

@@ -30,4 +30,12 @@ v1.include_router(contact.router)
 v1.include_router(api_keys.router)
 v1.include_router(guardrails.router)
 v1.include_router(webhooks.router)
-# Ne
+# New feature routers
+v1.include_router(activity_stream.router)
+v1.include_router(agent_credentials.router)
+v1.include_router(delegation.router)
+v1.include_router(git_sync.router)
+v1.include_router(policy_simulation.router)
+v1.include_router(policy_templates.router)
+# OAuth 2.0 — mounted at root (not /api/v1) so URLs match RFC 8414 conventions
+# Registered separately in main.py via oauth.router

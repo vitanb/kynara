@@ -127,4 +127,35 @@ spec:
               image: {{ include "kynara.backend.image" . }}
               command: ["python", "-m", "app.scripts.update_risk_scores"]
               envFrom:
-                - secretRef: { name: {{ .Va
+                - secretRef: { name: {{ .Values.backend.envFromSecret }} }
+              securityContext:
+                {{- toYaml .Values.containerSecurityContext | nindent 16 }}
+---
+# Daily usage warning mailer — runs at 08:00 UTC.
+# Sends 80% and 100% quota warning emails to org owners.
+# Uses UsageRecord sentinel rows for deduplication so re-runs are safe.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "kynara.fullname" . }}-usage-warnings
+  labels:
+    {{- include "kynara.labels" . | nindent 4 }}
+spec:
+  schedule: "0 8 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ .Values.serviceAccount.name }}
+          restartPolicy: OnFailure
+          containers:
+            - name: mailer
+              image: {{ include "kynara.backend.image" . }}
+              command: ["python", "-m", "app.scripts.send_usage_warnings"]
+              envFrom:
+                - secretRef: { name: {{ .Values.backend.envFromSecret }} }
+              securityContext:
+                {{- toYaml .Values.containerSecurityContext | nindent 16 }}

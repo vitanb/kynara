@@ -291,4 +291,79 @@ async def sidecar_bundle(
                 "id": str(p.id), "slug": p.slug,
                 "effect": p.effect, "priority": p.priority,
                 "actions": list(p.actions or []),
-                "resource_typ
+                "resource_types": list(p.resource_types or []),
+                "condition": p.condition,
+                "is_enabled": p.is_enabled,
+            } for p in pols
+        ],
+    }
+
+    try:
+        priv_pem, _ = await get_or_create_org_keypair(session, principal.org_id)
+        bundle = sign_bundle(bundle, priv_pem)
+        await session.commit()
+    except Exception as exc:
+        import logging
+        logging.getLogger("policy_bundle").error(
+            "bundle_signing.failed -- returning unsigned bundle: %s", exc
+        )
+        bundle["signature"] = ""
+
+    return bundle
+
+
+@router.get("/pubkey", summary="Ed25519 public key for bundle signature verification")
+async def bundle_pubkey(
+    principal: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(_session),
+):
+    """Return the org's Ed25519 public key in PEM format.
+
+    The Go sidecar and any external verifier should call this endpoint on
+    startup (and after receiving a ``bundle.key_rotated`` webhook event) to
+    keep their cached public key current.
+    """
+    _, pub_pem = await get_or_create_org_keypair(session, principal.org_id)
+    await session.commit()
+    return {"org_id": principal.org_id, "public_key_pem": pub_pem.decode()}
+
+
+@router.post("/rotate-signing-key", summary="Rotate the bundle signing keypair")
+async def rotate_signing_key(
+    principal: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(_session),
+):
+    """Generate a new Ed25519 keypair for the org, replacing the existing one.
+
+    After rotation the sidecar must re-fetch the bundle and the public key.
+    """
+    from sqlalchemy import select as _select
+    from app.models.security import TenantKey
+    from app.security.bundle_signing import generate_keypair
+    from app.security.kms import encrypt_for_tenant
+
+    PURPOSE = "bundle_signing"
+    existing = await session.scalar(
+        _select(TenantKey).where(
+            TenantKey.organization_id == uuid.UUID(principal.org_id),
+            TenantKey.purpose == PURPOSE,
+        )
+    )
+    priv_pem, pub_pem = generate_keypair()
+    bundle_enc = encrypt_for_tenant(priv_pem, org_id=principal.org_id)
+
+    if existing:
+        existing.encrypted_key = bundle_enc
+        existing.metadata = {
+            **(existing.metadata or {}),
+            "bundle_signing_pub_pem": pub_pem.decode(),
+        }
+    else:
+        session.add(TenantKey(
+            organization_id=uuid.UUID(principal.org_id),
+            purpose=PURPOSE,
+            encrypted_key=bundle_enc,
+            metadata={"bundle_signing_pub_pem": pub_pem.decode()},
+        ))
+    await session.commit()
+    return {"ok": True, "message": "Signing keypair rotated. Re-fetch the bundle and public key."}
