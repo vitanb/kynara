@@ -412,7 +412,3 @@ async def export_access_review(
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
- total * 100, 1) if total else 0.0
-        result.append(entry)
-
-    return sorted(result, key=lambda x: -x["total"])
