@@ -4,11 +4,24 @@ A JIT grant is a time-bound elevation of a user's effective scopes. Used for
 break-glass scenarios: "give me ``crm:write`` for 2 hours to debug a prod
 escalation." Every grant carries a justification and a link to the originating
 ticket. Every grant create/revoke is recorded in the audit chain.
+
+Self-service flow (Task #14)
+-----------------------------
+Any authenticated user can POST /jit-grants/request to ask for a temporary
+elevation.  This creates an ApprovalRequest with request_type="jit_elevation"
+and returns the approval ID so the requester can poll status.
+
+When an admin approves that request via POST /approvals/{id}/approve the hook
+``auto_fulfill_jit_elevation`` (called from approvals.py) automatically creates
+the JitGrant with the requested scopes and duration.
+
+Users can view their own pending/recent requests via GET /jit-grants/my-requests.
 """
 from __future__ import annotations
 
 import uuid
 from datetime import datetime, timedelta, timezone
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -18,6 +31,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.audit.service import record_admin
 from app.auth.dependencies import Principal, get_principal
 from app.db.session import SessionLocal
+from app.models import ApprovalRequest
 from app.models.jit_grant import JitGrant
 from app.webhooks.service import emit
 
@@ -159,29 +173,9 @@ async def revoke_grant(
     return GrantOut.from_orm(g)
 
 
-@router.post("/expire-due", include_in_schema=False)
-async def expire_due(
-    principal: Principal = Depends(get_principal),
-    session: AsyncSession = Depends(_session),
-):
-    """Cron-callable: deactivate grants whose expiry has passed."""
-    _admin(principal)
-    now = datetime.now(timezone.utc)
-    rows = (await session.scalars(
-        select(JitGrant).where(
-            JitGrant.organization_id == uuid.UUID(principal.org_id),
-            JitGrant.is_active.is_(True),
-            JitGrant.expires_at <= now,
-        )
-    )).all()
-    for g in rows:
-        g.is_active = False
-        await record_admin(
-            session,
-            org_id=principal.org_id, actor="system:jit-expirer",
-            event_type="access.elevation.expired",
-            resource_type="jit_grant", resource_id=str(g.id),
-            payload={"scopes": list(g.scopes or [])},
-        )
-    await session.commit()
-    return {"expired": len(rows)}
+# ── Self-service elevation request ───────────────────────────────────────────
+
+class ElevationRequestIn(BaseModel):
+    scopes: list[str] = Field(..., min_length=1)
+    duration_minutes: int = Field(60, ge=5, le=480)
+  

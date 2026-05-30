@@ -100,17 +100,19 @@ spec:
               securityContext:
                 {{- toYaml .Values.containerSecurityContext | nindent 16 }}
 ---
-# Daily usage warning mailer — runs at 08:00 UTC.
-# Sends 80% and 100% quota warning emails to org owners.
-# Uses UsageRecord sentinel rows for deduplication so re-runs are safe.
+# Daily agent risk scorer — runs at 03:00 UTC.
+# For every active agent, computes a 0-100 risk score from the last 30 days
+# of policy decisions (deny rate, approval rate, anomaly flags) and persists
+# it to agent.risk_score / agent.risk_factors.  Escalates risk_class to
+# "high" (>75) or "critical" (>90) automatically.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "kynara.fullname" . }}-usage-warnings
+  name: {{ include "kynara.fullname" . }}-risk-scorer
   labels:
     {{- include "kynara.labels" . | nindent 4 }}
 spec:
-  schedule: "0 8 * * *"
+  schedule: "0 3 * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 5
@@ -121,10 +123,8 @@ spec:
           serviceAccountName: {{ .Values.serviceAccount.name }}
           restartPolicy: OnFailure
           containers:
-            - name: mailer
+            - name: scorer
               image: {{ include "kynara.backend.image" . }}
-              command: ["python", "-m", "app.scripts.send_usage_warnings"]
+              command: ["python", "-m", "app.scripts.update_risk_scores"]
               envFrom:
-                - secretRef: { name: {{ .Values.backend.envFromSecret }} }
-              securityContext:
-                {{- toYaml .Values.containerSecurityContext | nindent 16 }}
+                - secretRef: { name: {{ .Va

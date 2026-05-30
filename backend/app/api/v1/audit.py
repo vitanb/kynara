@@ -1,10 +1,12 @@
-"""Audit log query + chain verification."""
+"""Audit log query + chain verification + compliance report exports."""
 from __future__ import annotations
 
 import csv
 import io
+import json
 import uuid
-from datetime import datetime
+import zipfile
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
@@ -15,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.audit.service import verify_chain
 from app.auth.dependencies import Principal, get_principal, require_scope
 from app.db.session import SessionLocal
-from app.models import AuditEvent
+from app.models import AuditEvent, OrgMembership, Subscription, UsageRecord
 
 router = APIRouter(prefix="/audit", tags=["audit"])
 
@@ -184,7 +186,4 @@ async def agent_decisions_report(
     for entry in agents.values():
         total = entry["total"]
         entry["autonomous_pct"] = round(entry["allow"] / total * 100, 1) if total else 0.0
-        entry["approval_pct"] = round(entry["require_approval"] / total * 100, 1) if total else 0.0
-        result.append(entry)
-
-    return sorted(result, key=lambda x: -x["total"])
+        entry["approval_pct"] = round(entry["require_approval"] /

@@ -7,6 +7,7 @@ from app.models.invite import OrgInvite
 from app.models.org import Organization, OrgMembership
 from app.models.password_reset import PasswordResetToken
 from app.models.policy import Policy, PolicyBinding, Role, RolePermission
+from app.models.policy_version import PolicyVersion
 from app.models.session import RefreshSession
 from app.models.sso import SsoConnection, ScimSync
 from app.models.oauth import OAuthClient, OAuthCode
@@ -29,6 +30,7 @@ __all__ = [
     "OrgMembership",
     "Policy",
     "PolicyBinding",
+    "PolicyVersion",
     "Role",
     "RolePermission",
     "RefreshSession",

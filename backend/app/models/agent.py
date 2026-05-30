@@ -59,6 +59,12 @@ class Agent(Base, UUIDPkMixin, TimestampMixin):
     risk_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     risk_factors: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
 
+    # Cost-attribution tags for internal chargeback / FinOps reporting.
+    # Free-form strings set by the operator; used by GET /billing/attribution.
+    project: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    team: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    cost_centre: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+
 
 class AgentAssignment(Base, UUIDPkMixin, TimestampMixin):
     """Binds an agent to the user it acts on behalf of.
@@ -81,8 +87,4 @@ class AgentAssignment(Base, UUIDPkMixin, TimestampMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    # Caps the permission set to at most the intersection of (user_grants, role_grants)
-    role_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("roles.id"))
-    # Time-boxed delegation is a *must-have* for agents
-    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    

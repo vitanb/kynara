@@ -2,19 +2,27 @@
 
 The platform provides AES-256-GCM "data keys" derived from a per-tenant KMS
 key. Tenants on Enterprise plans can elect BYOK (Bring-Your-Own-Key): they
-configure an AWS KMS key in their account and grant Kynara's worker role
-``kms:GenerateDataKey`` and ``kms:Decrypt`` on it. We never see the master key.
+configure a KMS key in their account and grant Kynara's worker role the
+necessary permissions. We never see the master key.
 
-This module is the abstraction layer between the application and KMS. It is
-deliberately *not* coupled to AWS so the same interface can wrap GCP KMS,
-Azure Key Vault, or HashiCorp Vault Transit on customer demand.
+This module is the abstraction layer between the application and KMS.
 
 Backend selection (KYNARA_KMS_BACKEND env var):
   - "local"  — dev/CI XOR backend (default). Set KYNARA_KMS_LOCAL_KEY to a 64-char hex string.
-  - "aws"    — production AWS KMS via boto3. Requires:
-                 AWS_KMS_KEY_ID       — default key ARN/alias for platform-managed keys
-                 AWS_REGION           — e.g. us-east-1 (or use standard boto3 env vars)
-                 Standard boto3 credential chain (IAM role, env vars, ~/.aws/credentials)
+  - "aws"    — AWS KMS via boto3. Requires:
+                 AWS_KMS_KEY_ID, AWS_REGION
+                 IAM permissions: kms:GenerateDataKey, kms:Decrypt
+  - "gcp"    — GCP Cloud KMS via google-cloud-kms. Requires:
+                 GCP_KMS_KEY_NAME     — full resource name:
+                   projects/{p}/locations/{l}/keyRings/{r}/cryptoKeys/{k}
+                 GOOGLE_APPLICATION_CREDENTIALS or Workload Identity
+                 IAM role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+  - "azure"  — Azure Key Vault via azure-keyvault-keys. Requires:
+                 AZURE_KEYVAULT_URL   — e.g. https://my-vault.vault.azure.net
+                 AZURE_KEY_NAME       — name of the RSA/EC key in the vault
+                 Standard Azure credential chain (DefaultAzureCredential):
+                   env vars, managed identity, VS Code, Azure CLI, etc.
+                 Key Vault access policy: get, wrapKey, unwrapKey
 """
 from __future__ import annotations
 
@@ -110,58 +118,42 @@ class AwsKmsBackend:
         return resp["Plaintext"]
 
 
-_backend: KmsBackend | None = None
+class GcpKmsBackend:
+    """GCP Cloud KMS backend using google-cloud-kms.
 
+    The service account / Workload Identity principal must have:
+        roles/cloudkms.cryptoKeyEncrypterDecrypter
+    on the key ring or individual key.
 
-def get_backend() -> KmsBackend:
-    global _backend
-    if _backend is None:
-        backend_name = os.environ.get("KYNARA_KMS_BACKEND", "local")
-        if backend_name == "local":
-            seed = os.environ.get("KYNARA_KMS_LOCAL_KEY", "")
-            if not seed:
-                # Generate a random key for dev — log a warning so it's visible.
-                seed = secrets.token_hex(32)
-                log.warning(
-                    "kms.using_ephemeral_local_key — set KYNARA_KMS_LOCAL_KEY for persistence"
-                )
-            _backend = LocalKmsBackend(bytes.fromhex(seed))
-        elif backend_name == "aws":
-            region = os.environ.get("AWS_REGION")
-            _backend = AwsKmsBackend(region=region)
-            log.info("kms.backend_aws", region=region)
-        else:
-            raise NotImplementedError(f"Unknown KMS backend: {backend_name!r}. Use 'local' or 'aws'.")
-    return _backend
+    GCP KMS does not have a GenerateDataKey primitive — we generate the
+    plaintext data key locally using os.urandom and wrap it with
+    ``cryptoKeyVersions.asymmetricDecrypt`` (RSA-OAEP) or the symmetric
+    ``encrypt``/``decrypt`` API.  We use the symmetric CryptoKey API here
+    because it mirrors the AWS KMS semantics most closely.
+    """
 
+    def __init__(self, key_name: str | None = None):
+        try:
+            from google.cloud import kms as gcp_kms  # type: ignore
+        except ImportError as exc:
+            raise RuntimeError(
+                "google-cloud-kms is required for the GCP KMS backend. "
+                "Add 'google-cloud-kms>=2.21' to pyproject.toml dependencies."
+            ) from exc
+        self._client = gcp_kms.KeyManagementServiceClient()
+        self._key_name = key_name or os.environ.get("GCP_KMS_KEY_NAME", "")
+        if not self._key_name:
+            raise RuntimeError(
+                "GCP_KMS_KEY_NAME must be set to the full CryptoKey resource name, e.g. "
+                "projects/my-project/locations/global/keyRings/my-ring/cryptoKeys/my-key"
+            )
 
-def encrypt_for_tenant(plaintext: bytes, *, org_id: str, kms_key_id: str | None = None) -> dict:
-    """Generate a data key, encrypt plaintext under it, return the bundle."""
-    backend = get_backend()
-    key_id = kms_key_id or f"alias/kynara-tenant-{org_id}"
-    dk = backend.generate_data_key(key_id, encryption_context={"org_id": org_id})
+    def generate_data_key(self, key_id: str, *, encryption_context: dict[str, str]) -> DataKey:
+        """Generate a random 32-byte data key and wrap it with GCP KMS encrypt."""
+        import json
+        from google.cloud import kms as gcp_kms  # type: ignore
 
-    # AES-256-GCM
-    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-    nonce = secrets.token_bytes(12)
-    aes = AESGCM(dk.plaintext)
-    ct = aes.encrypt(nonce, plaintext, associated_data=org_id.encode())
-    return {
-        "v": 1,
-        "kms_key_id": key_id,
-        "ciphertext_blob": base64.b64encode(dk.ciphertext_blob).decode(),
-        "nonce": base64.b64encode(nonce).decode(),
-        "ciphertext": base64.b64encode(ct).decode(),
-    }
-
-
-def decrypt_for_tenant(bundle: dict, *, org_id: str) -> bytes:
-    backend = get_backend()
-    cb = base64.b64decode(bundle["ciphertext_blob"])
-    nonce = base64.b64decode(bundle["nonce"])
-    ct = base64.b64decode(bundle["ciphertext"])
-    pt_key = backend.decrypt(cb, encryption_context={"org_id": org_id})
-
-    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-    aes = AESGCM(pt_key)
-    return aes.decrypt(nonce, ct, associated_data=org_id.encode())
+        plaintext = secrets.token_bytes(32)
+        # Encode the encryption context as additional authenticated data (AAD).
+        aad = json.dumps(encryption_context, sort_keys=True).encode()
+        r

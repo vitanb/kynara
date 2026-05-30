@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from typing import Literal
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -17,6 +17,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.dependencies import Principal, get_principal
 from app.db.session import SessionLocal
 from app.models import ApprovalRequest
+
+# Lazy import to avoid circular dependency — resolved at call time.
+_auto_fulfill_jit: Any = None
+
+def _get_jit_hook():
+    global _auto_fulfill_jit
+    if _auto_fulfill_jit is None:
+        from app.api.v1.jit_grants import auto_fulfill_jit_elevation
+        _auto_fulfill_jit = auto_fulfill_jit_elevation
+    return _auto_fulfill_jit
 
 router = APIRouter(prefix="/approvals", tags=["approvals"])
 
@@ -240,6 +250,18 @@ async def approve(
     row.reviewed_by_user_id = uuid.UUID(principal.user_id)
     row.reviewed_at = datetime.now(tz=timezone.utc)
     row.review_note = body.note
+    await session.flush()
+
+    # Auto-fulfill self-service JIT elevation requests.
+    try:
+        await _get_jit_hook()(session, row, principal.user_id)
+    except Exception as _hook_err:
+        # Non-fatal — the approval is still recorded even if grant creation fails.
+        import logging
+        logging.getLogger("kynara.approvals").warning(
+            "jit_auto_fulfill_failed: %s", _hook_err
+        )
+
     await session.commit()
     await session.refresh(row)
     return ApprovalOut.from_orm(row)
@@ -249,23 +271,4 @@ async def approve(
 async def reject(
     approval_id: str,
     body: ReviewIn,
-    principal: Principal = Depends(get_principal),
-    session: AsyncSession = Depends(_session),
-):
-    _require_admin(principal)
-    row = await _get_or_404(session, principal.org_id, approval_id)
-
-    if row.status != "pending":
-        raise HTTPException(409, f"Request is already '{row.status}' and cannot be rejected")
-    if row.expires_at < datetime.now(tz=timezone.utc):
-        row.status = "expired"
-        await session.flush()
-        raise HTTPException(410, "Approval request has expired")
-
-    row.status = "rejected"
-    row.reviewed_by_user_id = uuid.UUID(principal.user_id)
-    row.reviewed_at = datetime.now(tz=timezone.utc)
-    row.review_note = body.note
-    await session.commit()
-    await session.refresh(row)
-    return ApprovalOut.from_orm(row)
+    principal

@@ -25,6 +25,7 @@ from app.audit.service import record_admin
 from app.auth.dependencies import Principal, get_principal
 from app.db.session import SessionLocal
 from app.models import Policy, Role, RolePermission, Tool, ToolScope
+from app.security.bundle_signing import get_or_create_org_keypair, sign_bundle
 
 router = APIRouter(prefix="/policy-bundle", tags=["policies"])
 
@@ -268,7 +269,12 @@ async def sidecar_bundle(
     principal: Principal = Depends(get_principal),
     session: AsyncSession = Depends(_session),
 ):
-    """Lean policy bundle consumed by the decision sidecar (Go binary)."""
+    """Lean policy bundle consumed by the decision sidecar (Go binary).
+
+    The bundle is signed with the org's Ed25519 private key.  The sidecar
+    should verify the signature using the public key from ``GET /bundle/pubkey``
+    before loading the bundle into memory.
+    """
     pols = (await session.scalars(
         select(Policy).where(
             Policy.organization_id == uuid.UUID(principal.org_id),
@@ -276,7 +282,8 @@ async def sidecar_bundle(
             Policy.is_enabled.is_(True),
         ).order_by(Policy.priority)
     )).all()
-    return {
+
+    bundle = {
         "org_id": principal.org_id,
         "issued_at": datetime.now(timezone.utc).isoformat(),
         "policies": [
@@ -284,11 +291,4 @@ async def sidecar_bundle(
                 "id": str(p.id), "slug": p.slug,
                 "effect": p.effect, "priority": p.priority,
                 "actions": list(p.actions or []),
-                "resource_types": list(p.resource_types or []),
-                "condition": p.condition,
-                "is_enabled": p.is_enabled,
-            } for p in pols
-        ],
-        # In production this would be JWS over canonical_json(bundle).
-        "signature": "TODO-Ed25519-server-side",
-    }
+                "resource_typ
