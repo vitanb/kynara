@@ -237,7 +237,7 @@ def upgrade() -> None:
                     (id, slug, display_name, description, category, author,
                      template_data, tags, install_count, is_published, created_at, updated_at)
                 VALUES
-                    (:id, :slug, :display_name, :description, :category, :author,
+                    (CAST(:id AS uuid), :slug, :display_name, :description, :category, :author,
                      CAST(:template_data AS jsonb), CAST(:tags AS text[]), 0, true, now(), now())
                 ON CONFLICT (slug) DO NOTHING
                 """
