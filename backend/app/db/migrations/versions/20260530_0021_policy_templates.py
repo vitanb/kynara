@@ -30,7 +30,7 @@ STARTER_TEMPLATES = [
         "description": "Allows reading CRM contacts freely; requires human approval before any CRM write operation.",
         "category": "crm",
         "author": "kynara",
-        "tags": '{"crm","contacts","read-only-writes"}',
+        "tags": "{crm,contacts,read-only-writes}",
         "template_data": """{
             "policies": [
                 {
@@ -61,7 +61,7 @@ STARTER_TEMPLATES = [
         "description": "Allows file reads, blocks file deletions, and requires approval before any file write.",
         "category": "code",
         "author": "kynara",
-        "tags": '{"code","files","restricted"}',
+        "tags": "{code,files,restricted}",
         "template_data": """{
             "policies": [
                 {
@@ -101,7 +101,7 @@ STARTER_TEMPLATES = [
         "description": "Allows database queries freely, requires approval for writes, and permanently blocks DROP operations.",
         "category": "data",
         "author": "kynara",
-        "tags": '{"data","database","analytics"}',
+        "tags": "{data,database,analytics}",
         "template_data": """{
             "policies": [
                 {
@@ -141,7 +141,7 @@ STARTER_TEMPLATES = [
         "description": "Allows reading emails, requires approval before sending, and blocks bulk delete operations.",
         "category": "email",
         "author": "kynara",
-        "tags": '{"email","communication"}',
+        "tags": "{email,communication}",
         "template_data": """{
             "policies": [
                 {
@@ -181,7 +181,7 @@ STARTER_TEMPLATES = [
         "description": "Permits any read action (matching *:read pattern) and denies all write operations by default.",
         "category": "general",
         "author": "kynara",
-        "tags": '{"read-only","safe","general"}',
+        "tags": "{read-only,safe,general}",
         "template_data": """{
             "policies": [
                 {
@@ -226,7 +226,9 @@ def upgrade() -> None:
     )
     op.create_index("ix_policy_templates_category", "policy_templates", ["category"])
 
-    # Insert the 5 starter templates
+    # Insert the 5 starter templates.
+    # Use CAST() instead of :: so SQLAlchemy's text() parser does not mistake
+    # the colon in ::jsonb / ::text[] for a named bind-parameter prefix.
     for t in STARTER_TEMPLATES:
         op.execute(
             sa.text(
@@ -236,7 +238,7 @@ def upgrade() -> None:
                      template_data, tags, install_count, is_published, created_at, updated_at)
                 VALUES
                     (:id, :slug, :display_name, :description, :category, :author,
-                     :template_data::jsonb, :tags::text[]::varchar[], 0, true, now(), now())
+                     CAST(:template_data AS jsonb), CAST(:tags AS text[]), 0, true, now(), now())
                 ON CONFLICT (slug) DO NOTHING
                 """
             ).bindparams(
