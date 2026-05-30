@@ -462,4 +462,29 @@ async def get_agent_risk(
         risk_score=a.risk_score,
         risk_class=a.risk_class,
         risk_factors=a.risk_factors or {},
-        scored_at=a.updated_at.isoformat() if hasattr(a, 
+        scored_at=a.updated_at.isoformat() if hasattr(a, "updated_at") and a.updated_at else None,
+    )
+
+
+# ── Reactivate ────────────────────────────────────────────────────────────────
+
+@router.post("/{agent_id}/reactivate", status_code=204)
+async def reactivate_agent(
+    agent_id: str, request: Request,
+    principal: Principal = Depends(require_seat("owner", "admin")),
+    session: AsyncSession = Depends(_session),
+):
+    a = await session.get(Agent, uuid.UUID(agent_id))
+    if not a or a.organization_id != uuid.UUID(principal.org_id):
+        raise HTTPException(404, "Agent not found")
+    if a.is_active:
+        return  # already active — no-op
+    a.is_active = True
+    await session.commit()
+    await record_admin(
+        session, org_id=principal.org_id,
+        actor=f"user:{principal.user_id}" if principal.user_id else "system",
+        event_type="agent.reactivated", resource_type="agent", resource_id=str(a.id),
+        payload={"slug": a.slug},
+        ip_address=request.client.host if request.client else None,
+    )
