@@ -271,4 +271,43 @@ async def approve(
 async def reject(
     approval_id: str,
     body: ReviewIn,
-    principal
+    principal: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(_session),
+):
+    _require_admin(principal)
+    row = await _get_or_404(session, principal.org_id, approval_id)
+
+    if row.status != "pending":
+        raise HTTPException(409, f"Request is already '{row.status}' and cannot be rejected")
+    if row.expires_at < datetime.now(tz=timezone.utc):
+        row.status = "expired"
+        await session.flush()
+        raise HTTPException(410, "Approval request has expired")
+
+    row.status = "rejected"
+    row.reviewed_by_user_id = uuid.UUID(principal.user_id)
+    row.reviewed_at = datetime.now(tz=timezone.utc)
+    row.review_note = body.note
+    await session.commit()
+    await session.refresh(row)
+    return ApprovalOut.from_orm(row)
+: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(_session),
+):
+    _require_admin(principal)
+    row = await _get_or_404(session, principal.org_id, approval_id)
+
+    if row.status != "pending":
+        raise HTTPException(409, f"Request is already '{row.status}' and cannot be rejected")
+    if row.expires_at < datetime.now(tz=timezone.utc):
+        row.status = "expired"
+        await session.flush()
+        raise HTTPException(410, "Approval request has expired")
+
+    row.status = "rejected"
+    row.reviewed_by_user_id = uuid.UUID(principal.user_id)
+    row.reviewed_at = datetime.now(tz=timezone.utc)
+    row.review_note = body.note
+    await session.commit()
+    await session.refresh(row)
+    return ApprovalOut.from_orm(row)
