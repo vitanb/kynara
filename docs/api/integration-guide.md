@@ -471,28 +471,34 @@ Every decision is written to a hash-chained audit log. Compliance teams can:
 
 ## 12. Webhooks
 
-Subscribe to events at **Settings → Webhooks**. Each delivery is HMAC-signed:
+Subscribe to events at **Settings → Webhooks**. Each delivery is HMAC-signed with `X-Kynara-Signature: sha256=v1,<hex>`.
+
+> **HTTPS only.** Webhook URLs must use `https://`. HTTP URLs and URLs resolving to private/internal addresses are rejected at creation time.
 
 ```python
 import hmac, hashlib
 
 def verify_webhook(secret: str, body: bytes, signature_header: str) -> bool:
     computed = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
-    return hmac.compare_digest("sha256=" + computed, signature_header)
+    expected = "sha256=v1," + computed
+    return hmac.compare_digest(expected, signature_header)
 ```
 
 **Available events:**
 
 | Event | When |
 |---|---|
+| `decision.allowed` | Agent action permitted by policy |
 | `decision.denied` | Agent action blocked by policy |
 | `decision.approval_requested` | Policy returned `require_approval` |
 | `decision.approved` | Human approved a pending request |
-| `decision.denied_by_approver` | Human denied a pending approval |
+| `decision.rejected` | Human rejected a pending approval |
+| `agent.created` | A new agent was registered |
 | `agent.killed` | Kill switch activated on an agent |
+| `agent.permissions_changed` | A role assignment or JIT grant changed an agent's effective scopes |
 | `policy.changed` | Policy created, updated, or deleted |
 | `audit.chain_broken` | Integrity verifier detected a chain gap |
-| `permissions_changed` | A role assignment or JIT grant changed an agent's effective scopes |
+| `approval.expired` | A pending approval timed out (default 24 h) |
 
 Subscribe via the API:
 
@@ -508,15 +514,20 @@ POST /api/v1/webhooks
 
 ## 13. Production checklist
 
+- [ ] Set `JWT_SECRET` to a random 32+ char string (`openssl rand -hex 32`) — the default placeholder is rejected at startup in production.
+- [ ] Set `PASSWORD_PEPPER` to a strong random value — the default `change-me-in-prod` is not enforced at startup but leaves passwords vulnerable.
+- [ ] Set `METRICS_SECRET` (`openssl rand -hex 32`) — the `/metrics` endpoint returns 403 for all requests unless this is set; configure your Prometheus scraper to send `X-Metrics-Token: <value>`.
+- [ ] After rotating `JWT_SECRET`, revoke and re-issue all API keys — HMAC-keyed hashes are derived from the server secret, so existing keys become invalid after rotation.
 - [ ] Rotate the server-side JWT secret and pepper on go-live.
 - [ ] Configure SSO so human sign-in is IdP-backed.
 - [ ] Enable Stripe metering for usage-based billing.
 - [ ] Set `KYNARA_FAIL_CLOSED=true` in every runtime.
 - [ ] Add `audit.chain_broken` alerts to PagerDuty.
 - [ ] Run `POST /api/v1/audit/verify` on a cron (weekly).
-- [ ] Subscribe to `permissions_changed` and `agent.killed` webhooks.
+- [ ] Subscribe to `agent.permissions_changed` and `agent.killed` webhooks.
 - [ ] Configure SIEM polling cursor for Splunk/Datadog/Elastic.
 - [ ] Load-test `/decisions/check` at 2× expected peak.
 - [ ] Export backups of `policies`, `roles`, and `audit_events` nightly.
 - [ ] Deploy Go sidecar if p95 decision latency must be < 1ms.
 - [ ] Set up `kynara-cli.py` in CI for policy-as-code diff on every PR.
+- [ ] Verify webhook endpoints use `https://` — HTTP URLs are rejected.

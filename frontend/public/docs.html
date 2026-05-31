@@ -262,7 +262,7 @@
 
     <!-- HEADER -->
     <div class="doc-header">
-      <div class="badge"><span class="badge-dot"></span> v2.1 · May 2026</div>
+      <div class="badge"><span class="badge-dot"></span> v2.2 · May 2026</div>
       <h1>Kynara User Guide</h1>
       <p class="lead">
         Everything you need to register agents, define access policies, govern approvals,
@@ -1553,12 +1553,21 @@ condition:    {}    // catch-all for any salary read not matched above</code></p
         <li><p>Click <strong>Save</strong>, then <strong>Send Test Event</strong> to verify your endpoint.</p></li>
       </ol>
 
+      <div class="callout warn">
+        <span class="callout-icon">🔒</span>
+        <div class="callout-body">
+          <strong>HTTPS only.</strong> Webhook endpoint URLs must use <code>https://</code>. HTTP URLs and URLs that resolve to private/internal network addresses are rejected at creation time.
+        </div>
+      </div>
+
       <h3>Verifying signatures</h3>
+      <p>Each delivery includes an <code>X-Kynara-Signature</code> header in the format <code>sha256=v1,&lt;hex&gt;</code>. Verify it before processing the payload:</p>
       <pre><code>import hmac, hashlib
 
-def verify(secret: str, body: bytes, sig_header: str) -> bool:
+def verify_webhook(secret: str, body: bytes, sig_header: str) -> bool:
     computed = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
-    return hmac.compare_digest("sha256=" + computed, sig_header)</code></pre>
+    expected = "sha256=v1," + computed
+    return hmac.compare_digest(expected, sig_header)</code></pre>
 
       <p>See <a href="#webhook-events">Webhook events reference</a> for the full list of subscribable events.</p>
     </section>
@@ -1569,6 +1578,12 @@ def verify(secret: str, body: bytes, sig_header: str) -> bool:
 
       <h3>API keys</h3>
       <p>Settings → API Keys lets you create, view, and revoke API keys with per-key scope restrictions and rate limits. Keys are prefixed <code>sk_live_</code> and shown only once — store them in a secret manager.</p>
+      <div class="callout info">
+        <span class="callout-icon">🔐</span>
+        <div class="callout-body">
+          <strong>HMAC-secured storage.</strong> API keys are stored as HMAC-SHA256 hashes keyed to the server secret — not plain SHA-256. This means an attacker who obtains the <code>api_keys</code> table cannot brute-force keys without also knowing the server secret. If you rotate <code>JWT_SECRET</code>, all existing API keys become invalid and must be re-issued — revoke and recreate them after any secret rotation.
+        </div>
+      </div>
 
       <h3>SSO configuration</h3>
       <p>Settings → SSO is where owners configure Okta, Azure AD, Google Workspace, or any SAML 2.0 / OIDC-compliant provider. Multiple SSO connections can coexist. See the <a href="#sso">SSO section</a> for step-by-step instructions.</p>
@@ -1668,7 +1683,17 @@ def verify(secret: str, body: bytes, sig_header: str) -> bool:
       <h3>Auth</h3>
       <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/auth/login</span></div>
       <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/auth/refresh</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/auth/register</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/auth/forgot-password</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/auth/reset-password</span></div>
       <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/auth/sso/okta/start</span></div>
+
+      <div class="callout info">
+        <span class="callout-icon">🚦</span>
+        <div class="callout-body">
+          <strong>Auth rate limits (per IP):</strong> <code>/login</code> 10 req/min · <code>/refresh</code> 20 req/min · <code>/register</code>, <code>/forgot-password</code>, <code>/reset-password</code> 5 req/min each. Exceeding a limit returns <code>429 Too Many Requests</code>.
+        </div>
+      </div>
 
       <h3>Agents</h3>
       <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/agents</span></div>
@@ -2030,19 +2055,22 @@ GET /api/v1/audit/events?limit=1000&amp;after_cursor=eyJ...
         <table>
           <thead><tr><th>Event</th><th>When it fires</th></tr></thead>
           <tbody>
+            <tr><td><code>decision.allowed</code></td><td>Agent action permitted by policy.</td></tr>
             <tr><td><code>decision.denied</code></td><td>Agent action blocked by policy.</td></tr>
             <tr><td><code>decision.approval_requested</code></td><td>Policy returned <code>require_approval</code>.</td></tr>
             <tr><td><code>decision.approved</code></td><td>Human approved a pending request.</td></tr>
-            <tr><td><code>decision.denied_by_approver</code></td><td>Human denied a pending approval.</td></tr>
+            <tr><td><code>decision.rejected</code></td><td>Human rejected a pending approval.</td></tr>
+            <tr><td><code>agent.created</code></td><td>A new agent was registered.</td></tr>
             <tr><td><code>agent.killed</code></td><td>Kill switch activated or guardrail threshold exceeded.</td></tr>
+            <tr><td><code>agent.permissions_changed</code></td><td>Role assignment or JIT grant changed an agent's effective scopes.</td></tr>
             <tr><td><code>policy.changed</code></td><td>Policy created, updated, or deleted.</td></tr>
             <tr><td><code>audit.chain_broken</code></td><td>Integrity verifier detected a hash chain gap.</td></tr>
-            <tr><td><code>permissions_changed</code></td><td>Role assignment or JIT grant changed an agent's effective scopes.</td></tr>
+            <tr><td><code>approval.expired</code></td><td>A pending approval request timed out (default 24 h).</td></tr>
           </tbody>
         </table>
       </div>
 
-      <p>All deliveries are HMAC-signed with <code>X-Kynara-Signature: sha256=&lt;hex&gt;</code> and include a timestamp to prevent replay attacks.</p>
+      <p>All deliveries are HMAC-signed with <code>X-Kynara-Signature: sha256=v1,&lt;hex&gt;</code> and include a timestamp to prevent replay attacks.</p>
     </section>
 
     <!-- FAQ -->
@@ -2069,6 +2097,12 @@ GET /api/v1/audit/events?limit=1000&amp;after_cursor=eyJ...
 
       <h3>How long is audit log data retained?</h3>
       <p>Free plans: 30 days. Pro plans: 1 year. Enterprise: custom retention with optional nightly S3 export.</p>
+
+      <h3>What are the password requirements?</h3>
+      <p>Passwords must be at least <strong>12 characters</strong>. There is no maximum length. Kynara uses Argon2id (64 MiB memory, 3 iterations, parallelism 4) with a server-side pepper, so stored hashes are resistant to offline cracking even if the database is compromised.</p>
+
+      <h3>Are auth endpoints rate-limited?</h3>
+      <p>Yes. Rate limits are enforced per IP: <code>/login</code> 10 req/min, <code>/refresh</code> 20 req/min, <code>/register</code> / <code>/forgot-password</code> / <code>/reset-password</code> 5 req/min. Exceeding the limit returns <code>429 Too Many Requests</code>.</p>
 
       <h3>Is my data encrypted at rest?</h3>
       <p>Yes — AES-256 at rest, TLS 1.3 in transit. Enterprise plans support customer-managed encryption keys (CMEK).</p>
