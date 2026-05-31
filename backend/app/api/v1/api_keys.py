@@ -1,13 +1,13 @@
 """API key CRUD — create, list, revoke org-scoped API keys.
 
 Keys are shown in clear-text exactly once at creation. The DB stores
-sha256(key) so no key material is ever recoverable server-side.
+hmac_sha256(key, derived_key) so no key material is ever recoverable
+server-side and offline brute-force requires the server secret.
 
 Format:  sk_live_<64 hex chars>  (72 chars total, prefix from settings)
 """
 from __future__ import annotations
 
-import hashlib
 import secrets
 import uuid
 from datetime import datetime, timezone
@@ -18,6 +18,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import Principal, get_principal, require_seat
+from app.auth.tokens import hash_api_key
 from app.core.config import get_settings
 from app.db.session import SessionLocal
 from app.models import ApiKey
@@ -99,7 +100,7 @@ async def create_key(
         organization_id=uuid.UUID(principal.org_id),
         created_by_user_id=uuid.UUID(principal.user_id),
         display_name=body.name,
-        key_hash=hashlib.sha256(raw_secret.encode()).hexdigest(),
+        key_hash=hash_api_key(raw_secret),
         last_four=raw_secret[-4:],
         prefix=raw_secret[:12],              # "sk_live_xxxx" (first 12 chars)
         scopes=body.scopes,

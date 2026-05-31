@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.audit.service import record_auth
 from app.auth.dependencies import Principal, get_principal
+from app.core.limiter import limiter
 from app.auth.passwords import needs_rehash, hash_password, verify_password
 from app.auth.tokens import (
     hash_refresh_token,
@@ -69,7 +70,8 @@ class UpdateMeIn(BaseModel):
 
 # --------------------------------------------------------------------- login --
 @router.post("/login", response_model=TokenOut)
-async def login(body: LoginIn, request: Request, session: AsyncSession = Depends(_session)):
+@limiter.limit("10/minute")
+async def login(request: Request, body: LoginIn, session: AsyncSession = Depends(_session)):
     user = await session.scalar(select(User).where(User.email == body.email.lower()))
     if not user or not user.is_active or not user.password_hash:
         auth_events_total.labels(event="login_failure").inc()
@@ -147,7 +149,8 @@ class RefreshIn(BaseModel):
 
 
 @router.post("/refresh", response_model=TokenOut)
-async def refresh(body: RefreshIn, request: Request, session: AsyncSession = Depends(_session)):
+@limiter.limit("20/minute")
+async def refresh(request: Request, body: RefreshIn, session: AsyncSession = Depends(_session)):
     token_hash = hash_refresh_token(body.refresh_token)
     row = await session.scalar(select(RefreshSession).where(RefreshSession.token_hash == token_hash))
     if not row:
@@ -161,7 +164,8 @@ async def refresh(body: RefreshIn, request: Request, session: AsyncSession = Dep
 
     row.revoked = True
     user = await session.get(User, row.user_id)
-    assert user
+    if not user:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
     membership = await _pick_org(session, user, body.org_id)
 
     access = mint_access_token(
@@ -212,7 +216,8 @@ async def me(principal: Principal = Depends(get_principal), session: AsyncSessio
     if not principal.user_id:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "API key principals have no /me")
     user = await session.get(User, principal.user_id)
-    assert user
+    if not user:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
     return MeOut(
         user_id=principal.user_id,
         email=user.email,
@@ -239,7 +244,8 @@ async def update_me(
     if not principal.user_id:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "API key principals have no /me")
     user = await session.get(User, principal.user_id)
-    assert user
+    if not user:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
     if body.display_name is not None:
         user.display_name = body.display_name.strip() or None
     if body.timezone is not None:
@@ -315,8 +321,8 @@ class RegisterIn(BaseModel):
     @field_validator("password")
     @classmethod
     def password_strength(cls, v: str) -> str:
-        if len(v) < 8:
-            raise ValueError("Password must be at least 8 characters")
+        if len(v) < 12:
+            raise ValueError("Password must be at least 12 characters")
         return v
 
     @field_validator("org_name")
@@ -333,7 +339,8 @@ def _slugify(name: str) -> str:
 
 
 @router.post("/register", response_model=TokenOut, status_code=201)
-async def register(body: RegisterIn, session: AsyncSession = Depends(_session)):
+@limiter.limit("5/minute")
+async def register(request: Request, body: RegisterIn, session: AsyncSession = Depends(_session)):
     existing = await session.scalar(select(User).where(User.email == body.email.lower()))
     if existing:
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
@@ -433,7 +440,8 @@ class ForgotPasswordIn(BaseModel):
 
 
 @router.post("/forgot-password", status_code=202)
-async def forgot_password(body: ForgotPasswordIn, session: AsyncSession = Depends(_session)):
+@limiter.limit("5/minute")
+async def forgot_password(request: Request, body: ForgotPasswordIn, session: AsyncSession = Depends(_session)):
     """Always returns 202 — we never reveal whether the email exists."""
     from app.core.config import get_settings
     from app.core.email import send_email, reset_email_content
@@ -489,13 +497,14 @@ class ResetPasswordIn(BaseModel):
     @field_validator("new_password")
     @classmethod
     def password_strength(cls, v: str) -> str:
-        if len(v) < 8:
-            raise ValueError("Password must be at least 8 characters")
+        if len(v) < 12:
+            raise ValueError("Password must be at least 12 characters")
         return v
 
 
 @router.post("/reset-password", status_code=200)
-async def reset_password(body: ResetPasswordIn, session: AsyncSession = Depends(_session)):
+@limiter.limit("5/minute")
+async def reset_password(request: Request, body: ResetPasswordIn, session: AsyncSession = Depends(_session)):
     tok_hash = hashlib.sha256(body.token.encode()).hexdigest()
     token = await session.scalar(
         select(PasswordResetToken).where(PasswordResetToken.token_hash == tok_hash)
@@ -510,6 +519,19 @@ async def reset_password(body: ResetPasswordIn, session: AsyncSession = Depends(
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
 
     user.password_hash = hash_password(body.new_password)
+    token.used_at = datetime.now(tz=timezone.utc)
+
+    from sqlalchemy import update as sa_update
+    await session.execute(
+        sa_update(RefreshSession)
+        .where(RefreshSession.user_id == user.id, RefreshSession.revoked.is_(False))
+        .values(revoked=True)
+    )
+
+    await session.commit()
+    auth_events_total.labels(event="password_reset").inc()
+    return {"detail": "Password updated. Please log in with your new password."}
+word)
     token.used_at = datetime.now(tz=timezone.utc)
 
     from sqlalchemy import update as sa_update

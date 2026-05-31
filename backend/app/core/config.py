@@ -140,6 +140,10 @@ class Settings(BaseSettings):
     # ---- Observability ----
     otlp_endpoint: str | None = None
     prometheus_enabled: bool = True
+    # Secret token required in the X-Metrics-Token header to access GET /metrics.
+    # Generate with: openssl rand -hex 32
+    # If left empty in prod, the /metrics endpoint will return 403 for all requests.
+    metrics_secret: str = ""
 
     @property
     def is_prod(self) -> bool:

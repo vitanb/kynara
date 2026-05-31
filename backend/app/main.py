@@ -3,17 +3,16 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
-from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 
 from app.api.v1 import v1
 from app.api.mcp_server import router as mcp_router
 from app.api.v1.oauth import router as oauth_router
 from app.core.config import get_settings
+from app.core.limiter import limiter
 from app.core.logging import configure_logging, get_logger
 from app.core.telemetry import init_telemetry
 from app.middleware.security import (
@@ -55,8 +54,8 @@ def create_app() -> FastAPI:
         redirect_slashes=False,
     )
 
-    # Rate limiting
-    limiter = Limiter(key_func=get_remote_address, default_limits=[settings.rate_limit_anonymous])
+    # Rate limiting — shared limiter instance from app.core.limiter
+    limiter.default_limits = [settings.rate_limit_anonymous]
     app.state.limiter = limiter
 
     # Middlewares (order matters — outermost last)
@@ -73,8 +72,23 @@ def create_app() -> FastAPI:
     app.include_router(oauth_router)   # /oauth/authorize, /oauth/token, /.well-known/...
 
     @app.get("/metrics", include_in_schema=False)
-    def metrics():
+    def metrics(x_metrics_token: str | None = Header(default=None)):
+        """Prometheus metrics — requires X-Metrics-Token header matching METRICS_SECRET."""
+        expected = settings.metrics_secret
+        if not expected or x_metrics_token != expected:
+            raise HTTPException(status_code=403, detail="Forbidden")
         return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+    @app.exception_handler(RateLimitExceeded)
+    async def _ratelimit_handler(request, exc):
+        from starlette.responses import JSONResponse
+        return JSONResponse({"detail": "rate limit exceeded"}, status_code=429)
+
+    return app
+
+
+app = create_app()
+rate_latest(), media_type=CONTENT_TYPE_LATEST)
 
     @app.exception_handler(RateLimitExceeded)
     async def _ratelimit_handler(request, exc):

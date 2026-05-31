@@ -10,6 +10,7 @@ from typing import Any, Iterable
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.ssrf import assert_safe_url
 from app.models import WebhookEndpoint, WebhookOutbox
 
 # Event vocabulary — keep in sync with docs/api/integration-guide.md.
@@ -58,6 +59,13 @@ class WebhookService:
 
         The secret is shown to the user exactly once.
         """
+        # Reject URLs that resolve to internal/private network addresses (SSRF protection).
+        # Mirrors the check applied to guardrail webhook URLs.
+        try:
+            assert_safe_url(url, scheme_whitelist={"https"})
+        except ValueError as exc:
+            raise ValueError(f"Webhook URL not allowed: {exc}") from exc
+
         # Validate event types
         accepted = set(EVENT_TYPES) | {"*"}
         for et in event_types:
@@ -123,7 +131,7 @@ class WebhookService:
         return n
 
 
+
 async def emit(session: AsyncSession, org_id: str, event_type: str, payload: dict) -> int:
     """Convenience: enqueue an event for all matching endpoints in this org."""
-    svc = WebhookService(session)
-    return await svc.enqueue(org_id=org_id, event_type=event_type, payload=payload)
+    return await WebhookService(session).enqueue(org_id, event_type, payload)

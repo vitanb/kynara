@@ -104,3 +104,31 @@ def refresh_token_expiry() -> datetime:
     return datetime.now(tz=timezone.utc) + timedelta(
         seconds=get_settings().jwt_refresh_ttl_seconds
     )
+
+
+# ----------------------------------------------------------------- API keys --
+def _api_key_hmac_key() -> bytes:
+    """Derive a stable HMAC key for API key hashing.
+
+    Domain-separated from the refresh-token key so the two cannot be
+    cross-used even if an attacker obtains one derived key.
+
+    NOTE: Changing jwt_secret invalidates all existing hashed API keys.
+    Existing keys must be rotated when the secret changes.
+    """
+    secret = get_settings().jwt_secret
+    return hashlib.sha256(f"api-key-hmac:{secret}".encode()).digest()
+
+
+def hash_api_key(raw: str) -> str:
+    """Compute HMAC-SHA256(api_key, derived_key) as a hex string.
+
+    Store this hash; never the clear-text key.  Consistent with the
+    refresh-token approach so both token types resist offline brute-force
+    even if the api_keys table is leaked without the server secret.
+
+    MIGRATION NOTE: Existing rows hashed with plain SHA-256 will not match
+    this new scheme.  Run a key-rotation campaign (revoke + re-issue) after
+    deploying this change.
+    """
+    return hmac.new(_api_key_hmac_key(), raw.encode(), hashlib.sha256).hexdigest()

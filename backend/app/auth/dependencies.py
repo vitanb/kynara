@@ -1,7 +1,6 @@
 """FastAPI auth dependencies."""
 from __future__ import annotations
 
-import hashlib
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Annotated
@@ -10,7 +9,7 @@ from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.tokens import decode_access_token
+from app.auth.tokens import decode_access_token, hash_api_key
 from app.core.config import get_settings
 from app.db.session import SessionLocal
 from app.models import ApiKey, OrgMembership, User
@@ -73,7 +72,7 @@ async def get_principal(
 
     settings = get_settings()
     if credential.startswith(settings.api_key_prefix):
-        h = hashlib.sha256(credential.encode()).hexdigest()
+        h = hash_api_key(credential)
         row = await session.scalar(
             select(ApiKey).where(ApiKey.key_hash == h, ApiKey.revoked.is_(False))
         )
