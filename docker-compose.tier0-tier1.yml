@@ -38,7 +38,7 @@ services:
       context: ./sidecar
       dockerfile: Dockerfile
     environment:
-      KYNARA_BASE_URL: ${KYNARA_API_BASE_URL:-https://app.kynara.io}
+      KYNARA_BASE_URL: ${KYNARA_API_BASE_URL:-https://api.kynaraai.com}
       KYNARA_API_KEY: ${KYNARA_API_KEY:?KYNARA_API_KEY is required}
       SIDECAR_ADDR: ":7070"
       BUNDLE_REFRESH_SECONDS: "30"
@@ -63,7 +63,7 @@ services:
       # ↓ Where to forward allowed requests — change to your actual API
       KYNARA_UPSTREAM_URL: ${PROXY_UPSTREAM_URL:-https://api.openai.com}
       KYNARA_SIDECAR_URL: http://kynara-sidecar:7070
-      KYNARA_API_BASE_URL: ${KYNARA_API_BASE_URL:-https://app.kynara.io}
+      KYNARA_API_BASE_URL: ${KYNARA_API_BASE_URL:-https://api.kynaraai.com}
       KYNARA_API_KEY: ${KYNARA_API_KEY}
       KYNARA_FAIL_OPEN: ${KYNARA_FAIL_OPEN:-false}
       KYNARA_PROXY_PORT: "8080"
@@ -94,7 +94,7 @@ services:
       KYNARA_UPSTREAM_MCP_URL: ${MCP_UPSTREAM_URL:-http://your-mcp-server:8000/sse}
       KYNARA_UPSTREAM_HEADERS: ${MCP_UPSTREAM_HEADERS:-}
       KYNARA_SIDECAR_URL: http://kynara-sidecar:7070
-      KYNARA_API_BASE_URL: ${KYNARA_API_BASE_URL:-https://app.kynara.io}
+      KYNARA_API_BASE_URL: ${KYNARA_API_BASE_URL:-https://api.kynaraai.com}
       KYNARA_API_KEY: ${KYNARA_API_KEY}
       KYNARA_FAIL_OPEN: ${KYNARA_FAIL_OPEN:-false}
       KYNARA_MCP_WRAPPER_PORT: "9090"
