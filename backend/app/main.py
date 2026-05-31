@@ -88,3 +88,14 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+rate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+    @app.exception_handler(RateLimitExceeded)
+    async def _ratelimit_handler(request, exc):
+        from starlette.responses import JSONResponse
+        return JSONResponse({"detail": "rate limit exceeded"}, status_code=429)
+
+    return app
+
+
+app = create_app()
