@@ -531,7 +531,6 @@ async def reset_password(request: Request, body: ResetPasswordIn, session: Async
     await session.commit()
     auth_events_total.labels(event="password_reset").inc()
     return {"detail": "Password updated. Please log in with your new password."}
-word)
     token.used_at = datetime.now(tz=timezone.utc)
 
     from sqlalchemy import update as sa_update
