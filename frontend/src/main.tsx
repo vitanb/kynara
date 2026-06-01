@@ -33,6 +33,7 @@ import NotFoundPage from "./pages/NotFound";
 import HowItWorksPage from "./pages/HowItWorks";
 import ProfilePage from "./pages/Profile";
 import SuperAdminPage from "./pages/SuperAdmin";
+import IntegrationsPage from "./pages/Integrations";
 import SsoCallbackPage from "./pages/SsoCallback";
 import OAuthConsentPage from "./pages/OAuthConsent";
 import RequireAuth from "./components/layout/RequireAuth";
@@ -87,6 +88,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <Route path="billing" element={<BillingPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="settings/sso/new" element={<SsoSetupPage />} />
+              <Route path="integrations" element={<IntegrationsPage />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

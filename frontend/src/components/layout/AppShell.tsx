@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation, Link } from "react-router-do
 import {
   LayoutDashboard, Bot, Wrench, ShieldCheck, ScrollText,
   CreditCard, Settings, LogOut, ChevronDown, Check, Building2,
-  Menu, X, CheckCircle2, Plug, ShieldAlert, KeyRound, BookOpen, UserCircle, Crown,
+  Menu, X, CheckCircle2, Plug, ShieldAlert, KeyRound, BookOpen, UserCircle, Crown, Blocks,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
@@ -20,7 +20,8 @@ const allNav = [
   { to: "policies",   label: "Policies",     icon: ShieldCheck,     roles: ["owner","admin","auditor","developer","member"] },
   { to: "approvals",  label: "Approvals",    icon: CheckCircle2,    roles: ["owner","admin","auditor","developer","member"], badge: true },
   { to: "webhooks",   label: "Webhooks",     icon: Plug,            roles: ["owner","admin"] },
-  { to: "guardrails", label: "Guardrails",   icon: ShieldAlert,     roles: ["owner","admin"] },
+  { to: "guardrails",    label: "Guardrails",    icon: ShieldAlert, roles: ["owner","admin"] },
+  { to: "integrations",  label: "Integrations",  icon: Blocks,      roles: ["owner","admin"] },
   { to: "audit",      label: "Audit log",    icon: ScrollText,      roles: ["owner","admin","auditor","developer","member"] },
   { to: "billing",    label: "Billing",      icon: CreditCard,      roles: ["owner","admin"] },
   { to: "settings",   label: "Settings",     icon: Settings,        roles: ["owner","admin"] },
