@@ -6,22 +6,35 @@ import {
   Eye, EyeOff, Trash2, Send, ExternalLink,
 } from "lucide-react";
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface IntegrationConfig {
+  slack_enabled: boolean;
+  slack_channel_id: string | null;
+  slack_bot_token_set: boolean;
+  slack_signing_secret_set: boolean;
+  slack_webhook_url_set: boolean;
+  teams_enabled: boolean;
+  teams_webhook_url_set: boolean;
+  teams_callback_secret_set: boolean;
+}
+
 // ── API helpers ───────────────────────────────────────────────────────────────
 
-async function fetchConfig() {
-  return api.get("/api/v1/integrations/config");
+async function fetchConfig(): Promise<IntegrationConfig> {
+  return api.get<IntegrationConfig>("/api/v1/integrations/config");
 }
 
-async function saveConfig(body: object) {
-  return api.put("/api/v1/integrations/config", body);
+async function saveConfig(body: object): Promise<IntegrationConfig> {
+  return api.put<IntegrationConfig>("/api/v1/integrations/config", body);
 }
 
-async function testConfig() {
-  return api.post("/api/v1/integrations/config/test");
+async function testConfig(): Promise<Record<string, string>> {
+  return api.post<Record<string, string>>("/api/v1/integrations/config/test");
 }
 
-async function deleteSlack() { await api.del("/api/v1/integrations/config/slack"); }
-async function deleteTeams() { await api.del("/api/v1/integrations/config/teams"); }
+async function deleteSlack(): Promise<void> { await api.del<void>("/api/v1/integrations/config/slack"); }
+async function deleteTeams(): Promise<void> { await api.del<void>("/api/v1/integrations/config/teams"); }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
