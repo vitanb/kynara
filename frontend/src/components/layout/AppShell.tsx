@@ -10,23 +10,140 @@ import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { useTheme, THEMES, type ThemeId } from "@/lib/theme";
 
-const allNav = [
-  { to: "how-it-works", label: "How it works", icon: BookOpen, roles: ["owner","admin","developer","auditor","member"] },
-  { to: "dashboard",  label: "Dashboard",    icon: LayoutDashboard, roles: ["owner","admin","developer","auditor","member"] },
-  { to: "agents",     label: "Agents",       icon: Bot,             roles: ["owner","admin","developer","auditor","member"] },
-  { to: "tools",      label: "Scope Catalog",icon: Wrench,          roles: ["owner","admin","developer","auditor","member"] },
-  { to: "catalog",    label: "Library",      icon: BookOpen,        roles: ["owner","admin","developer","auditor","member"] },
-  { to: "roles",      label: "Roles",        icon: KeyRound,        roles: ["owner","admin","auditor","developer","member"] },
-  { to: "policies",   label: "Policies",     icon: ShieldCheck,     roles: ["owner","admin","auditor","developer","member"] },
-  { to: "approvals",  label: "Approvals",    icon: CheckCircle2,    roles: ["owner","admin","auditor","developer","member"], badge: true },
-  { to: "webhooks",   label: "Webhooks",     icon: Plug,            roles: ["owner","admin"] },
-  { to: "guardrails",    label: "Guardrails",    icon: ShieldAlert, roles: ["owner","admin"] },
-  { to: "integrations",  label: "Integrations",  icon: Blocks,      roles: ["owner","admin"] },
-  { to: "audit",      label: "Audit log",    icon: ScrollText,      roles: ["owner","admin","auditor","developer","member"] },
-  { to: "billing",    label: "Billing",      icon: CreditCard,      roles: ["owner","admin"] },
-  { to: "settings",   label: "Settings",     icon: Settings,        roles: ["owner","admin"] },
-  { to: "superadmin", label: "Super Admin",  icon: Crown,           roles: ["owner","admin","developer","auditor","member"], superadminOnly: true },
+type NavItem = { to: string; label: string; icon: React.ElementType; roles: string[]; badge?: boolean; superadminOnly?: boolean };
+type NavGroup = { group: string; icon: React.ElementType; roles: string[]; items: NavItem[] };
+type NavEntry = NavItem | NavGroup;
+
+const allNav: NavEntry[] = [
+  { to: "dashboard",  label: "Dashboard",  icon: LayoutDashboard, roles: ["owner","admin","developer","auditor","member"] },
+  { to: "agents",     label: "Agents",     icon: Bot,             roles: ["owner","admin","developer","auditor","member"] },
+  { to: "policies",   label: "Policies",   icon: ShieldCheck,     roles: ["owner","admin","auditor","developer","member"] },
+  { to: "approvals",  label: "Approvals",  icon: CheckCircle2,    roles: ["owner","admin","auditor","developer","member"], badge: true },
+  { to: "audit",      label: "Audit log",  icon: ScrollText,      roles: ["owner","admin","auditor","developer","member"] },
+  {
+    group: "Governance",
+    icon: KeyRound,
+    roles: ["owner","admin","auditor","developer","member"],
+    items: [
+      { to: "roles",      label: "Roles",         icon: KeyRound,   roles: ["owner","admin","auditor","developer","member"] },
+      { to: "tools",      label: "Scope Catalog", icon: Wrench,     roles: ["owner","admin","developer","auditor","member"] },
+      { to: "guardrails", label: "Guardrails",    icon: ShieldAlert,roles: ["owner","admin"] },
+      { to: "catalog",    label: "Library",       icon: BookOpen,   roles: ["owner","admin","developer","auditor","member"] },
+      { to: "how-it-works", label: "How it works",icon: BookOpen,   roles: ["owner","admin","developer","auditor","member"] },
+    ],
+  },
+  {
+    group: "Platform",
+    icon: Plug,
+    roles: ["owner","admin"],
+    items: [
+      { to: "webhooks",     label: "Webhooks",     icon: Plug,      roles: ["owner","admin"] },
+      { to: "integrations", label: "Integrations", icon: Blocks,    roles: ["owner","admin"] },
+      { to: "billing",      label: "Billing",      icon: CreditCard,roles: ["owner","admin"] },
+      { to: "settings",     label: "Settings",     icon: Settings,  roles: ["owner","admin"] },
+    ],
+  },
+  { to: "superadmin", label: "Super Admin", icon: Crown, roles: ["owner","admin","developer","auditor","member"], superadminOnly: true },
 ];
+
+function isGroup(entry: NavEntry): entry is NavGroup { return "group" in entry; }
+
+
+// ── NavItems component ────────────────────────────────────────────────────────
+
+function NavItems({ nav, pendingApprovals, location, role }: {
+  nav: NavEntry[];
+  pendingApprovals: number;
+  location: ReturnType<typeof import("react-router-dom").useLocation>;
+  role: string;
+}) {
+  const activePath = location.pathname.split("/").pop() || "";
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    // Auto-expand the group containing the current route
+    const init: Record<string, boolean> = {};
+    for (const entry of nav) {
+      if (isGroup(entry)) {
+        const hasActive = entry.items.some(i => activePath === i.to || location.pathname.endsWith("/" + i.to));
+        init[entry.group] = hasActive;
+      }
+    }
+    return init;
+  });
+
+  function toggleGroup(group: string) {
+    setOpenGroups(prev => ({ ...prev, [group]: !prev[group] }));
+  }
+
+  return (
+    <nav className="flex-1 px-2 pt-2 pb-3 overflow-y-auto" style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+      {nav.map((entry) => {
+        if (!isGroup(entry)) {
+          const Icon = entry.icon;
+          return (
+            <NavLink
+              key={entry.to}
+              to={entry.to}
+              className={({ isActive }) => isActive ? "nav-item-active" : "nav-item"}
+            >
+              <Icon className="size-4 shrink-0" />
+              <span className="flex-1">{entry.label}</span>
+              {entry.badge && pendingApprovals > 0 && (
+                <span className="text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 shrink-0"
+                  style={{ background: "#F59E0B", color: "#000" }}>
+                  {pendingApprovals > 99 ? "99+" : pendingApprovals}
+                </span>
+              )}
+            </NavLink>
+          );
+        }
+
+        // Group entry
+        const GroupIcon = entry.icon;
+        const isOpen = !!openGroups[entry.group];
+        const hasActiveChild = entry.items.some(i =>
+          activePath === i.to || location.pathname.endsWith("/" + i.to)
+        );
+        const visibleItems = entry.items.filter(i => i.roles.includes(role));
+        if (visibleItems.length === 0) return null;
+
+        return (
+          <div key={entry.group}>
+            <button
+              onClick={() => toggleGroup(entry.group)}
+              className="nav-item w-full"
+              style={hasActiveChild ? { color: "var(--s0-accent-text)" } : {}}
+            >
+              <GroupIcon className="size-4 shrink-0" />
+              <span className="flex-1 text-left">{entry.group}</span>
+              <ChevronDown
+                className="size-3 shrink-0 transition-transform"
+                style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", color: "var(--s0-text-muted)" }}
+              />
+            </button>
+            {isOpen && (
+              <div className="ml-3 mt-0.5 mb-0.5 border-l pl-2" style={{ borderColor: "rgba(148,163,184,0.1)" }}>
+                {visibleItems.map(item => {
+                  const ItemIcon = item.icon;
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      className={({ isActive }) => isActive ? "nav-item-active" : "nav-item"}
+                      style={{ paddingTop: "5px", paddingBottom: "5px" }}
+                    >
+                      <ItemIcon className="size-3.5 shrink-0" />
+                      <span className="flex-1 text-[13px]">{item.label}</span>
+                    </NavLink>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </nav>
+  );
+}
 
 export default function AppShell() {
   const { me, orgs, logout, switchOrg } = useAuth();
@@ -39,7 +156,10 @@ export default function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const role = me?.seat_role ?? "member";
-  const nav = allNav.filter(n => n.roles.includes(role) && (!('superadminOnly' in n && n.superadminOnly) || Boolean(me?.is_superadmin)));
+  const nav = allNav.filter(entry => {
+    if (isGroup(entry)) return entry.roles.includes(role);
+    return entry.roles.includes(role) && (!('superadminOnly' in entry && entry.superadminOnly) || Boolean(me?.is_superadmin));
+  });
   const currentOrg = orgs.find(o => o.org_id === me?.org_id);
 
   const { data: approvalCountData } = useQuery<{ pending_count: number }>({
@@ -143,29 +263,12 @@ export default function AppShell() {
       )}
 
       {/* Nav links */}
-      <nav className="flex-1 px-2 pt-2 space-y-px pb-3 overflow-y-auto">
-        {nav.map((n) => {
-          const Icon = n.icon;
-          return (
-            <NavLink
-              key={n.to}
-              to={n.to}
-              className={({ isActive }) => isActive ? "nav-item-active" : "nav-item"}
-            >
-              <Icon className="size-4 shrink-0" />
-              <span className="flex-1">{n.label}</span>
-              {n.badge && pendingApprovals > 0 && (
-                <span
-                  className="text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 shrink-0"
-                  style={{ background: "#F59E0B", color: "#000" }}
-                >
-                  {pendingApprovals > 99 ? "99+" : pendingApprovals}
-                </span>
-              )}
-            </NavLink>
-          );
-        })}
-      </nav>
+      <NavItems
+        nav={nav}
+        pendingApprovals={pendingApprovals}
+        location={location}
+        role={role}
+      />
 
       {/* User footer */}
       <div className="p-3" style={{ borderTop: "1px solid var(--s0-border)" }}>
