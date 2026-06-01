@@ -3,16 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kynara — AI Agent Permission System</title>
+    <title>Kynara — AI Agent Permission Control Plane | RBAC + ABAC for AI Agents</title>
+    <meta name="description" content="Kynara is the permission control plane for AI agents. Enforce RBAC + ABAC policies, require human approval for sensitive actions, and maintain a tamper-evident audit log — for LangChain, AutoGen, CrewAI, OpenAI, and Anthropic agents." />
+    <meta name="keywords" content="AI agent permissions, AI agent governance, RBAC for AI agents, ABAC policy engine, LangChain permissions, AutoGen access control, CrewAI governance, agent audit log, AI agent security, human-in-the-loop AI, AI access control, agent policy enforcement, AI compliance, AI guardrails" />
+    <meta name="author" content="Kynara" />
+    <link rel="canonical" href="https://kynaraai.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://kynaraai.com/" />
+    <meta property="og:title" content="Kynara — Permission Control Plane for AI Agents" />
+    <meta property="og:description" content="Control what your AI agents are allowed to do. Enforce RBAC + ABAC policies, route sensitive actions to human approval, and maintain a cryptographic audit trail. Works with LangChain, AutoGen, CrewAI, OpenAI, and Anthropic." />
+    <meta property="og:image" content="https://kynaraai.com/logo-192.png" />
+    <meta property="og:site_name" content="Kynara" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Kynara — Permission Control Plane for AI Agents" />
+    <meta name="twitter:description" content="RBAC + ABAC policy enforcement for AI agents. Human-in-the-loop approvals. Tamper-evident audit log. LangChain, AutoGen, CrewAI, OpenAI, Anthropic." />
+    <meta name="twitter:image" content="https://kynaraai.com/logo-192.png" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/logo-192.png" />
-    <meta property="og:image" content="/logo-192.png" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Kynara","url":"https://kynaraai.com","description":"AI agent permission control plane enforcing RBAC and ABAC policies with human-in-the-loop approvals and a tamper-evident audit log.","applicationCategory":"SecurityApplication","operatingSystem":"Cloud","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"Free: 3 seats, 10k decisions/mo. Pro: $49/mo."},"featureList":["RBAC and ABAC policy enforcement","Human-in-the-loop approvals","SHA-256 hash-chained audit log","JIT grants","Policy replay","LangChain AutoGen CrewAI OpenAI Anthropic integrations","Go sidecar sub-millisecond enforcement","Anomaly detection","SAML 2.0 OIDC SSO","SOC 2 ISO 27001 GDPR HIPAA"],"publisher":{"@type":"Organization","name":"Kynara","url":"https://kynaraai.com","logo":"https://kynaraai.com/logo-192.png"}}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Kynara","url":"https://kynaraai.com","logo":"https://kynaraai.com/logo-192.png","description":"Kynara builds permission control infrastructure for AI agents.","contactPoint":{"@type":"ContactPoint","contactType":"sales","url":"https://kynaraai.com"}}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Kynara?","acceptedAnswer":{"@type":"Answer","text":"Kynara is an AI agent permission control plane. It evaluates every tool call against RBAC and ABAC policies and returns allow, deny, or require_approval, appending every decision to a tamper-evident audit log."}},{"@type":"Question","name":"How do I add permissions to a LangChain agent?","acceptedAnswer":{"@type":"Answer","text":"Install kynara-sdk and add KynaraCallbackHandler to your AgentExecutor. It intercepts on_tool_start and calls the decision API before the tool runs."}},{"@type":"Question","name":"What is the difference between Kynara and OPA?","acceptedAnswer":{"@type":"Answer","text":"OPA is a policy evaluation engine. Kynara is a full control plane: it manages agent identities and policies, enforces non-escalation guarantees, runs human approval workflows, and maintains a tamper-evident audit chain."}},{"@type":"Question","name":"How do I prevent an AI agent from exceeding a user's permissions?","acceptedAnswer":{"@type":"Answer","text":"Kynara enforces a non-escalation guarantee: an agent's effective permissions are the intersection of the agent's roles and the user's roles. An agent can never acquire more authority than the human who dispatched it."}},{"@type":"Question","name":"Does Kynara work with AutoGen, CrewAI, and OpenAI Assistants?","acceptedAnswer":{"@type":"Answer","text":"Yes. Kynara has integrations for LangChain, LangGraph, AutoGen, CrewAI, OpenAI Assistants, and Anthropic tool use in Python, plus guarded() wrappers and Express middleware in TypeScript."}},{"@type":"Question","name":"How does Kynara support compliance in regulated industries?","acceptedAnswer":{"@type":"Answer","text":"Kynara maintains a SHA-256 hash-chained audit log. Any tampering is detectable. Supports SOC 2, ISO 27001, GDPR, HIPAA. Enterprise plans include HIPAA BAA and custom retention."}}]}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body class="h-full antialiased">
     <div id="root" class="h-full"></div>

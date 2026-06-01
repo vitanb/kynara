@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Kynara",
+  "name_for_model": "kynara",
+  "description_for_human": "Permission control plane for AI agents. Enforce RBAC + ABAC policies, require human approval for sensitive actions, and maintain a tamper-evident audit log.",
+  "description_for_model": "Kynara is a permission control plane for AI agents. It evaluates whether an AI agent is allowed to execute a specific action on a resource, given RBAC roles and ABAC conditions. Use it to check agent permissions, list policies, review approval queues, and inspect the audit log. The primary endpoint is POST /api/v1/decisions/check which takes subject_type, subject_id, action, resource, and context and returns allow, deny, or require_approval.",
+  "auth": {
+    "type": "bearer"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://kynaraai.com/api/v1/openapi.json"
+  },
+  "logo_url": "https://kynaraai.com/logo-192.png",
+  "contact_email": "support@kynaraai.com",
+  "legal_info_url": "https://kynaraai.com/privacy"
+}
