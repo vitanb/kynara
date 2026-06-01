@@ -35,6 +35,7 @@ const stats = [
 
 export default function LandingPage() {
   const [contactOpen, setContactOpen] = useState(false);
+  const [solutionsOpen, setSolutionsOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
   const [contactState, setContactState] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
@@ -80,6 +81,36 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-7 text-sm text-slate-400">
             <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
             <a href="#features" className="hover:text-white transition-colors">Features</a>
+            {/* Solutions dropdown */}
+            <div className="relative" onMouseEnter={() => setSolutionsOpen(true)} onMouseLeave={() => setSolutionsOpen(false)}>
+              <button className="flex items-center gap-1 hover:text-white transition-colors">
+                Solutions <ChevronRight className="w-3.5 h-3.5 rotate-90 transition-transform" style={{ transform: solutionsOpen ? "rotate(270deg)" : "rotate(90deg)" }} />
+              </button>
+              {solutionsOpen && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
+                  <div className="rounded-xl p-3 w-72" style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.12)", boxShadow: "0 16px 48px rgba(0,0,0,0.5)" }}>
+                    <div className="text-xs font-semibold uppercase tracking-widest text-slate-600 px-2 pb-2 mb-1">By Industry</div>
+                    {[
+                      { href: "/solutions/financial-services.html", icon: "🏦", label: "Financial Services", desc: "SOC 2, HIPAA, regulated agents" },
+                      { href: "/solutions/healthcare.html", icon: "🏥", label: "Healthcare", desc: "HIPAA BAA, patient data, clinical AI" },
+                      { href: "/solutions/manufacturing.html", icon: "🏭", label: "Manufacturing", desc: "Industrial IoT, production agents" },
+                      { href: "/solutions/devops-engineering.html", icon: "⚙️", label: "DevOps & Engineering", desc: "CI/CD agents, infra automation" },
+                      { href: "/solutions/security-operations.html", icon: "🛡️", label: "Security Operations", desc: "SecOps, threat response agents" },
+                    ].map((item) => (
+                      <a key={item.href} href={item.href}
+                        className="flex items-start gap-3 px-2 py-2.5 rounded-lg hover:bg-white/5 transition-colors group"
+                        style={{ textDecoration: "none" }}>
+                        <span className="text-lg flex-shrink-0 mt-0.5">{item.icon}</span>
+                        <div>
+                          <div className="text-sm font-medium text-white group-hover:text-indigo-300 transition-colors">{item.label}</div>
+                          <div className="text-xs text-slate-500 mt-0.5">{item.desc}</div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
             <Link to="/docs" className="hover:text-white transition-colors">Docs</Link>
             <button onClick={openContact} className="hover:text-white transition-colors">Contact</button>
           </div>

@@ -79,6 +79,10 @@ const issueRefund = guarded({ client, action: "payments.refund.issue", ... }, ha
 - Documentation: https://kynaraai.com/docs
 - Free policy sandbox + MCP inspector: https://kynaraai.com/sandbox (no signup required)
 - Financial services solution page: https://kynaraai.com/solutions/financial-services
+- Healthcare solution page: https://kynaraai.com/solutions/healthcare
+- Manufacturing solution page: https://kynaraai.com/solutions/manufacturing
+- DevOps & Engineering solution page: https://kynaraai.com/solutions/devops-engineering
+- Security Operations solution page: https://kynaraai.com/solutions/security-operations
 - Live demo: https://kynaraai.com/demo
 - REST API reference: https://kynaraai.com/api/v1/docs
 

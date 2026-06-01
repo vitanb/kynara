@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Agent Governance for Security Operations | Kynara</title>
+  <meta name="description" content="Govern AI agents in your SOC and security operations center with Kynara. Enforce least-privilege policies, require analyst approval before containment actions, and maintain a tamper-evident audit log for every threat response decision." />
+  <link rel="canonical" href="https://kynaraai.com/solutions/security-operations" />
+  <meta property="og:title" content="AI Agent Governance for Security Operations | Kynara" />
+  <meta property="og:description" content="Policy enforcement for SOAR agents and AI-driven threat response. Human approval before containment or remediation. Full audit trail for every security agent action." />
+  <meta property="og:image" content="https://kynaraai.com/logo-192.png" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <style>
+    :root{--bg:#05080F;--surface:#080C14;--surface2:#0D1421;--border:rgba(148,163,184,0.1);--accent:#6366F1;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#10B981;--warn:#F59E0B;--danger:#F43F5E;--font:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",monospace;--ind:#F43F5E;--ind-bg:rgba(244,63,94,0.1);--ind-border:rgba(244,63,94,0.25);}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.7;}
+    a{color:#818CF8;text-decoration:none;} a:hover{text-decoration:underline;}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(5,8,15,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:700;color:white;font-size:15px;text-decoration:none;}
+    .gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+    .gem svg{width:14px;height:14px;color:white;}
+    .nav-links{display:flex;align-items:center;gap:24px;font-size:13px;color:var(--muted);}
+    .nav-links a:hover{color:white;text-decoration:none;}
+    .btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+    .btn-primary{background:var(--accent);color:white;} .btn-primary:hover{background:#4F46E5;text-decoration:none;}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);} .btn-ghost:hover{color:white;text-decoration:none;}
+    .hero{max-width:1100px;margin:0 auto;padding:80px 40px 60px;}
+    .bc{font-size:12px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:6px;}
+    .bc a{color:var(--muted);} .bc a:hover{color:white;text-decoration:none;}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--ind-bg);border:1px solid var(--ind-border);color:var(--ind);margin-bottom:20px;}
+    h1{font-size:clamp(32px,4.5vw,52px);font-weight:900;color:white;letter-spacing:-.03em;line-height:1.1;margin-bottom:20px;}
+    h1 span{background:linear-gradient(135deg,#F43F5E,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .sub{font-size:18px;color:var(--muted);max-width:600px;margin-bottom:36px;line-height:1.65;}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:48px;}
+    .cbadges{display:flex;flex-wrap:wrap;gap:8px;}
+    .cb{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:7px;font-size:11px;font-weight:600;background:var(--surface);border:1px solid var(--border);color:var(--text);}
+    .cb .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);}
+    section{max-width:1100px;margin:0 auto;padding:0 40px 72px;}
+    .stag{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ind);margin-bottom:10px;}
+    h2{font-size:32px;font-weight:800;color:white;letter-spacing:-.025em;margin-bottom:14px;line-height:1.2;}
+    h2 .dim{color:var(--muted);font-weight:400;}
+    .ssub{font-size:16px;color:var(--muted);max-width:540px;margin-bottom:40px;line-height:1.65;}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;} .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+    @media(max-width:800px){.g2,.g3{grid-template-columns:1fr;}}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;}
+    .card-icon{font-size:24px;margin-bottom:12px;}
+    .card-title{font-size:14px;font-weight:700;color:white;margin-bottom:6px;}
+    .card-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+    .pb{background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.2);border-radius:16px;padding:28px 30px;}
+    .po{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:16px;padding:28px 30px;}
+    .pt{font-size:15px;font-weight:700;color:white;margin-bottom:12px;}
+    ul.cl{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;}
+    ul.cl li{display:flex;gap:8px;font-size:13px;color:#94A3B8;}
+    pre{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:12px;color:#94A3B8;line-height:1.8;margin-bottom:16px;}
+    .tw{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    thead tr{background:rgba(148,163,184,.04);border-bottom:1px solid var(--border);}
+    th{text-align:left;padding:10px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+    td{padding:10px 16px;border-bottom:1px solid rgba(148,163,184,.05);color:var(--text);vertical-align:top;}
+    tr:last-child td{border-bottom:none;}
+    .pok{display:inline-flex;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(16,185,129,.12);color:var(--ok);border:1px solid rgba(16,185,129,.3);}
+    .cta{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(244,63,94,.05));border:1px solid rgba(99,102,241,.2);border-radius:20px;padding:52px 48px;text-align:center;}
+    .cta p{color:var(--muted);font-size:16px;margin-bottom:28px;max-width:480px;margin-left:auto;margin-right:auto;}
+    .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+    footer{border-top:1px solid var(--border);padding:24px 40px;max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);flex-wrap:wrap;gap:12px;}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><div class="gem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11.5 2 2 7 2 17 11.5 22 21 17 21 7 11.5 2"/></svg></div>Kynara</a>
+  <div class="nav-links"><a href="/#features">Features</a><a href="/docs.html">Docs</a><a href="/sandbox.html">Policy Sandbox</a></div>
+  <a href="https://kynaraai.com" class="btn btn-primary">Book a demo</a>
+</nav>
+
+<div class="hero">
+  <div class="bc"><a href="/">Kynara</a><span>/</span><span style="color:var(--strong);">Security Operations</span></div>
+  <div class="badge">🛡️ Security Operations</div>
+  <h1>Keep your SOC agents <span>from making things worse</span></h1>
+  <p class="sub">AI-driven SOAR and threat response agents can act faster than any human — but an unchecked agent blocking the wrong endpoint or wiping the wrong host is a bigger incident than the one it was trying to stop. Kynara enforces analyst approval before any containment or remediation action.</p>
+  <div class="hero-actions">
+    <a href="https://kynaraai.com" class="btn btn-primary">Book a demo</a>
+    <a href="/sandbox.html" class="btn btn-ghost">Try the policy sandbox</a>
+  </div>
+  <div class="cbadges">
+    <span class="cb"><span class="dot"></span>SOAR agent governance</span>
+    <span class="cb"><span class="dot"></span>Mandatory analyst approval</span>
+    <span class="cb"><span class="dot"></span>SIEM webhook integration</span>
+    <span class="cb"><span class="dot"></span>Tamper-evident incident log</span>
+    <span class="cb"><span class="dot"></span>Anomaly detection</span>
+  </div>
+</div>
+
+<section>
+  <div class="stag">The risk</div>
+  <h2>Autonomous response without <span class="dim">guardrails</span></h2>
+  <div class="g2">
+    <div class="pb">
+      <div class="pt">Without Kynara</div>
+      <ul class="cl">
+        <li><span style="color:var(--danger);">✕</span> SOAR agent blocks the CEO's laptop as a false positive — no analyst review</li>
+        <li><span style="color:var(--danger);">✕</span> Threat response agent wipes a server that wasn't actually compromised</li>
+        <li><span style="color:var(--danger);">✕</span> Agent running on stolen API key performs lateral movement undetected</li>
+        <li><span style="color:var(--danger);">✕</span> No complete record of which automated action triggered during an incident</li>
+        <li><span style="color:var(--danger);">✕</span> Agent makes containment decisions based on stale threat intel</li>
+      </ul>
+    </div>
+    <div class="po">
+      <div class="pt">With Kynara</div>
+      <ul class="cl">
+        <li><span style="color:var(--ok);">✓</span> All containment actions require tier-2 analyst approval with justification</li>
+        <li><span style="color:var(--ok);">✓</span> Destructive remediation requires senior analyst + MFA regardless of severity</li>
+        <li><span style="color:var(--ok);">✓</span> Compromised agent key triggers auto-revocation on anomalous deny-rate spike</span></li>
+        <li><span style="color:var(--ok);">✓</span> Every automated action hash-chained — complete incident timeline for forensics</li>
+        <li><span style="color:var(--ok);">✓</span> Context requirements (threat_confidence, ticket_url) enforced before any action</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="stag">Use cases</div>
+  <h2>SecOps AI agent <span class="dim">scenarios</span></h2>
+  <div class="g3">
+    <div class="card"><div class="card-icon">🚨</div><div class="card-title">SOAR automation</div><div class="card-desc">Triage and enrichment agents run autonomously. Containment (block IP, isolate host, revoke credentials) always requires analyst approval — no exceptions, regardless of alert severity.</div></div>
+    <div class="card"><div class="card-icon">🔍</div><div class="card-title">Threat hunting agents</div><div class="card-desc">Agents can query SIEM, EDR, and threat intel feeds freely. Writing signatures, creating detection rules, or modifying firewall configs requires senior analyst approval with ticket link.</div></div>
+    <div class="card"><div class="card-icon">💻</div><div class="card-title">Endpoint response</div><div class="card-desc">Allow agents to collect forensic artifacts and run scans. Gate isolation, process kill, and remediation commands behind on-call lead approval and a mandatory incident ID.</div></div>
+    <div class="card"><div class="card-icon">🔐</div><div class="card-title">Identity response</div><div class="card-desc">Agents can read user activity and session data. Revoking credentials, resetting passwords, or disabling accounts always requires IAM team approval — preventing accidental lockouts.</div></div>
+    <div class="card"><div class="card-icon">📡</div><div class="card-title">Network response</div><div class="card-desc">Block IP and firewall rule modifications require approval and a confidence score threshold. Read operations (query flow logs, scan network) proceed automatically.</div></div>
+    <div class="card"><div class="card-icon">📝</div><div class="card-title">Incident documentation</div><div class="card-desc">Agents auto-populate incident timelines from the Kynara audit log — every automated action with its context, outcome, and approver is already captured and hash-verified.</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="stag">Policy example</div>
+  <h2>SOAR containment <span class="dim">with approval gates</span></h2>
+  <pre>// Allow enrichment + investigation freely
+{ "display_name": "Allow threat intel reads",
+  "effect": "allow", "priority": 100,
+  "actions": ["siem.query", "edr.read", "threat_intel.lookup"],
+  "condition": {} }
+
+// Require analyst approval for containment
+{ "display_name": "Require approval for containment",
+  "effect": "require_approval", "priority": 200,
+  "actions": ["endpoint.isolate", "ip.block", "credentials.revoke"],
+  "condition": {} }
+
+// Deny remediation without MFA + high confidence
+{ "display_name": "Deny low-confidence remediation",
+  "effect": "deny", "priority": 50,
+  "actions": ["host.wipe", "service.terminate", "data.delete"],
+  "condition": {
+    "op": "or",
+    "args": [
+      { "op": "lt", "args": ["ctx.resource.attrs.threat_confidence", 0.9] },
+      { "op": "eq", "args": ["ctx.context.mfa_verified", false] }
+    ]
+  }}</pre>
+</section>
+
+<section>
+  <div class="stag">SIEM integration</div>
+  <h2>Kynara audit log <span class="dim">streams into your SIEM</span></h2>
+  <p class="ssub">Every Kynara decision event — allow, deny, require_approval, and approval resolutions — streams into your SIEM via the polling cursor API. Analysts get a complete picture of AI agent activity alongside human activity in the same platform.</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>SIEM</th><th>Setup</th><th>Kynara events</th></tr></thead>
+      <tbody>
+        <tr><td>Splunk</td><td>Kynara Add-on with polling cursor</td><td><span class="pok">All events</span></td></tr>
+        <tr><td>Microsoft Sentinel</td><td>Data connector; built-in rules for agent.killed and audit.chain_broken</td><td><span class="pok">All events</span></td></tr>
+        <tr><td>Datadog</td><td>Log pipeline from cursor endpoint</td><td><span class="pok">All events</span></td></tr>
+        <tr><td>Elastic / ECS</td><td>Filebeat module with ECS field mapping</td><td><span class="pok">All events</span></td></tr>
+        <tr><td>PagerDuty</td><td>Webhook on agent.killed + anomaly.deny_rate_spike</td><td><span class="pok">Critical events</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="cta">
+    <div class="badge" style="display:inline-flex;margin-bottom:16px;">🛡️ Security Operations</div>
+    <h2>Govern your security AI agents</h2>
+    <p>Free plan to get started. Enterprise plans include custom SIEM connectors, dedicated deployment, and SLA.</p>
+    <div class="cta-btns">
+      <a href="https://kynaraai.com" class="btn btn-primary" style="font-size:14px;padding:11px 24px;">Book a demo</a>
+      <a href="/sandbox.html" class="btn btn-ghost" style="font-size:14px;padding:11px 24px;">Try the policy sandbox</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span style="color:var(--muted);">Kynara &copy; 2026</span>
+  <div style="display:flex;gap:20px;"><a href="/" style="color:var(--muted);">Home</a><a href="/docs.html" style="color:var(--muted);">Docs</a><a href="/sandbox.html" style="color:var(--muted);">Sandbox</a></div>
+</footer>
+</body>
+</html>

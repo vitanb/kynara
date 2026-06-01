@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Agent Governance for Healthcare | Kynara</title>
+  <meta name="description" content="Deploy AI agents in clinical and healthcare environments with Kynara — HIPAA BAA, patient data access controls, human-in-the-loop approvals for clinical decisions, and a tamper-evident audit log." />
+  <link rel="canonical" href="https://kynaraai.com/solutions/healthcare" />
+  <meta property="og:title" content="AI Agent Governance for Healthcare | Kynara" />
+  <meta property="og:description" content="HIPAA-compliant AI agent governance. Control what clinical AI agents can access, require human approval for sensitive patient actions, and maintain audit trails that satisfy HIPAA, SOC 2, and HITRUST." />
+  <meta property="og:image" content="https://kynaraai.com/logo-192.png" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <style>
+    :root{--bg:#05080F;--surface:#080C14;--surface2:#0D1421;--border:rgba(148,163,184,0.1);--accent:#6366F1;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#10B981;--warn:#F59E0B;--danger:#F43F5E;--font:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",monospace;--industry:#34D399;--industry-bg:rgba(16,185,129,0.1);--industry-border:rgba(16,185,129,0.25);}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.7;}
+    a{color:#818CF8;text-decoration:none;} a:hover{text-decoration:underline;}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(5,8,15,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:700;color:white;font-size:15px;text-decoration:none;}
+    .gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+    .gem svg{width:14px;height:14px;color:white;}
+    .nav-links{display:flex;align-items:center;gap:24px;font-size:13px;color:var(--muted);}
+    .nav-links a:hover{color:white;text-decoration:none;}
+    .btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+    .btn-primary{background:var(--accent);color:white;} .btn-primary:hover{background:#4F46E5;text-decoration:none;}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);} .btn-ghost:hover{color:white;text-decoration:none;}
+    .hero{max-width:1100px;margin:0 auto;padding:80px 40px 60px;}
+    .bc{font-size:12px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:6px;}
+    .bc a{color:var(--muted);} .bc a:hover{color:white;text-decoration:none;}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--industry-bg);border:1px solid var(--industry-border);color:var(--industry);margin-bottom:20px;}
+    h1{font-size:clamp(32px,4.5vw,52px);font-weight:900;color:white;letter-spacing:-.03em;line-height:1.1;margin-bottom:20px;}
+    h1 span{background:linear-gradient(135deg,#34D399,#60A5FA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .sub{font-size:18px;color:var(--muted);max-width:600px;margin-bottom:36px;line-height:1.65;}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:48px;}
+    .cbadges{display:flex;flex-wrap:wrap;gap:8px;}
+    .cb{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:7px;font-size:11px;font-weight:600;background:var(--surface);border:1px solid var(--border);color:var(--text);}
+    .cb .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);}
+    section{max-width:1100px;margin:0 auto;padding:0 40px 72px;}
+    .stag{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--industry);margin-bottom:10px;}
+    h2{font-size:32px;font-weight:800;color:white;letter-spacing:-.025em;margin-bottom:14px;line-height:1.2;}
+    h2 .dim{color:var(--muted);font-weight:400;}
+    .ssub{font-size:16px;color:var(--muted);max-width:540px;margin-bottom:40px;line-height:1.65;}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;} .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+    @media(max-width:800px){.g2,.g3{grid-template-columns:1fr;}}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;}
+    .card-icon{font-size:24px;margin-bottom:12px;}
+    .card-title{font-size:14px;font-weight:700;color:white;margin-bottom:6px;}
+    .card-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+    .pb{background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.2);border-radius:16px;padding:28px 30px;}
+    .po{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:16px;padding:28px 30px;}
+    .pt{font-size:15px;font-weight:700;color:white;margin-bottom:12px;}
+    ul.cl{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;}
+    ul.cl li{display:flex;gap:8px;font-size:13px;color:#94A3B8;}
+    pre{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:12px;color:#94A3B8;line-height:1.8;margin-bottom:16px;}
+    code{font-family:var(--mono);font-size:12px;background:rgba(148,163,184,.08);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:#818CF8;}
+    .tw{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    thead tr{background:rgba(148,163,184,.04);border-bottom:1px solid var(--border);}
+    th{text-align:left;padding:10px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+    td{padding:10px 16px;border-bottom:1px solid rgba(148,163,184,.05);color:var(--text);vertical-align:top;}
+    tr:last-child td{border-bottom:none;}
+    .pok{display:inline-flex;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(16,185,129,.12);color:var(--ok);border:1px solid rgba(16,185,129,.3);}
+    .pwarn{display:inline-flex;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(245,158,11,.12);color:var(--warn);border:1px solid rgba(245,158,11,.3);}
+    .qc{background:var(--surface);border:1px solid rgba(52,211,153,.2);border-radius:16px;padding:28px 30px;}
+    .cta{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(52,211,153,.06));border:1px solid rgba(99,102,241,.2);border-radius:20px;padding:52px 48px;text-align:center;}
+    .cta p{color:var(--muted);font-size:16px;margin-bottom:28px;max-width:480px;margin-left:auto;margin-right:auto;}
+    .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+    footer{border-top:1px solid var(--border);padding:24px 40px;max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);flex-wrap:wrap;gap:12px;}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><div class="gem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11.5 2 2 7 2 17 11.5 22 21 17 21 7 11.5 2"/></svg></div>Kynara</a>
+  <div class="nav-links"><a href="/#features">Features</a><a href="/docs.html">Docs</a><a href="/sandbox.html">Policy Sandbox</a></div>
+  <a href="https://kynaraai.com" class="btn btn-primary">Book a demo</a>
+</nav>
+
+<div class="hero">
+  <div class="bc"><a href="/">Kynara</a><span>/</span><a href="#">Solutions</a><span>/</span><span style="color:var(--strong);">Healthcare</span></div>
+  <div class="badge">🏥 Healthcare</div>
+  <h1>Deploy clinical AI agents with <span>HIPAA-grade governance</span></h1>
+  <p class="sub">Kynara gives healthcare organizations per-action policy enforcement, mandatory human approval for patient-data actions, and a tamper-evident audit log that satisfies HIPAA, HITRUST, SOC 2, and state-level privacy laws.</p>
+  <div class="hero-actions">
+    <a href="https://kynaraai.com" class="btn btn-primary">Book a demo</a>
+    <a href="/sandbox.html" class="btn btn-ghost">Try the policy sandbox</a>
+  </div>
+  <div class="cbadges">
+    <span class="cb"><span class="dot"></span>HIPAA BAA (Enterprise)</span>
+    <span class="cb"><span class="dot"></span>HITRUST CSF mapping</span>
+    <span class="cb"><span class="dot"></span>SOC 2 Type II</span>
+    <span class="cb"><span class="dot"></span>Minimum necessary access</span>
+    <span class="cb"><span class="dot"></span>PHI access audit trail</span>
+    <span class="cb"><span class="dot"></span>Break-glass JIT grants</span>
+  </div>
+</div>
+
+<section>
+  <div class="stag">The challenge</div>
+  <h2>Healthcare AI agents face <span class="dim">unique compliance requirements</span></h2>
+  <p class="ssub">HIPAA's minimum necessary standard, state privacy laws, and clinical safety requirements mean healthcare AI agents need stricter governance than any other industry. Kynara enforces this at the infrastructure level.</p>
+  <div class="g2">
+    <div class="pb">
+      <div class="pt">Without Kynara</div>
+      <ul class="cl">
+        <li><span style="color:var(--danger);">✕</span> AI agent accesses full patient record when only a lab result was needed</li>
+        <li><span style="color:var(--danger);">✕</span> Clinical decision support agent makes a recommendation with no physician review</li>
+        <li><span style="color:var(--danger);">✕</span> PHI accessed from outside approved geographies or after hours</li>
+        <li><span style="color:var(--danger);">✕</span> No audit trail when a patient requests access logs under HIPAA</li>
+        <li><span style="color:var(--danger);">✕</span> Agent acting for a medical assistant can access data above their clearance</li>
+      </ul>
+    </div>
+    <div class="po">
+      <div class="pt">With Kynara</div>
+      <ul class="cl">
+        <li><span style="color:var(--ok);">✓</span> Minimum-necessary enforcement: agents granted only the specific fields required</li>
+        <li><span style="color:var(--ok);">✓</span> Clinical recommendations require attending physician approval before delivery</li>
+        <li><span style="color:var(--ok);">✓</span> PHI access restricted to approved facilities and business hours by policy</li>
+        <li><span style="color:var(--ok);">✓</span> Every PHI access is hash-chained — complete audit log for HIPAA requests</li>
+        <li><span style="color:var(--ok);">✓</span> Agent permissions intersect with the clinician's own access level</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="stag">Use cases</div>
+  <h2>Built for clinical and <span class="dim">healthcare AI workflows</span></h2>
+  <div class="g3">
+    <div class="card"><div class="card-icon">🩺</div><div class="card-title">Clinical decision support</div><div class="card-desc">Require attending physician approval before any AI-generated clinical recommendation reaches a patient. The agent pauses until a licensed clinician approves, with a mandatory justification logged.</div></div>
+    <div class="card"><div class="card-icon">📋</div><div class="card-title">Patient record access</div><div class="card-desc">Enforce minimum-necessary: agents can only access the specific fields the workflow requires. A scheduling agent cannot read lab values; a billing agent cannot read diagnoses.</div></div>
+    <div class="card"><div class="card-icon">💊</div><div class="card-title">Medication management</div><div class="card-desc">Block medication write actions outside approved hours and require pharmacist approval above defined dosage thresholds. Every interaction is logged for DEA and state board audits.</div></div>
+    <div class="card"><div class="card-icon">📊</div><div class="card-title">Population health analytics</div><div class="card-desc">Allow de-identified population queries freely. Gate any query returning identifiable records behind MFA verification and a declared purpose string — logged in the audit chain.</div></div>
+    <div class="card"><div class="card-icon">🔐</div><div class="card-title">EHR & FHIR integration agents</div><div class="card-desc">Agents connecting to Epic, Cerner, or FHIR APIs are scoped to exactly the resource types and patient populations they need. Cross-patient queries require explicit approval.</div></div>
+    <div class="card"><div class="card-icon">🚨</div><div class="card-title">Emergency break-glass access</div><div class="card-desc">JIT grants enable emergency elevated access for on-call clinicians, with mandatory justification, automatic expiry, and full audit trail — satisfying HIPAA break-glass requirements.</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="stag">Policy example</div>
+  <h2>Enforcing minimum necessary <span class="dim">in code</span></h2>
+  <div class="g2">
+    <div>
+      <p style="color:var(--muted);font-size:14px;margin-bottom:16px;">This policy allows a clinical AI agent to read basic demographic fields but requires attending physician approval before accessing diagnosis or medication records:</p>
+      <pre>{
+  "display_name": "PHI access — require approval for clinical data",
+  "effect":       "require_approval",
+  "priority":     100,
+  "actions":      ["ehr.read"],
+  "condition": {
+    "op": "in",
+    "args": [
+      "ctx.resource.attrs.record_type",
+      ["diagnosis", "medication", "lab_result", "imaging"]
+    ]
+  }
+}
+
+// Second policy: allow demographics freely
+{
+  "display_name": "PHI access — allow demographics",
+  "effect":       "allow",
+  "priority":     200,
+  "actions":      ["ehr.read"],
+  "condition": {
+    "op": "eq",
+    "args": ["ctx.resource.attrs.record_type", "demographics"]
+  }
+}</pre>
+    </div>
+    <div>
+      <p style="color:var(--muted);font-size:14px;margin-bottom:16px;">In your clinical AI agent:</p>
+      <pre>from kynara_sdk import permission_required
+
+@permission_required(
+    "ehr.read",
+    resource_arg="patient_id",
+    resource_type="patient_record",
+    resource_attrs=lambda patient_id, record_type: {
+        "record_type": record_type,
+        "patient_id": patient_id,
+    }
+)
+def read_patient_record(patient_id: str, record_type: str):
+    return ehr.get_record(patient_id, record_type)
+
+# Diagnosis access → pauses for physician approval
+# Demographics → proceeds immediately
+# Every call → recorded in audit chain</pre>
+      <div style="background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.2);border-radius:10px;padding:14px 16px;font-size:13px;color:#6EE7B7;margin-top:12px;">
+        <strong>HIPAA minimum necessary:</strong> The policy engine enforces that agents only access what the current workflow actually requires — not what they technically <em>could</em> access.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="stag">Compliance</div>
+  <h2>HIPAA and HITRUST <span class="dim">requirement mapping</span></h2>
+  <div class="tw">
+    <table>
+      <thead><tr><th>HIPAA / HITRUST Requirement</th><th>Kynara Feature</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Minimum necessary standard (§164.514(d))</td><td>Per-action ABAC conditions on resource type and field</td><td><span class="pok">Built-in</span></td></tr>
+        <tr><td>Access controls (§164.312(a)(1))</td><td>RBAC roles + ABAC conditions, non-escalation guarantee</td><td><span class="pok">Built-in</span></td></tr>
+        <tr><td>Audit controls (§164.312(b))</td><td>SHA-256 hash-chained audit log, append-only, CSV export</td><td><span class="pok">Built-in</span></td></tr>
+        <tr><td>Person/entity authentication (§164.312(d))</td><td>JWT + API key auth, Okta/SAML/OIDC SSO</td><td><span class="pok">Built-in</span></td></tr>
+        <tr><td>Emergency access procedure (§164.312(a)(2)(ii))</td><td>JIT grants with justification + auto-expiry</td><td><span class="pok">Built-in</span></td></tr>
+        <tr><td>Workforce supervision of automated systems</td><td>require_approval as first-class policy outcome</td><td><span class="pok">Built-in</span></td></tr>
+        <tr><td>Business Associate Agreement (BAA)</td><td>HIPAA BAA available</td><td><span class="pwarn">Enterprise</span></td></tr>
+        <tr><td>Data residency (state laws)</td><td>Residency middleware, regional endpoint enforcement</td><td><span class="pok">Built-in</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="qc">
+    <div style="font-size:36px;color:rgba(52,211,153,.25);font-family:Georgia,serif;margin-bottom:12px;">"</div>
+    <p style="font-size:15px;color:var(--strong);line-height:1.7;margin-bottom:16px;font-style:italic;">Our compliance team was blocked on deploying clinical AI agents until we found Kynara. The audit chain and the require_approval workflow gave us exactly what we needed for our HIPAA BAA — our counsel reviewed it in a day.</p>
+    <div style="font-size:13px;font-weight:600;color:white;">VP of Engineering</div>
+    <div style="font-size:12px;color:var(--muted);">Series C Digital Health Platform</div>
+  </div>
+</section>
+
+<section>
+  <div class="cta">
+    <div class="badge" style="display:inline-flex;margin-bottom:16px;">🏥 Healthcare</div>
+    <h2>Ready to deploy HIPAA-compliant AI agents?</h2>
+    <p>Enterprise plans include a HIPAA BAA, custom data retention, and dedicated deployment. Free plan available with no credit card required.</p>
+    <div class="cta-btns">
+      <a href="https://kynaraai.com" class="btn btn-primary" style="font-size:14px;padding:11px 24px;">Book a demo</a>
+      <a href="/sandbox.html" class="btn btn-ghost" style="font-size:14px;padding:11px 24px;">Try the policy sandbox</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span style="color:var(--muted);">Kynara &copy; 2026</span>
+  <div style="display:flex;gap:20px;"><a href="/" style="color:var(--muted);">Home</a><a href="/docs.html" style="color:var(--muted);">Docs</a><a href="/sandbox.html" style="color:var(--muted);">Sandbox</a></div>
+</footer>
+</body>
+</html>

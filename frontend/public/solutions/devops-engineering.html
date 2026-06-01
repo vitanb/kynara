@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Agent Governance for DevOps & Engineering | Kynara</title>
+  <meta name="description" content="Govern AI coding assistants, CI/CD agents, and infrastructure automation with Kynara. Enforce policies before agents touch production, require approval for destructive operations, and audit every deployment action." />
+  <link rel="canonical" href="https://kynaraai.com/solutions/devops-engineering" />
+  <meta property="og:title" content="AI Agent Governance for DevOps & Engineering | Kynara" />
+  <meta property="og:description" content="Policy enforcement for CI/CD agents, coding assistants, and infrastructure automation. Human approval before production deploys. Full audit trail for every agent action." />
+  <meta property="og:image" content="https://kynaraai.com/logo-192.png" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <style>
+    :root{--bg:#05080F;--surface:#080C14;--surface2:#0D1421;--border:rgba(148,163,184,0.1);--accent:#6366F1;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#10B981;--warn:#F59E0B;--danger:#F43F5E;--font:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",monospace;--ind:#818CF8;--ind-bg:rgba(99,102,241,0.1);--ind-border:rgba(99,102,241,0.25);}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.7;}
+    a{color:#818CF8;text-decoration:none;} a:hover{text-decoration:underline;}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(5,8,15,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:700;color:white;font-size:15px;text-decoration:none;}
+    .gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+    .gem svg{width:14px;height:14px;color:white;}
+    .nav-links{display:flex;align-items:center;gap:24px;font-size:13px;color:var(--muted);}
+    .nav-links a:hover{color:white;text-decoration:none;}
+    .btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+    .btn-primary{background:var(--accent);color:white;} .btn-primary:hover{background:#4F46E5;text-decoration:none;}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);} .btn-ghost:hover{color:white;text-decoration:none;}
+    .hero{max-width:1100px;margin:0 auto;padding:80px 40px 60px;}
+    .bc{font-size:12px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:6px;}
+    .bc a{color:var(--muted);} .bc a:hover{color:white;text-decoration:none;}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--ind-bg);border:1px solid var(--ind-border);color:var(--ind);margin-bottom:20px;}
+    h1{font-size:clamp(32px,4.5vw,52px);font-weight:900;color:white;letter-spacing:-.03em;line-height:1.1;margin-bottom:20px;}
+    h1 span{background:linear-gradient(135deg,#818CF8,#2DD4BF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .sub{font-size:18px;color:var(--muted);max-width:600px;margin-bottom:36px;line-height:1.65;}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:48px;}
+    .cbadges{display:flex;flex-wrap:wrap;gap:8px;}
+    .cb{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:7px;font-size:11px;font-weight:600;background:var(--surface);border:1px solid var(--border);color:var(--text);}
+    .cb .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);}
+    section{max-width:1100px;margin:0 auto;padding:0 40px 72px;}
+    .stag{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ind);margin-bottom:10px;}
+    h2{font-size:32px;font-weight:800;color:white;letter-spacing:-.025em;margin-bottom:14px;line-height:1.2;}
+    h2 .dim{color:var(--muted);font-weight:400;}
+    .ssub{font-size:16px;color:var(--muted);max-width:540px;margin-bottom:40px;line-height:1.65;}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;} .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+    @media(max-width:800px){.g2,.g3{grid-template-columns:1fr;}}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;}
+    .card-icon{font-size:24px;margin-bottom:12px;}
+    .card-title{font-size:14px;font-weight:700;color:white;margin-bottom:6px;}
+    .card-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+    .pb{background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.2);border-radius:16px;padding:28px 30px;}
+    .po{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:16px;padding:28px 30px;}
+    .pt{font-size:15px;font-weight:700;color:white;margin-bottom:12px;}
+    ul.cl{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;}
+    ul.cl li{display:flex;gap:8px;font-size:13px;color:#94A3B8;}
+    pre{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:12px;color:#94A3B8;line-height:1.8;margin-bottom:16px;}
+    code{font-family:var(--mono);font-size:12px;background:rgba(148,163,184,.08);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:#818CF8;}
+    .cta{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(45,212,191,.06));border:1px solid rgba(99,102,241,.2);border-radius:20px;padding:52px 48px;text-align:center;}
+    .cta p{color:var(--muted);font-size:16px;margin-bottom:28px;max-width:480px;margin-left:auto;margin-right:auto;}
+    .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+    footer{border-top:1px solid var(--border);padding:24px 40px;max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);flex-wrap:wrap;gap:12px;}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><div class="gem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11.5 2 2 7 2 17 11.5 22 21 17 21 7 11.5 2"/></svg></div>Kynara</a>
+  <div class="nav-links"><a href="/#features">Features</a><a href="/docs.html">Docs</a><a href="/sandbox.html">Policy Sandbox</a></div>
+  <a href="https://kynaraai.com" class="btn btn-primary">Book a demo</a>
+</nav>
+
+<div class="hero">
+  <div class="bc"><a href="/">Kynara</a><span>/</span><span style="color:var(--strong);">DevOps &amp; Engineering</span></div>
+  <div class="badge">⚙️ DevOps &amp; Engineering</div>
+  <h1>Control what your <span>AI agents can do in production</span></h1>
+  <p class="sub">Coding assistants, CI/CD agents, and infrastructure automation are powerful — and dangerous without guardrails. Kynara enforces per-action policies, requires human approval before production changes, and audits everything.</p>
+  <div class="hero-actions">
+    <a href="https://kynaraai.com" class="btn btn-primary">Book a demo</a>
+    <a href="/sandbox.html" class="btn btn-ghost">Try the policy sandbox</a>
+  </div>
+  <div class="cbadges">
+    <span class="cb"><span class="dot"></span>Production environment guard</span>
+    <span class="cb"><span class="dot"></span>LangChain, AutoGen, CrewAI support</span>
+    <span class="cb"><span class="dot"></span>Claude Code / Cursor governance</span>
+    <span class="cb"><span class="dot"></span>MFA-gated destructive ops</span>
+    <span class="cb"><span class="dot"></span>Anomaly detection + auto-revoke</span>
+  </div>
+</div>
+
+<section>
+  <div class="stag">The problem</div>
+  <h2>AI agents in your codebase <span class="dim">with unchecked access</span></h2>
+  <div class="g2">
+    <div class="pb">
+      <div class="pt">Without Kynara</div>
+      <ul class="cl">
+        <li><span style="color:var(--danger);">✕</span> Claude Code / Cursor agent runs a shell command on a production server</li>
+        <li><span style="color:var(--danger);">✕</span> CI/CD agent deploys to production without a change ticket</li>
+        <li><span style="color:var(--danger);">✕</span> Infrastructure agent resizes a database in the wrong region</li>
+        <li><span style="color:var(--danger);">✕</span> Prompt injection causes an agent to drop a table</li>
+        <li><span style="color:var(--danger);">✕</span> No record of which AI made which infrastructure change before the incident</li>
+      </ul>
+    </div>
+    <div class="po">
+      <div class="pt">With Kynara</div>
+      <ul class="cl">
+        <li><span style="color:var(--ok);">✓</span> Shell execution on production requires MFA and on-call engineer approval</li>
+        <li><span style="color:var(--ok);">✓</span> Production deploys gated by environment condition + ticket_url context field</li>
+        <li><span style="color:var(--ok);">✓</span> Infra changes blocked outside US/EU and outside maintenance windows</li>
+        <li><span style="color:var(--ok);">✓</span> Policy engine sits outside LLM trust boundary — prompt injection can't bypass it</li>
+        <li><span style="color:var(--ok);">✓</span> Every agent action hash-chained — full audit trail for incident retrospectives</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="stag">Use cases</div>
+  <h2>Engineering AI agent <span class="dim">scenarios</span></h2>
+  <div class="g3">
+    <div class="card"><div class="card-icon">💻</div><div class="card-title">Coding assistants (Claude Code, Cursor)</div><div class="card-desc">Allow agents to read code and run tests freely. Require approval before running arbitrary shell commands, modifying CI configuration, or pushing to protected branches.</div></div>
+    <div class="card"><div class="card-icon">🚀</div><div class="card-title">CI/CD pipeline agents</div><div class="card-desc">Gate production deploys behind an environment condition check and mandatory change ticket. Staging deploys proceed automatically. Rollback commands require on-call approval.</div></div>
+    <div class="card"><div class="card-icon">☁️</div><div class="card-title">Infrastructure automation</div><div class="card-desc">Terraform / Pulumi agents can plan freely. Apply to production requires approval. Destructive operations (terminate, delete, drop) always require MFA-verified approval regardless of environment.</div></div>
+    <div class="card"><div class="card-icon">📊</div><div class="card-title">Observability & incident response</div><div class="card-desc">Allow agents to query logs, metrics, and traces freely. Gate write operations — creating alerts, modifying dashboards, triggering runbooks — behind the on-call engineer's approval.</div></div>
+    <div class="card"><div class="card-icon">🗄️</div><div class="card-title">Database agents</div><div class="card-desc">SELECT queries are unrestricted. DDL statements (ALTER, DROP, TRUNCATE) require both an environment condition (non-production) and an explicit approval. Cross-database queries are denied by default.</div></div>
+    <div class="card"><div class="card-icon">🔑</div><div class="card-title">Secrets & credential management</div><div class="card-desc">Agents can read secrets they're explicitly scoped for. Writing or rotating secrets requires a JIT grant with justification. Any access to production credentials is logged with full context.</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="stag">Integration</div>
+  <h2>Works with the tools <span class="dim">your team already uses</span></h2>
+  <div class="g2">
+    <div>
+      <pre># LangChain agent with Kynara enforcement
+from kynara_sdk.langchain import KynaraCallbackHandler
+
+executor = AgentExecutor(
+    agent=infra_agent,
+    tools=infra_tools,
+    callbacks=[KynaraCallbackHandler(
+        kynara, agent_id=AGENT_ID
+    )],
+)
+# Every on_tool_start is checked before execution</pre>
+      <pre># Policy: require MFA for production infra changes
+{
+  "effect": "require_approval",
+  "actions": ["infra.apply", "infra.destroy"],
+  "condition": {
+    "op": "and",
+    "args": [
+      { "op": "eq",
+        "args": ["ctx.context.env", "production"] },
+      { "op": "eq",
+        "args": ["ctx.context.mfa_verified", false] }
+    ]
+  }
+}</pre>
+    </div>
+    <div>
+      <pre># TypeScript — Express middleware for API agents
+import { requirePermission } from "@kynara/sdk/express";
+
+app.post("/infra/deploy",
+  requirePermission({
+    client,
+    action: "infra.deploy",
+    resource: (req) => ({
+      type: "environment",
+      id: req.body.env,
+      attrs: {
+        environment: req.body.env,
+        service: req.body.service,
+      }
+    }),
+    context: (req) => ({
+      env: req.body.env,
+      mfa_verified: req.user.mfaVerified,
+      ticket_url: req.body.ticket_url,
+    }),
+  }),
+  deployController,
+);</pre>
+      <div style="background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:14px 16px;font-size:13px;color:#A5B4FC;margin-top:12px;">
+        <strong>Prompt injection safe:</strong> Kynara evaluates structured data from your code — not text from the LLM. No matter what a prompt injection attack writes, the policy engine evaluates the action, resource, and context your wrapper provides.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="cta">
+    <div class="badge" style="display:inline-flex;margin-bottom:16px;">⚙️ DevOps &amp; Engineering</div>
+    <h2>Govern your engineering AI agents today</h2>
+    <p>Free plan to get started — 3 seats, 10,000 decisions/month, full policy engine and audit log. No credit card required.</p>
+    <div class="cta-btns">
+      <a href="https://kynaraai.com" class="btn btn-primary" style="font-size:14px;padding:11px 24px;">Get started free</a>
+      <a href="/sandbox.html" class="btn btn-ghost" style="font-size:14px;padding:11px 24px;">Try the policy sandbox</a>
+      <a href="/docs.html" class="btn btn-ghost" style="font-size:14px;padding:11px 24px;">Read the docs</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span style="color:var(--muted);">Kynara &copy; 2026</span>
+  <div style="display:flex;gap:20px;"><a href="/" style="color:var(--muted);">Home</a><a href="/docs.html" style="color:var(--muted);">Docs</a><a href="/sandbox.html" style="color:var(--muted);">Sandbox</a></div>
+</footer>
+</body>
+</html>
