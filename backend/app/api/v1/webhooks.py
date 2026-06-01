@@ -228,3 +228,30 @@ async def stats(
         "failed": counts.get("failed", 0),
         "dead": counts.get("dead", 0),
     }
+
+
+@router.post("/{endpoint_id}/test", status_code=202)
+async def test_endpoint(
+    endpoint_id: str,
+    principal: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(_session),
+):
+    """Enqueue a test event delivery to verify the endpoint is reachable."""
+    _admin(principal)
+    ep = await session.get(WebhookEndpoint, uuid.UUID(endpoint_id))
+    if not ep or str(ep.organization_id) != principal.org_id:
+        raise HTTPException(404, "Endpoint not found")
+
+    from app.webhooks.service import WebhookService
+    svc = WebhookService(session)
+    await svc.enqueue(
+        org_id=principal.org_id,
+        event_type="decision.allowed",
+        payload={
+            "test": True,
+            "message": "This is a test delivery from Kynara.",
+            "endpoint_id": endpoint_id,
+        },
+    )
+    await session.commit()
+    return {"status": "queued", "message": "Test event queued — check your endpoint for delivery."}

@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation, Link } from "react-router-do
 import {
   LayoutDashboard, Bot, Wrench, ShieldCheck, ScrollText,
   CreditCard, Settings, LogOut, ChevronDown, Check, Building2,
-  Menu, X, CheckCircle2, Plug, ShieldAlert, KeyRound, BookOpen, UserCircle, Crown, Blocks,
+  Menu, X, CheckCircle2, Plug, ShieldAlert, KeyRound, BookOpen, UserCircle, Crown, Blocks, History, BarChart2, Code2,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
@@ -18,7 +18,8 @@ const allNav: NavEntry[] = [
   { to: "dashboard",  label: "Dashboard",  icon: LayoutDashboard, roles: ["owner","admin","developer","auditor","member"] },
   { to: "agents",     label: "Agents",     icon: Bot,             roles: ["owner","admin","developer","auditor","member"] },
   { to: "policies",   label: "Policies",   icon: ShieldCheck,     roles: ["owner","admin","auditor","developer","member"] },
-  { to: "approvals",  label: "Approvals",  icon: CheckCircle2,    roles: ["owner","admin","auditor","developer","member"], badge: true },
+  { to: "approvals",            label: "Approvals",         icon: CheckCircle2, roles: ["owner","admin","auditor","developer","member"], badge: true },
+  { to: "approvals/analytics", label: "Approval Analytics", icon: BarChart2,    roles: ["owner","admin","auditor"] },
   { to: "audit",      label: "Audit log",  icon: ScrollText,      roles: ["owner","admin","auditor","developer","member"] },
   {
     group: "Governance",
@@ -28,7 +29,8 @@ const allNav: NavEntry[] = [
       { to: "roles",      label: "Roles",         icon: KeyRound,   roles: ["owner","admin","auditor","developer","member"] },
       { to: "tools",      label: "Scope Catalog", icon: Wrench,     roles: ["owner","admin","developer","auditor","member"] },
       { to: "guardrails", label: "Guardrails",    icon: ShieldAlert,roles: ["owner","admin"] },
-      { to: "catalog",    label: "Library",       icon: BookOpen,   roles: ["owner","admin","developer","auditor","member"] },
+      { to: "catalog",          label: "Library",          icon: BookOpen, roles: ["owner","admin","developer","auditor","member"] },
+      { to: "policy-templates", label: "Policy Templates", icon: Blocks,   roles: ["owner","admin"] },
       { to: "how-it-works", label: "How it works",icon: BookOpen,   roles: ["owner","admin","developer","auditor","member"] },
     ],
   },

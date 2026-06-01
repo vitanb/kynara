@@ -56,9 +56,21 @@ class TeamsConfigIn(BaseModel):
     enabled: bool = True
 
 
+class PagerDutyConfigIn(BaseModel):
+    routing_key: str
+    enabled: bool = True
+
+
+class EmailConfigIn(BaseModel):
+    recipients: str  # comma-separated email addresses
+    enabled: bool = True
+
+
 class IntegrationConfigIn(BaseModel):
     slack: SlackConfigIn | None = None
     teams: TeamsConfigIn | None = None
+    pagerduty: PagerDutyConfigIn | None = None
+    email: EmailConfigIn | None = None
 
 
 class IntegrationConfigOut(BaseModel):
@@ -71,6 +83,12 @@ class IntegrationConfigOut(BaseModel):
     teams_enabled: bool
     teams_webhook_url_set: bool
     teams_callback_secret_set: bool
+
+    pagerduty_enabled: bool
+    pagerduty_routing_key_set: bool
+
+    email_enabled: bool
+    email_recipients: str | None
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -106,6 +124,8 @@ async def get_config(
             slack_enabled=False, slack_channel_id=None,
             slack_bot_token_set=False, slack_signing_secret_set=False, slack_webhook_url_set=False,
             teams_enabled=False, teams_webhook_url_set=False, teams_callback_secret_set=False,
+            pagerduty_enabled=False, pagerduty_routing_key_set=False,
+            email_enabled=False, email_recipients=None,
         )
     return IntegrationConfigOut(
         slack_enabled=row.slack_enabled,
@@ -116,6 +136,10 @@ async def get_config(
         teams_enabled=row.teams_enabled,
         teams_webhook_url_set=bool(row.teams_webhook_url_enc),
         teams_callback_secret_set=bool(row.teams_callback_secret_enc),
+        pagerduty_enabled=row.pagerduty_enabled,
+        pagerduty_routing_key_set=bool(row.pagerduty_routing_key_enc),
+        email_enabled=row.approval_email_enabled,
+        email_recipients=row.approval_email_to,
     )
 
 
@@ -147,6 +171,14 @@ async def upsert_config(
             row.teams_callback_secret_enc = encrypt(t.callback_secret)
         row.teams_enabled = t.enabled
 
+    if body.pagerduty is not None:
+        row.pagerduty_routing_key_enc = encrypt(body.pagerduty.routing_key)
+        row.pagerduty_enabled = body.pagerduty.enabled
+
+    if body.email is not None:
+        row.approval_email_to = body.email.recipients
+        row.approval_email_enabled = body.email.enabled
+
     await session.commit()
 
     return IntegrationConfigOut(
@@ -158,6 +190,10 @@ async def upsert_config(
         teams_enabled=row.teams_enabled,
         teams_webhook_url_set=bool(row.teams_webhook_url_enc),
         teams_callback_secret_set=bool(row.teams_callback_secret_enc),
+        pagerduty_enabled=row.pagerduty_enabled,
+        pagerduty_routing_key_set=bool(row.pagerduty_routing_key_enc),
+        email_enabled=row.approval_email_enabled,
+        email_recipients=row.approval_email_to,
     )
 
 

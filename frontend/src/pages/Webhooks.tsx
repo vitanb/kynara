@@ -26,6 +26,11 @@ export default function WebhooksPage() {
     queryFn: () => api.get<any>("/api/v1/webhooks/event-types"),
   });
 
+  const testEp = useMutation({
+    mutationFn: (id: string) => api.post<{status:string;message:string}>(`/api/v1/webhooks/${id}/test`),
+    onSuccess: () => alert("Test event queued — check your endpoint logs."),
+  });
+
   const del = useMutation({
     mutationFn: (id: string) => api.del(`/api/v1/webhooks/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["webhooks"] }),
@@ -132,6 +137,10 @@ export default function WebhooksPage() {
                       : <span className="pill-ok">healthy</span>}
                   </td>
                   <td className="text-right">
+                    <button className="btn-ghost text-xs" onClick={(ev) => { ev.stopPropagation(); testEp.mutate(e.id); }}
+                      disabled={testEp.isPending}>
+                      Send Test
+                    </button>
                     <button className="btn-ghost text-xs" onClick={(ev) => { ev.stopPropagation(); rotate.mutate(e.id); }}>
                       <RotateCcw className="size-3.5" />
                     </button>

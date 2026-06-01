@@ -39,3 +39,12 @@ class OrgIntegration(Base, UUIDPkMixin, TimestampMixin):
     teams_webhook_url_enc: Mapped[str | None] = mapped_column(Text, nullable=True)
     teams_callback_secret_enc: Mapped[str | None] = mapped_column(Text, nullable=True)
     teams_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    # ── PagerDuty ──────────────────────────────────────────────────────────────
+    pagerduty_routing_key_enc: Mapped[str | None] = mapped_column(Text, nullable=True)
+    pagerduty_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    # ── Email notifications ────────────────────────────────────────────────────
+    # Comma-separated list of email addresses for approval notifications
+    approval_email_to: Mapped[str | None] = mapped_column(Text, nullable=True)
+    approval_email_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

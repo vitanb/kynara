@@ -1,8 +1,8 @@
 """Approval notification dispatcher.
 
-Looks up the org's OrgIntegration row and fires Slack and/or Teams
-notifications concurrently. Failures are logged but never propagate
-to the caller so the decision API remains fast and reliable.
+Looks up the org's OrgIntegration row and fires Slack, Teams, Email,
+and PagerDuty notifications concurrently. Failures are logged but
+never propagate so the decision API remains fast and reliable.
 """
 from __future__ import annotations
 
@@ -18,7 +18,6 @@ log = logging.getLogger("kynara.integrations.notify")
 
 
 async def _get_org_integration(session: AsyncSession, org_id: str):
-    """Fetch the OrgIntegration row for this org, or None."""
     try:
         import uuid
         from app.models.org_integration import OrgIntegration
@@ -32,24 +31,17 @@ async def _get_org_integration(session: AsyncSession, org_id: str):
 
 
 async def notify_approval_created(approval: ApprovalRequest, session: AsyncSession | None = None) -> None:
-    """Send Slack and/or Teams notification for a new approval.
-
-    Uses the org's per-org integration config (OrgIntegration) if available,
-    falls back to global env vars for self-hosted deployments.
-    Runs both notifications concurrently. Errors are caught internally.
-    """
+    """Send all configured notifications for a new approval request."""
     from app.integrations.slack import post_approval_message
     from app.integrations.teams import post_approval_card
 
     approval_id = str(approval.id)
     org_id = str(approval.organization_id)
 
-    # Look up per-org integration config
     org_integration = None
     if session:
         org_integration = await _get_org_integration(session, org_id)
     else:
-        # Create a short-lived session just for the lookup
         try:
             from app.db.session import SessionLocal
             async with SessionLocal() as s:
@@ -86,4 +78,29 @@ async def notify_approval_created(approval: ApprovalRequest, session: AsyncSessi
         except Exception as exc:
             log.exception("Teams notification failed for approval %s: %s", approval_id, exc)
 
-    await asyncio.gather(_slack(), _teams(), return_exceptions=True)
+    async def _email():
+        try:
+            if not (org_integration and org_integration.approval_email_enabled and org_integration.approval_email_to):
+                return
+            from app.integrations.email_notify import notify_approval_email
+            recipients = [r.strip() for r in org_integration.approval_email_to.split(",") if r.strip()]
+            email_kwargs = {k: v for k, v in kwargs.items() if k != "context"}
+            await notify_approval_email(**email_kwargs, recipients=recipients)
+            log.info("Email notified: approval=%s", approval_id)
+        except Exception as exc:
+            log.exception("Email notification failed for approval %s: %s", approval_id, exc)
+
+    async def _pagerduty():
+        try:
+            if not (org_integration and org_integration.pagerduty_enabled and org_integration.pagerduty_routing_key_enc):
+                return
+            from app.integrations.pagerduty import notify_approval_pagerduty
+            from app.core.encryption import decrypt
+            routing_key = decrypt(org_integration.pagerduty_routing_key_enc)
+            pd_kwargs = {k: v for k, v in kwargs.items() if k != "context"}
+            await notify_approval_pagerduty(**pd_kwargs, routing_key=routing_key)
+            log.info("PagerDuty notified: approval=%s", approval_id)
+        except Exception as exc:
+            log.exception("PagerDuty notification failed for approval %s: %s", approval_id, exc)
+
+    await asyncio.gather(_slack(), _teams(), _email(), _pagerduty(), return_exceptions=True)

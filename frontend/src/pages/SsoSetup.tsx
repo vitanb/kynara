@@ -35,6 +35,13 @@ export default function SsoSetupPage() {
     onSuccess: () => nav("/app/settings"),
   });
 
+  const [testStatus, setTestStatus] = useState<"idle"|"testing"|"ok"|"fail">("idle");
+  const testConn = useMutation({
+    mutationFn: () => api.post<{success:boolean;detail:string}>("/api/v1/sso/connections/test", { protocol, ...form }),
+    onSuccess: (data) => setTestStatus(data.success ? "ok" : "fail"),
+    onError: () => setTestStatus("fail"),
+  });
+
   const base = (import.meta.env.VITE_API_BASE || window.location.origin).replace(/\/$/, "");
   const spMetadata  = `${base}/api/v1/auth/sso/saml/metadata`;
   const spAcs       = `${base}/api/v1/auth/sso/saml/acs`;
@@ -217,8 +224,10 @@ export default function SsoSetupPage() {
 
             <div className="flex justify-between pt-2">
               <button className="btn-ghost" onClick={() => setStep(2)}>Back</button>
-              <button className="btn-primary" onClick={() => create.mutate()}>
-                <Check className="size-4" /> Create connection
+              <button className="btn-primary"
+                onClick={() => setStep(4)}
+                disabled={!form.domain || (protocol === "oidc" ? !form.issuer || !form.client_id : !form.idp_entity_id || !form.idp_sso_url)}>
+                Next
               </button>
             </div>
           </div>
@@ -228,8 +237,49 @@ export default function SsoSetupPage() {
   );
 }
 
+        {step === 4 && (
+          <div className="card p-6 space-y-5">
+            <div className="text-sm font-medium">Test your connection before saving</div>
+            <p className="text-xs text-ink-400">
+              We'll attempt to fetch your IdP's discovery document / metadata to verify the
+              configuration is reachable and the values are correct. No login is triggered.
+            </p>
+
+            <div className="flex items-center gap-4">
+              <button className="btn-primary" onClick={() => { setTestStatus("testing"); testConn.mutate(); }}
+                disabled={testStatus === "testing"}>
+                {testStatus === "testing" ? "Testing…" : "Test connection"}
+              </button>
+              {testStatus === "ok" && <span className="text-sm text-ok-400 font-medium">✓ Connection verified</span>}
+              {testStatus === "fail" && <span className="text-sm text-danger-400 font-medium">✗ Connection failed — check your values</span>}
+            </div>
+
+            {testStatus === "fail" && (
+              <div className="text-xs text-ink-400 border-l-2 border-danger-500 pl-3 py-1">
+                Common causes: incorrect issuer URL, client ID mismatch, certificate format error, or firewall blocking our IP.
+                Check each value in step 3 and ensure your IdP allows connections from Kynara's IP range.
+              </div>
+            )}
+
+            <div className="pt-3 border-t border-ink-800">
+              <div className="text-xs text-ink-400 mb-3">
+                <strong className="text-ink-300">Note:</strong> Do not disable password login until at least one owner
+                has verified they can sign in via SSO. If SSO breaks, contact support.
+              </div>
+            </div>
+
+            <div className="flex justify-between pt-2">
+              <button className="btn-ghost" onClick={() => setStep(3)}>Back</button>
+              <button className="btn-primary" onClick={() => create.mutate()} disabled={create.isPending}>
+                <Check className="size-4" /> {create.isPending ? "Saving…" : "Save connection"}
+              </button>
+            </div>
+          </div>
+        )}
+
+
 function Stepper({ step }: { step: number }) {
-  const steps = ["Provider", "SP details", "IdP config"];
+  const steps = ["Provider", "SP details", "IdP config", "Test & Save"];
   return (
     <div className="flex items-center gap-3 mb-6">
       {steps.map((label, i) => {
