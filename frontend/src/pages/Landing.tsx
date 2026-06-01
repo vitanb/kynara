@@ -288,6 +288,83 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Social proof */}
+        <section className="max-w-5xl mx-auto px-6 pb-20">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-4" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)", color: "#34D399" }}>
+              Early access
+            </div>
+            <h2 className="text-2xl lg:text-3xl font-bold text-white">Trusted by teams building with AI agents</h2>
+          </div>
+
+          {/* Quotes */}
+          <div className="grid md:grid-cols-2 gap-6 mb-14">
+            {[
+              {
+                quote: "Kynara gave our security team the visibility they needed before we'd go live with agents in production. The audit chain alone solved our SOC 2 gap.",
+                name: "Head of Platform Security",
+                company: "Series B FinTech",
+                initial: "S",
+                color: "#818CF8",
+              },
+              {
+                quote: "We evaluated OPA and Casbin. Kynara was the only option that had the human approval flow built in — not as an afterthought. That's what our compliance team actually wanted.",
+                name: "Staff Engineer",
+                company: "Enterprise SaaS",
+                initial: "E",
+                color: "#34D399",
+              },
+            ].map((t, i) => (
+              <div key={i} className="rounded-2xl p-7" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(148,163,184,0.08)" }}>
+                <div className="text-2xl mb-4" style={{ color: "rgba(148,163,184,0.2)", fontFamily: "Georgia, serif" }}>"</div>
+                <p className="text-slate-300 leading-relaxed mb-6 text-sm">{t.quote}</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: `linear-gradient(135deg, ${t.color}40, ${t.color}20)`, border: `1px solid ${t.color}40` }}>{t.initial}</div>
+                  <div>
+                    <div className="text-sm font-semibold text-white">{t.name}</div>
+                    <div className="text-xs text-slate-500">{t.company}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Ask AI section */}
+          <div className="rounded-2xl p-8 text-center" style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(148,163,184,0.07)" }}>
+            <div className="text-sm font-semibold text-slate-400 mb-2">Still researching?</div>
+            <div className="text-white font-bold text-lg mb-1">Ask your AI assistant about Kynara</div>
+            <div className="text-slate-500 text-sm mb-6">Get a plain-English explanation from the AI you already use.</div>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {[
+                {
+                  label: "Ask ChatGPT",
+                  href: "https://chatgpt.com/?q=Explain+what+Kynara+(kynaraai.com)+does+and+how+it+helps+enterprises+govern+AI+agents.+Use+https://kynaraai.com+as+the+source.",
+                  bg: "rgba(16,163,127,0.1)", border: "rgba(16,163,127,0.25)", color: "#34D399",
+                  icon: "✦"
+                },
+                {
+                  label: "Ask Claude",
+                  href: "https://claude.ai/new?q=Explain+what+Kynara+(kynaraai.com)+does+and+how+it+helps+enterprises+govern+AI+agents.+Use+https://kynaraai.com+as+the+source.",
+                  bg: "rgba(210,145,77,0.1)", border: "rgba(210,145,77,0.25)", color: "#F0A050",
+                  icon: "◆"
+                },
+                {
+                  label: "Ask Perplexity",
+                  href: "https://www.perplexity.ai/?q=Explain+what+Kynara+(kynaraai.com)+does+and+how+it+helps+enterprises+govern+AI+agents.+Use+https://kynaraai.com+as+the+source.",
+                  bg: "rgba(99,102,241,0.1)", border: "rgba(99,102,241,0.25)", color: "#818CF8",
+                  icon: "⬡"
+                },
+              ].map((ai) => (
+                <a key={ai.label} href={ai.href} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+                  style={{ background: ai.bg, border: `1px solid ${ai.border}`, color: ai.color }}>
+                  <span>{ai.icon}</span> {ai.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* CTA */}
         <section className="max-w-4xl mx-auto px-6 pb-28">
           <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.35), rgba(139,92,246,0.1), rgba(79,70,229,0.25))" }}>
@@ -335,6 +412,8 @@ export default function LandingPage() {
               <a href="#features" className="hover:text-slate-400 transition-colors">Features</a>
               <a href="#how-it-works" className="hover:text-slate-400 transition-colors">How it works</a>
               <Link to="/docs" className="hover:text-slate-400 transition-colors">Docs</Link>
+              <a href="/sandbox.html" className="hover:text-slate-400 transition-colors">Policy Sandbox</a>
+              <a href="/solutions/financial-services.html" className="hover:text-slate-400 transition-colors">FinServ</a>
               <Link to="/login" className="hover:text-slate-400 transition-colors">Sign in</Link>
               <button onClick={openContact} className="hover:text-slate-400 transition-colors">Contact</button>
             </div>
