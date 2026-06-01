@@ -9,22 +9,19 @@ import {
 // ── API helpers ───────────────────────────────────────────────────────────────
 
 async function fetchConfig() {
-  const r = await api.get("/api/v1/integrations/config");
-  return r.data;
+  return api.get("/api/v1/integrations/config");
 }
 
 async function saveConfig(body: object) {
-  const r = await api.put("/api/v1/integrations/config", body);
-  return r.data;
+  return api.put("/api/v1/integrations/config", body);
 }
 
 async function testConfig() {
-  const r = await api.post("/api/v1/integrations/config/test");
-  return r.data;
+  return api.post("/api/v1/integrations/config/test");
 }
 
-async function deleteSlack() { await api.delete("/api/v1/integrations/config/slack"); }
-async function deleteTeams() { await api.delete("/api/v1/integrations/config/teams"); }
+async function deleteSlack() { await api.del("/api/v1/integrations/config/slack"); }
+async function deleteTeams() { await api.del("/api/v1/integrations/config/teams"); }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
