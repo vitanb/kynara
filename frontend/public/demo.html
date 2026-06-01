@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kynara — Live Demo</title>
+  <style>
+    :root {
+      --bg: #05080F;
+      --surface: #080C14;
+      --surface2: #0D1421;
+      --surface3: #111827;
+      --border: rgba(148,163,184,0.1);
+      --accent: #6366F1;
+      --accent2: #8B5CF6;
+      --teal: #2DD4BF;
+      --text: #CBD5E1;
+      --text-muted: #64748B;
+      --text-strong: #F1F5F9;
+      --ok: #10B981;
+      --warn: #F59E0B;
+      --danger: #F43F5E;
+      --font: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.6; overflow-x: hidden; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(5,8,15,0.85); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 60px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 700; color: white; font-size: 16px; }
+    .logo-gem {
+      width: 30px; height: 30px; background: var(--accent);
+      border-radius: 7px; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 0 1px rgba(99,102,241,0.5), 0 4px 14px rgba(79,70,229,0.4);
+    }
+    .logo-gem svg { width: 16px; height: 16px; color: white; }
+    .nav-badge { font-size: 11px; background: rgba(45,212,191,0.15); color: var(--teal); border: 1px solid rgba(45,212,191,0.3); border-radius: 999px; padding: 2px 10px; font-weight: 600; }
+    .nav-cta { display: flex; gap: 10px; align-items: center; }
+    .btn { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: white; border-color: rgba(148,163,184,0.3); }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: #4F46E5; box-shadow: 0 4px 14px rgba(79,70,229,0.5); }
+
+    /* ── VOICE CONTROLS ── */
+    .voice-bar {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 999px; padding: 10px 20px;
+      display: flex; align-items: center; gap: 14px; z-index: 200;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      min-width: 420px;
+    }
+    .voice-btn {
+      width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .voice-btn-play { background: var(--accent); color: white; }
+    .voice-btn-play:hover { background: #4F46E5; transform: scale(1.05); }
+    .voice-btn-pause { background: rgba(99,102,241,0.2); color: var(--accent); }
+    .voice-btn-pause:hover { background: rgba(99,102,241,0.3); }
+    .voice-btn-stop { background: rgba(244,63,94,0.15); color: var(--danger); }
+    .voice-btn-stop:hover { background: rgba(244,63,94,0.25); }
+    .voice-progress-wrap { flex: 1; }
+    .voice-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    .voice-progress { width: 100%; height: 3px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .voice-progress-bar { height: 100%; background: var(--accent); border-radius: 999px; transition: width 0.3s; }
+    .voice-step-dots { display: flex; gap: 5px; }
+    .voice-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: all 0.3s; cursor: pointer; }
+    .voice-dot.active { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .voice-dot.done { background: var(--ok); }
+    .voice-speed { font-size: 11px; color: var(--text-muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 3px 7px; cursor: pointer; user-select: none; }
+    .voice-speed:hover { color: white; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 100px 32px 80px; text-align: center; position: relative; overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute; width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
+    }
+    .hero-tag { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 20px; }
+    .hero h1 { font-size: clamp(36px, 5vw, 64px); font-weight: 900; color: white; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 20px; max-width: 800px; }
+    .hero h1 span { background: linear-gradient(135deg, var(--accent), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-sub { font-size: 18px; color: var(--text-muted); max-width: 560px; margin-bottom: 40px; line-height: 1.65; }
+    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── SECTIONS ── */
+    section { padding: 80px 32px; max-width: 1100px; margin: 0 auto; }
+    .section-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+    h2 { font-size: 36px; font-weight: 800; color: white; letter-spacing: -0.03em; margin-bottom: 14px; line-height: 1.2; }
+    h2 .muted { color: var(--text-muted); font-weight: 400; }
+    .section-sub { font-size: 17px; color: var(--text-muted); max-width: 560px; margin-bottom: 48px; line-height: 1.65; }
+
+    /* ── DEMO SCENE: DECISION FLOW ── */
+    .demo-scene {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+      padding: 36px; overflow: hidden; position: relative;
+    }
+    .demo-scene-title { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+    .demo-scene-title::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); display: inline-block; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .flow-row { display: flex; align-items: center; gap: 0; margin-bottom: 32px; flex-wrap: wrap; gap: 0; }
+    .flow-node {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 18px; min-width: 150px; text-align: center;
+      transition: all 0.4s; position: relative;
+    }
+    .flow-node.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 20px rgba(99,102,241,0.3); }
+    .flow-node.done-ok { border-color: var(--ok); box-shadow: 0 0 0 1px var(--ok), 0 0 16px rgba(16,185,129,0.25); }
+    .flow-node.done-deny { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger), 0 0 16px rgba(244,63,94,0.25); }
+    .flow-node.done-approval { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn), 0 0 16px rgba(245,158,11,0.25); }
+    .flow-node-icon { font-size: 22px; margin-bottom: 6px; }
+    .flow-node-label { font-size: 12px; font-weight: 600; color: white; }
+    .flow-node-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .flow-arrow { width: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 18px; }
+    .flow-arrow.active { color: var(--accent); }
+
+    /* ── DECISION RESULT CARD ── */
+    .result-card {
+      border-radius: 14px; padding: 20px 24px; margin-top: 24px;
+      display: none; animation: fadeUp 0.5s ease;
+      border: 1px solid;
+    }
+    .result-card.show { display: block; }
+    .result-card.allow { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.3); }
+    .result-card.deny { background: rgba(244,63,94,0.08); border-color: rgba(244,63,94,0.3); }
+    .result-card.approval { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.3); }
+    .result-effect { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .allow .result-effect { color: var(--ok); }
+    .deny .result-effect { color: var(--danger); }
+    .approval .result-effect { color: var(--warn); }
+    .result-json { font-family: var(--mono); font-size: 12px; color: #94A3B8; margin-top: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px 16px; line-height: 1.8; }
+    .json-key { color: #7DD3FC; }
+    .json-str { color: #86EFAC; }
+    .json-num { color: #FCA5A5; }
+    .json-bool { color: #C4B5FD; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── SCENARIO TABS ── */
+    .scenario-tabs { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
+    .tab {
+      padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: 1px solid var(--border); color: var(--text-muted);
+      transition: all 0.15s; background: transparent;
+    }
+    .tab:hover { color: white; border-color: rgba(148,163,184,0.25); }
+    .tab.active { background: rgba(99,102,241,0.15); border-color: var(--accent); color: var(--accent); }
+
+    /* ── REQUEST EDITOR ── */
+    .req-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    @media (max-width: 700px) { .req-grid { grid-template-columns: 1fr; } }
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .field-input {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; color: white; font-family: var(--mono); font-size: 12px;
+      outline: none; transition: border-color 0.15s;
+    }
+    .field-input:focus { border-color: var(--accent); }
+    .field-select {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; color: white; font-size: 13px; outline: none; cursor: pointer;
+    }
+    .run-btn {
+      width: 100%; padding: 14px; border-radius: 10px; background: var(--accent);
+      color: white; font-weight: 700; font-size: 14px; border: none; cursor: pointer;
+      transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .run-btn:hover { background: #4F46E5; box-shadow: 0 4px 20px rgba(79,70,229,0.5); }
+    .run-btn:active { transform: scale(0.98); }
+    .run-btn.loading { opacity: 0.7; pointer-events: none; }
+
+    /* ── AUDIT LOG ── */
+    .audit-feed { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; }
+    .audit-entry {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px;
+      animation: fadeUp 0.3s ease;
+    }
+    .audit-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .audit-dot-allow { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+    .audit-dot-deny { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+    .audit-dot-approval { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+    .audit-main { flex: 1; }
+    .audit-action { font-size: 13px; font-weight: 600; color: white; }
+    .audit-meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .audit-outcome { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
+    .audit-outcome-allow { background: rgba(16,185,129,0.12); color: var(--ok); border: 1px solid rgba(16,185,129,0.3); }
+    .audit-outcome-deny { background: rgba(244,63,94,0.12); color: var(--danger); border: 1px solid rgba(244,63,94,0.3); }
+    .audit-outcome-approval { background: rgba(245,158,11,0.12); color: var(--warn); border: 1px solid rgba(245,158,11,0.3); }
+
+    /* ── STATS ROW ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 48px; }
+    @media (max-width: 700px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; }
+    .stat-val { font-size: 32px; font-weight: 800; color: white; letter-spacing: -0.03em; }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── FEATURE GRID ── */
+    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 900px) { .feature-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { .feature-grid { grid-template-columns: 1fr; } }
+    .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; transition: border-color 0.2s; }
+    .feature-card:hover { border-color: rgba(99,102,241,0.3); }
+    .feature-icon { font-size: 26px; margin-bottom: 12px; }
+    .feature-title { font-size: 14px; font-weight: 700; color: white; margin-bottom: 6px; }
+    .feature-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── APPROVAL DEMO ── */
+    .approval-card { background: var(--surface); border: 1px solid rgba(245,158,11,0.3); border-radius: 16px; padding: 24px; max-width: 520px; }
+    .approval-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .approval-badge { background: rgba(245,158,11,0.15); color: var(--warn); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(245,158,11,0.3); }
+    .approval-title { font-size: 15px; font-weight: 700; color: white; }
+    .approval-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .approval-row:last-of-type { border-bottom: none; }
+    .approval-key { color: var(--text-muted); }
+    .approval-val { color: white; font-weight: 500; }
+    .approval-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-approve { flex: 1; padding: 10px; border-radius: 8px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.4); color: var(--ok); font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .btn-approve:hover { background: rgba(16,185,129,0.25); }
+    .btn-reject { flex: 1; padding: 10px; border-radius: 8px; background: rgba(244,63,94,0.12); border: 1px solid rgba(244,63,94,0.3); color: var(--danger); font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .btn-reject:hover { background: rgba(244,63,94,0.2); }
+
+    /* ── HASH CHAIN VIZ ── */
+    .chain-wrap { display: flex; gap: 0; overflow-x: auto; padding-bottom: 8px; }
+    .chain-block {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 14px; min-width: 170px; flex-shrink: 0;
+      font-family: var(--mono); font-size: 11px;
+    }
+    .chain-block.latest { border-color: var(--accent); }
+    .chain-block-id { color: var(--accent); font-weight: 700; margin-bottom: 4px; }
+    .chain-block-hash { color: var(--teal); word-break: break-all; margin-bottom: 4px; }
+    .chain-block-prev { color: var(--text-muted); word-break: break-all; }
+    .chain-arrow { display: flex; align-items: center; color: var(--text-muted); padding: 0 6px; font-size: 16px; }
+    .chain-verified { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 999px; padding: 6px 14px; font-size: 12px; font-weight: 600; color: var(--ok); margin-top: 16px; }
+
+    /* ── CODE BLOCK ── */
+    .code-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+    .code-header { padding: 10px 16px; background: rgba(148,163,184,0.04); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .code-lang { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .code-copy { font-size: 11px; color: var(--text-muted); cursor: pointer; background: none; border: none; padding: 0; }
+    .code-copy:hover { color: white; }
+    .code-body { padding: 18px 20px; font-family: var(--mono); font-size: 12.5px; color: #94A3B8; line-height: 1.8; overflow-x: auto; }
+    .kw { color: #C4B5FD; } .fn { color: #7DD3FC; } .str { color: #86EFAC; } .cm { color: #4B5563; } .num { color: #FCA5A5; }
+
+    /* ── CTA ── */
+    .cta-section { text-align: center; padding: 80px 32px; }
+    .cta-card { background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(45,212,191,0.08)); border: 1px solid rgba(99,102,241,0.2); border-radius: 24px; padding: 60px 40px; max-width: 700px; margin: 0 auto; }
+    .cta-card h2 { margin-bottom: 16px; }
+    .cta-card p { color: var(--text-muted); font-size: 17px; margin-bottom: 32px; }
+    .cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── NARRATION HIGHLIGHT ── */
+    .highlighted { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 14px; transition: outline 0.3s; }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.2); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="logo-gem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11.5 2 2 7 2 17 11.5 22 21 17 21 7 11.5 2"/>
+      </svg>
+    </div>
+    Kynara
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="nav-badge">Live Demo</span>
+  </div>
+  <div class="nav-cta">
+    <a href="/docs.html" class="btn btn-ghost">Docs</a>
+    <a href="https://kynaraai.com" class="btn btn-primary">Get started →</a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-tag">Interactive Product Demo</div>
+  <h1>Permission control for<br><span>AI agents</span> that act in the real world</h1>
+  <p class="hero-sub">
+    See how Kynara enforces RBAC + ABAC policies, routes sensitive actions to human approval,
+    and writes every decision to a tamper-evident audit log — in real time.
+  </p>
+  <div class="hero-actions">
+    <button class="btn btn-primary" onclick="startTour()">▶ Start guided tour</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('playground').scrollIntoView({behavior:'smooth'})">Try the playground</button>
+  </div>
+</div>
+
+<!-- ══ STATS ══ -->
+<section class="reveal">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-val" id="stat-decisions">0</div><div class="stat-label">Decisions evaluated</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-latency">&lt;8ms</div><div class="stat-label">p95 API latency</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-approvals">0</div><div class="stat-label">Approvals pending</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-agents">0</div><div class="stat-label">Active agents</div></div>
+  </div>
+</section>
+
+<!-- ══ DECISION FLOW VISUALIZATION ══ -->
+<section class="reveal" id="flow-section">
+  <div class="section-tag">How it works</div>
+  <h2>Every tool call, <span class="muted">checked in milliseconds</span></h2>
+  <p class="section-sub">Your agent calls Kynara before executing any action. Policies evaluate in priority order — the first match wins. No match means deny.</p>
+
+  <div class="demo-scene" id="flow-scene">
+    <div class="demo-scene-title">Decision pipeline</div>
+
+    <div class="flow-row" style="justify-content:center; gap:0;">
+      <div class="flow-node" id="fn-agent">
+        <div class="flow-node-icon">🤖</div>
+        <div class="flow-node-label">AI Agent</div>
+        <div class="flow-node-sub">CRM Assistant</div>
+      </div>
+      <div class="flow-arrow" id="fa-1">→</div>
+      <div class="flow-node" id="fn-check">
+        <div class="flow-node-icon">🔍</div>
+        <div class="flow-node-label">decisions/check</div>
+        <div class="flow-node-sub">POST /api/v1</div>
+      </div>
+      <div class="flow-arrow" id="fa-2">→</div>
+      <div class="flow-node" id="fn-rbac">
+        <div class="flow-node-icon">🛡️</div>
+        <div class="flow-node-label">RBAC gate</div>
+        <div class="flow-node-sub">Role check</div>
+      </div>
+      <div class="flow-arrow" id="fa-3">→</div>
+      <div class="flow-node" id="fn-abac">
+        <div class="flow-node-icon">⚙️</div>
+        <div class="flow-node-label">ABAC engine</div>
+        <div class="flow-node-sub">Condition eval</div>
+      </div>
+      <div class="flow-arrow" id="fa-4">→</div>
+      <div class="flow-node" id="fn-result">
+        <div class="flow-node-icon">✅</div>
+        <div class="flow-node-label">Decision</div>
+        <div class="flow-node-sub">allow / deny / approve</div>
+      </div>
+    </div>
+
+    <div id="flow-result" class="result-card">
+      <div class="result-effect" id="result-effect-text"></div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px;" id="result-reason"></div>
+      <div class="result-json" id="result-json"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PLAYGROUND ══ -->
+<section class="reveal" id="playground">
+  <div class="section-tag">Interactive Playground</div>
+  <h2>Run a <span class="muted">real policy decision</span></h2>
+  <p class="section-sub">Pick a scenario or build your own request. Watch the decision flow animate and see the audit entry appear.</p>
+
+  <div class="scenario-tabs" id="scenario-tabs">
+    <button class="tab active" onclick="loadScenario('crm-allow')">✅ CRM read (allow)</button>
+    <button class="tab" onclick="loadScenario('payment-approval')">⏳ Payment refund (approval)</button>
+    <button class="tab" onclick="loadScenario('infra-deny')">❌ Infra restart (deny)</button>
+    <button class="tab" onclick="loadScenario('after-hours')">🕐 After-hours write</button>
+    <button class="tab" onclick="loadScenario('custom')">✏️ Custom</button>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+    <div>
+      <div class="req-grid">
+        <div class="field-group">
+          <label class="field-label">Subject type</label>
+          <select class="field-select" id="f-subject-type">
+            <option value="agent">agent</option>
+            <option value="user">user</option>
+            <option value="api_key">api_key</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Subject ID</label>
+          <input class="field-input" id="f-subject-id" value="agt_crm_assistant_01" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Action</label>
+          <input class="field-input" id="f-action" value="crm:contacts.read" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Resource type</label>
+          <input class="field-input" id="f-resource-type" value="crm.contact" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">IP country</label>
+          <select class="field-select" id="f-country">
+            <option value="US">US</option>
+            <option value="GB">GB</option>
+            <option value="DE">DE</option>
+            <option value="CN">CN</option>
+            <option value="IN">IN</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Time (HH:MM)</label>
+          <input class="field-input" id="f-time" value="10:30" />
+        </div>
+      </div>
+      <button class="run-btn" id="run-btn" onclick="runDecision()">
+        <span>▶</span> <span id="run-label">Check permission</span>
+      </button>
+    </div>
+
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">Live Audit Log</div>
+      <div class="audit-feed" id="audit-feed">
+        <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">Decisions will appear here...</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ APPROVAL WORKFLOW ══ -->
+<section class="reveal" id="approvals-section">
+  <div class="section-tag">Human-in-the-loop</div>
+  <h2>Sensitive actions <span class="muted">wait for a human</span></h2>
+  <p class="section-sub">When a policy returns <code style="font-family:var(--mono);background:rgba(148,163,184,.08);padding:2px 8px;border-radius:4px;font-size:13px;">require_approval</code>, the agent pauses. A reviewer sees the full context and decides.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
+    <div>
+      <div class="approval-card" id="approval-demo-card">
+        <div class="approval-header">
+          <span class="approval-badge">⏳ PENDING REVIEW</span>
+        </div>
+        <div class="approval-title">payments.refund.issue</div>
+        <div style="margin-top:16px;">
+          <div class="approval-row"><span class="approval-key">Agent</span><span class="approval-val">Billing Assistant</span></div>
+          <div class="approval-row"><span class="approval-key">Action</span><span class="approval-val">payments.refund.issue</span></div>
+          <div class="approval-row"><span class="approval-key">Amount</span><span class="approval-val">$4,200.00</span></div>
+          <div class="approval-row"><span class="approval-key">Customer</span><span class="approval-val">cust_8812</span></div>
+          <div class="approval-row"><span class="approval-key">Policy</span><span class="approval-val" style="font-size:11px;">Refunds &gt; $1k require approval</span></div>
+          <div class="approval-row"><span class="approval-key">Expires</span><span class="approval-val">in 23h 58m</span></div>
+        </div>
+        <div class="approval-actions" id="approval-actions">
+          <button class="btn-approve" onclick="resolveApproval('approved')">✓ Approve</button>
+          <button class="btn-reject" onclick="resolveApproval('rejected')">✕ Reject</button>
+        </div>
+        <div id="approval-resolved" style="display:none;margin-top:16px;text-align:center;font-weight:700;font-size:15px;"></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:14px;font-weight:600;color:white;margin-bottom:16px;">What the agent sees</div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">Python</span></div>
+        <div class="code-body"><span class="kw">try</span>:
+    kynara.<span class="fn">enforce</span>(<span class="str">"payments.refund.issue"</span>,
+        resource={<span class="str">"type"</span>: <span class="str">"payment"</span>,
+                  <span class="str">"id"</span>: refund_id,
+                  <span class="str">"attrs"</span>: {<span class="str">"amount_cents"</span>: <span class="num">420000</span>}})
+    issue_refund(refund_id)
+
+<span class="kw">except</span> ApprovalRequired <span class="kw">as</span> e:
+    <span class="cm"># Agent pauses here — sends URL to Slack</span>
+    slack.<span class="fn">post</span>(f<span class="str">"Approval needed: {e.approval_url}"</span>)
+    <span class="cm"># Resumes only after human approves</span></div>
+      </div>
+      <div style="font-size:13px;color:var(--text-muted);line-height:1.7;">
+        The agent never proceeds past <code style="font-size:12px;background:rgba(148,163,184,.08);padding:1px 6px;border-radius:4px;">enforce()</code> until a human resolves the approval. The SDK raises <code style="font-size:12px;background:rgba(148,163,184,.08);padding:1px 6px;border-radius:4px;">ApprovalRequired</code> — no workaround, no timeout bypass, no way to skip.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ AUDIT CHAIN ══ -->
+<section class="reveal" id="audit-section">
+  <div class="section-tag">Tamper-evident audit</div>
+  <h2>Every decision, <span class="muted">hash-chained forever</span></h2>
+  <p class="section-sub">The audit log is append-only and SHA-256 hash-chained. Modifying any past record breaks the chain — detectable in seconds.</p>
+
+  <div class="demo-scene">
+    <div class="demo-scene-title">SHA-256 hash chain (last 3 events)</div>
+    <div class="chain-wrap">
+      <div class="chain-block">
+        <div class="chain-block-id">Event #1041</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;">login.success · user:u_vitan</div>
+        <div class="chain-block-hash">hash: a3f9c2…d84e1b</div>
+        <div class="chain-block-prev">prev: 9b2e14…f3c77a</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-block">
+        <div class="chain-block-id">Event #1042</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;">decision.allow · agent:crm</div>
+        <div class="chain-block-hash">hash: 7c1d88…2fb04e</div>
+        <div class="chain-block-prev">prev: a3f9c2…d84e1b</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-block latest">
+        <div class="chain-block-id">Event #1043 ← latest</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;">approval.created · agent:billing</div>
+        <div class="chain-block-hash">hash: e5a312…90c128</div>
+        <div class="chain-block-prev">prev: 7c1d88…2fb04e</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;">
+      <button onclick="verifyChain()" class="btn btn-ghost" style="font-size:13px;">🔍 Verify chain integrity</button>
+      <div class="chain-verified" id="chain-ok" style="display:none;">✓ Chain intact — 1,043 events verified, no tampering detected</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FEATURES ══ -->
+<section class="reveal">
+  <div class="section-tag">Full platform</div>
+  <h2>Everything you need, <span class="muted">nothing you don't</span></h2>
+  <p class="section-sub">Kynara handles the full governance lifecycle so your team can focus on building agents, not permission systems.</p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <div class="feature-title">RBAC + ABAC policies</div>
+      <div class="feature-desc">Role-based grants scoped to namespaced actions. Attribute conditions (time, IP, data class, environment) evaluated per request. Priority-ordered, first-match-wins.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔬</div>
+      <div class="feature-title">Policy replay</div>
+      <div class="feature-desc">Before deploying a policy change, simulate it against 30 days of real decisions. See exactly what would flip — allow→deny counts — before any live agent is affected.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Sub-millisecond sidecar</div>
+      <div class="feature-desc">Go sidecar evaluates a JWS Ed25519-signed local policy bundle at &lt;1ms p95. Streams decisions back to the central audit log in 5-second batches.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔑</div>
+      <div class="feature-title">JIT break-glass grants</div>
+      <div class="feature-desc">Time-bound permission elevations with justification + ticket URL. Auto-expire. Every grant is recorded in the audit chain. No permanent policy changes required.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Anomaly detection</div>
+      <div class="feature-desc">Z-score deny-rate alerting and geo-jump detection across a 30-day rolling baseline. Automatic agent revocation when guardrail thresholds are crossed.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔗</div>
+      <div class="feature-title">Framework integrations</div>
+      <div class="feature-desc">LangChain, LangGraph, AutoGen, CrewAI, OpenAI Assistants, Anthropic tool use, Express.js — one SDK enforces across all of them.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CODE SNIPPETS ══ -->
+<section class="reveal">
+  <div class="section-tag">Integration</div>
+  <h2>Drop-in enforcement, <span class="muted">any framework</span></h2>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:10px;">Python — decorator</div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">Python</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+        <div class="code-body"><span class="kw">from</span> kynara_sdk <span class="kw">import</span> permission_required
+
+<span class="fn">@permission_required</span>(
+    <span class="str">"payments.refund.issue"</span>,
+    resource_arg=<span class="str">"refund_id"</span>,
+    resource_type=<span class="str">"payment.refund"</span>,
+)
+<span class="kw">def</span> <span class="fn">issue_refund</span>(refund_id: str):
+    <span class="cm"># Only runs if Kynara says allow</span>
+    <span class="kw">return</span> stripe.<span class="fn">refund</span>(refund_id)</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:10px;">TypeScript — guarded wrapper</div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">TypeScript</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+        <div class="code-body"><span class="kw">import</span> { guarded } <span class="kw">from</span> <span class="str">"@kynara/sdk"</span>;
+
+<span class="kw">const</span> issueRefund = <span class="fn">guarded</span>({
+  client, action: <span class="str">"payments.refund.issue"</span>,
+  resource: (id, cents) => ({
+    type: <span class="str">"payment.refund"</span>, id,
+    attrs: { amount_cents: cents },
+  }),
+}, <span class="kw">async</span> (id, cents) => {
+  <span class="kw">return await</span> <span class="fn">processRefund</span>(id, cents);
+});</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ══ -->
+<div class="cta-section reveal">
+  <div class="cta-card">
+    <div class="section-tag" style="margin-bottom:12px;">Get started free</div>
+    <h2>3 seats · 10,000 decisions/mo · No credit card</h2>
+    <p>Start enforcing permissions in your agent in under 5 minutes. Free plan includes the full policy engine, audit log, approvals, and JIT grants.</p>
+    <div class="cta-buttons">
+      <a href="https://kynaraai.com" class="btn btn-primary" style="font-size:15px;padding:12px 28px;">Create free account →</a>
+      <a href="/docs.html" class="btn btn-ghost" style="font-size:15px;padding:12px 28px;">Read the docs</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VOICE CONTROL BAR ══ -->
+<div class="voice-bar" id="voice-bar">
+  <button class="voice-btn voice-btn-play" id="voice-play-btn" onclick="toggleNarration()" title="Play narration">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+  </button>
+  <button class="voice-btn voice-btn-stop" onclick="stopNarration()" title="Stop">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18"/></svg>
+  </button>
+  <div class="voice-progress-wrap">
+    <div class="voice-label" id="voice-label">Click ▶ for guided narration</div>
+    <div class="voice-progress"><div class="voice-progress-bar" id="voice-bar-fill" style="width:0%"></div></div>
+  </div>
+  <div class="voice-step-dots" id="voice-dots"></div>
+  <div class="voice-speed" id="speed-btn" onclick="cycleSpeed()">1×</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  NARRATION SCRIPT
+// ══════════════════════════════════════════════════════════
+const NARRATION = [
+  {
+    id: "hero",
+    target: null,
+    scroll: ".hero",
+    text: "Welcome to Kynara — the permission control plane for AI agents. As AI agents start taking real actions in the world, like reading customer data, issuing refunds, or restarting servers, you need a way to control what they're allowed to do. That's exactly what Kynara solves."
+  },
+  {
+    id: "problem",
+    target: "#flow-section",
+    scroll: "#flow-section",
+    text: "Every time an AI agent wants to call a tool, it sends a decision request to Kynara. The request includes the agent's identity, the action it wants to take, the resource it wants to act on, and ambient context like the current time and the caller's location."
+  },
+  {
+    id: "rbac",
+    target: "#fn-rbac",
+    scroll: "#flow-section",
+    text: "Kynara first runs a role-based access control check. Does this agent have a role that grants the requested scope? Agents can never have more authority than the human user they're acting on behalf of — this non-escalation guarantee is hardwired into the engine."
+  },
+  {
+    id: "abac",
+    target: "#fn-abac",
+    scroll: "#flow-section",
+    text: "Then the attribute-based engine evaluates policy conditions: is it within business hours? Is the request coming from an allowed country? Does the amount exceed the approval threshold? Conditions are a safe JSON AST — no code execution, no injection surface."
+  },
+  {
+    id: "playground",
+    target: "#playground",
+    scroll: "#playground",
+    text: "Let's see it live. You can run a real policy decision right here in the playground. Change the action, resource, country, or time of day and watch the decision flow animate with the result."
+  },
+  {
+    id: "approvals",
+    target: "#approvals-section",
+    scroll: "#approvals-section",
+    text: "When a policy returns require-approval, the agent doesn't guess or retry — it pauses completely. The approval request appears in the human review queue with full context: which agent, which action, what the risk score is, and how long until it expires."
+  },
+  {
+    id: "audit",
+    target: "#audit-section",
+    scroll: "#audit-section",
+    text: "Every single decision — allow, deny, or approval — is appended to a SHA-256 hash-chained audit log. The chain links each event to the one before it. If anyone modifies or deletes a past record, the chain breaks. You can verify the entire log's integrity with a single API call."
+  },
+  {
+    id: "cta",
+    target: ".cta-card",
+    scroll: ".cta-section",
+    text: "Kynara is free to get started: three seats, ten thousand policy decisions per month, the full policy engine, approvals, JIT grants, and the audit log. You can wire it into a Python or TypeScript agent in under five minutes. Thank you for watching."
+  }
+];
+
+// ── Audio engine: ElevenLabs MP3 first, Web Speech API fallback ──────────────
+const AUDIO_BASE = './audio/';  // served from frontend/public/audio/
+let currentAudio = null;
+let audioReady = {};  // tracks which clips loaded successfully
+
+// Pre-flight: check if MP3 files exist
+function probeAudio() {
+  NARRATION.forEach((step, i) => {
+    const a = new Audio();
+    a.src = AUDIO_BASE + 'narration_' + i + '.mp3';
+    a.addEventListener('canplaythrough', () => { audioReady[i] = true; }, { once: true });
+    a.addEventListener('error', () => { audioReady[i] = false; }, { once: true });
+    a.load();
+  });
+}
+
+// Web Speech API fallback
+let synth = window.speechSynthesis;
+let voices = [];
+let currentStep = -1;
+let isPlaying = false;
+let speechRate = 1.0;
+let speeds = [0.85, 1.0, 1.25, 1.5];
+let speedIdx = 1;
+let currentUtterance = null;
+
+function initVoices() {
+  voices = synth.getVoices();
+  if (!voices.length) {
+    synth.onvoiceschanged = () => { voices = synth.getVoices(); };
+  }
+}
+
+function pickVoice() {
+  const preferred = ['Google US English', 'Microsoft Aria Online (Natural)', 'Microsoft Jenny Online (Natural)',
+                     'Samantha', 'Karen', 'Daniel', 'Alex'];
+  for (const name of preferred) {
+    const v = voices.find(v => v.name.includes(name) || v.name === name);
+    if (v) return v;
+  }
+  return voices.find(v => v.lang.startsWith('en')) || voices[0];
+}
+
+function buildDots() {
+  const wrap = document.getElementById('voice-dots');
+  wrap.innerHTML = '';
+  NARRATION.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'voice-dot';
+    d.title = NARRATION[i].id;
+    d.onclick = () => jumpToStep(i);
+    wrap.appendChild(d);
+  });
+}
+
+function updateDots() {
+  const dots = document.querySelectorAll('.voice-dot');
+  dots.forEach((d, i) => {
+    d.classList.remove('active', 'done');
+    if (i < currentStep) d.classList.add('done');
+    else if (i === currentStep) d.classList.add('active');
+  });
+}
+
+function updateProgress() {
+  const pct = currentStep < 0 ? 0 : Math.round(((currentStep + 1) / NARRATION.length) * 100);
+  document.getElementById('voice-bar-fill').style.width = pct + '%';
+}
+
+function setPlayIcon(playing) {
+  const btn = document.getElementById('voice-play-btn');
+  if (playing) {
+    btn.className = 'voice-btn voice-btn-pause';
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+  } else {
+    btn.className = 'voice-btn voice-btn-play';
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+  }
+}
+
+function highlightTarget(selector) {
+  document.querySelectorAll('.highlighted').forEach(el => el.classList.remove('highlighted'));
+  if (!selector) return;
+  const el = document.querySelector(selector);
+  if (el) el.classList.add('highlighted');
+}
+
+function scrollToTarget(selector) {
+  if (!selector) return;
+  const el = document.querySelector(selector);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function speakStep(idx) {
+  if (idx >= NARRATION.length) {
+    finishNarration();
+    return;
+  }
+  currentStep = idx;
+  const step = NARRATION[idx];
+
+  document.getElementById('voice-label').textContent = `Step ${idx + 1} / ${NARRATION.length} — ${step.id}`;
+  updateDots();
+  updateProgress();
+  highlightTarget(step.target);
+  scrollToTarget(step.scroll);
+  if (step.id === 'rbac') animateFlow();
+
+  // Stop any currently playing audio
+  stopCurrentAudio();
+
+  const useMP3 = audioReady[idx] === true;
+
+  if (useMP3) {
+    // ── ElevenLabs real voice ──────────────────────────────────────
+    const audio = new Audio(AUDIO_BASE + 'narration_' + idx + '.mp3');
+    audio.playbackRate = speechRate;
+    currentAudio = audio;
+
+    // Animate progress bar based on audio duration
+    audio.addEventListener('loadedmetadata', () => {
+      const dur = audio.duration;
+      let start = null;
+      const tick = (ts) => {
+        if (!start) start = ts;
+        const elapsed = (ts - start) / 1000;
+        const pct = Math.min((elapsed / dur) * 100, 100);
+        const fill = document.getElementById('voice-bar-fill');
+        if (fill) fill.style.width = Math.round(((idx + pct/100) / NARRATION.length) * 100) + '%';
+        if (elapsed < dur && currentAudio === audio) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }, { once: true });
+
+    audio.onended = () => {
+      if (isPlaying && currentAudio === audio) {
+        currentAudio = null;
+        setTimeout(() => speakStep(idx + 1), 500);
+      }
+    };
+    audio.onerror = () => {
+      // Fallback to Web Speech if MP3 fails mid-tour
+      audioReady[idx] = false;
+      currentAudio = null;
+      speakWithSynthesis(idx, step);
+    };
+    audio.play().catch(() => {
+      currentAudio = null;
+      speakWithSynthesis(idx, step);
+    });
+  } else {
+    // ── Web Speech API fallback ────────────────────────────────────
+    speakWithSynthesis(idx, step);
+  }
+}
+
+function speakWithSynthesis(idx, step) {
+  synth.cancel();
+  const utt = new SpeechSynthesisUtterance(step.text);
+  utt.rate = speechRate;
+  utt.pitch = 1.0;
+  utt.volume = 1.0;
+  const v = pickVoice();
+  if (v) utt.voice = v;
+  utt.onend = () => { if (isPlaying) setTimeout(() => speakStep(idx + 1), 600); };
+  utt.onerror = () => { if (isPlaying) setTimeout(() => speakStep(idx + 1), 500); };
+  currentUtterance = utt;
+  synth.speak(utt);
+}
+
+function stopCurrentAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.src = '';
+    currentAudio = null;
+  }
+  synth.cancel();
+}
+
+function toggleNarration() {
+  initVoices();
+  if (isPlaying) {
+    isPlaying = false;
+    // Pause MP3 if active
+    if (currentAudio) {
+      currentAudio.pause();
+    } else {
+      synth.pause();
+    }
+    setPlayIcon(false);
+    document.getElementById('voice-label').textContent = 'Paused — click ▶ to resume';
+  } else {
+    isPlaying = true;
+    setPlayIcon(true);
+    // Resume if paused, else start fresh
+    if (currentAudio && currentAudio.paused && currentAudio.src) {
+      currentAudio.play();
+    } else if (synth.paused) {
+      synth.resume();
+    } else {
+      const start = currentStep < 0 ? 0 : currentStep;
+      speakStep(start);
+    }
+  }
+}
+
+function stopNarration() {
+  isPlaying = false;
+  stopCurrentAudio();
+  setPlayIcon(false);
+  currentStep = -1;
+  updateDots();
+  updateProgress();
+  highlightTarget(null);
+  document.getElementById('voice-label').textContent = 'Click ▶ for guided narration';
+}
+
+function finishNarration() {
+  isPlaying = false;
+  setPlayIcon(false);
+  highlightTarget(null);
+  document.getElementById('voice-label').textContent = '✓ Tour complete — click ▶ to replay';
+  currentStep = -1;
+  updateDots();
+  updateProgress();
+}
+
+function jumpToStep(idx) {
+  synth.cancel();
+  if (isPlaying) {
+    speakStep(idx);
+  } else {
+    currentStep = idx;
+    scrollToTarget(NARRATION[idx].scroll);
+    highlightTarget(NARRATION[idx].target);
+    document.getElementById('voice-label').textContent = `Step ${idx + 1} — click ▶ to play`;
+    updateDots();
+    updateProgress();
+  }
+}
+
+function cycleSpeed() {
+  speedIdx = (speedIdx + 1) % speeds.length;
+  speechRate = speeds[speedIdx];
+  document.getElementById('speed-btn').textContent = speechRate + '×';
+  // Apply to active MP3
+  if (currentAudio) currentAudio.playbackRate = speechRate;
+  // If using Web Speech, restart current step at new rate
+  if (isPlaying && currentUtterance && !currentAudio) {
+    synth.cancel();
+    if (currentStep >= 0) speakStep(currentStep);
+  }
+}
+
+function startTour() {
+  initVoices();
+  isPlaying = true;
+  setPlayIcon(true);
+  speakStep(0);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ══════════════════════════════════════════════════════════
+//  FLOW ANIMATION
+// ══════════════════════════════════════════════════════════
+function animateFlow(outcome) {
+  const nodes = ['fn-agent', 'fn-check', 'fn-rbac', 'fn-abac', 'fn-result'];
+  const arrows = ['fa-1', 'fa-2', 'fa-3', 'fa-4'];
+  nodes.forEach(n => {
+    const el = document.getElementById(n);
+    if (el) { el.className = 'flow-node'; }
+  });
+  arrows.forEach(a => {
+    const el = document.getElementById(a);
+    if (el) el.className = 'flow-arrow';
+  });
+
+  let i = 0;
+  const step = () => {
+    if (i < nodes.length) {
+      const el = document.getElementById(nodes[i]);
+      if (el) {
+        if (i < nodes.length - 1) el.classList.add('active');
+        else {
+          const cls = outcome === 'allow' ? 'done-ok' : outcome === 'deny' ? 'done-deny' : 'done-approval';
+          el.classList.add(cls);
+          el.querySelector('.flow-node-icon').textContent =
+            outcome === 'allow' ? '✅' : outcome === 'deny' ? '🚫' : '⏳';
+        }
+      }
+      if (i < arrows.length) {
+        const a = document.getElementById(arrows[i]);
+        if (a) a.classList.add('active');
+      }
+      i++;
+      setTimeout(step, 280);
+    }
+  };
+  step();
+}
+
+// ══════════════════════════════════════════════════════════
+//  PLAYGROUND LOGIC
+// ══════════════════════════════════════════════════════════
+const SCENARIOS = {
+  'crm-allow': { subjectType: 'agent', subjectId: 'agt_crm_assistant_01', action: 'crm:contacts.read', resourceType: 'crm.contact', country: 'US', time: '10:30' },
+  'payment-approval': { subjectType: 'agent', subjectId: 'agt_billing_01', action: 'payments.refund.issue', resourceType: 'payment.refund', country: 'US', time: '14:00' },
+  'infra-deny': { subjectType: 'agent', subjectId: 'agt_infra_mgr', action: 'infra:restart', resourceType: 'service', country: 'CN', time: '03:00' },
+  'after-hours': { subjectType: 'agent', subjectId: 'agt_crm_assistant_01', action: 'crm:contacts.write', resourceType: 'crm.contact', country: 'US', time: '22:00' },
+  'custom': { subjectType: 'agent', subjectId: 'my-agent-id', action: 'your.action.here', resourceType: 'resource.type', country: 'US', time: '12:00' }
+};
+
+const DECISION_ENGINE = {
+  'crm:contacts.read': (ctx) => ({ effect: 'allow', reason: 'Policy: CRM agent — read access', policy: 'pol_crm_read_allow' }),
+  'payments.refund.issue': (ctx) => ({ effect: 'require_approval', reason: 'Policy: Refunds > $1k require approval', policy: 'pol_payment_approval', approval_id: 'apr_' + Math.random().toString(36).slice(2, 10) }),
+  'infra:restart': (ctx) => {
+    if (['CN','RU','KP'].includes(ctx.country)) return { effect: 'deny', reason: 'Policy: Infra — deny non-US/EU geo', policy: 'pol_infra_geofence' };
+    return { effect: 'require_approval', reason: 'Policy: Infra — destructive ops require approval', policy: 'pol_infra_approval' };
+  },
+  'crm:contacts.write': (ctx) => {
+    const h = parseInt(ctx.time.split(':')[0]);
+    if (h < 9 || h >= 18) return { effect: 'require_approval', reason: 'Policy: CRM write — require approval off-hours', policy: 'pol_crm_write_offhours' };
+    return { effect: 'allow', reason: 'Policy: CRM write — allow during business hours', policy: 'pol_crm_write_hours' };
+  },
+};
+
+let auditEntries = [];
+let decisionCount = 0;
+
+function loadScenario(name) {
+  const s = SCENARIOS[name];
+  document.getElementById('f-subject-type').value = s.subjectType;
+  document.getElementById('f-subject-id').value = s.subjectId;
+  document.getElementById('f-action').value = s.action;
+  document.getElementById('f-resource-type').value = s.resourceType;
+  document.getElementById('f-country').value = s.country;
+  document.getElementById('f-time').value = s.time;
+  document.querySelectorAll('.scenario-tabs .tab').forEach(t => t.classList.remove('active'));
+  const tabs = document.querySelectorAll('.scenario-tabs .tab');
+  const names = ['crm-allow','payment-approval','infra-deny','after-hours','custom'];
+  const idx = names.indexOf(name);
+  if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+
+  const rc = document.getElementById('flow-result');
+  if (rc) rc.classList.remove('show');
+}
+
+function runDecision() {
+  const btn = document.getElementById('run-btn');
+  const label = document.getElementById('run-label');
+  btn.classList.add('loading');
+  label.textContent = 'Evaluating...';
+
+  const action = document.getElementById('f-action').value;
+  const country = document.getElementById('f-country').value;
+  const time = document.getElementById('f-time').value;
+  const subjectId = document.getElementById('f-subject-id').value;
+  const resourceType = document.getElementById('f-resource-type').value;
+
+  setTimeout(() => {
+    const engine = DECISION_ENGINE[action];
+    const result = engine
+      ? engine({ country, time, subjectId, resourceType })
+      : { effect: 'deny', reason: 'No policy matched — default deny', policy: null };
+
+    animateFlow(result.effect);
+
+    const rc = document.getElementById('flow-result');
+    rc.className = 'result-card ' + (result.effect === 'allow' ? 'allow' : result.effect === 'deny' ? 'deny' : 'approval') + ' show';
+
+    const effectMap = { allow: '✅ allow', deny: '🚫 deny', require_approval: '⏳ require_approval' };
+    document.getElementById('result-effect-text').textContent = effectMap[result.effect] || result.effect;
+    document.getElementById('result-reason').textContent = result.reason;
+
+    const ts = new Date().toISOString();
+    const jti = Math.random().toString(36).slice(2, 10);
+    let json = `{
+  <span class="json-key">"effect"</span>: <span class="json-str">"${result.effect}"</span>,
+  <span class="json-key">"reason"</span>: <span class="json-str">"${result.reason}"</span>,
+  <span class="json-key">"matched_policy_id"</span>: <span class="json-str">"${result.policy || 'null'}"</span>,
+  <span class="json-key">"rbac_pass"</span>: <span class="json-bool">true</span>,
+  <span class="json-key">"granted_scopes"</span>: [<span class="json-str">"${action}"</span>],
+  <span class="json-key">"decision_id"</span>: <span class="json-str">"dec_${jti}"</span>,
+  <span class="json-key">"evaluated_at"</span>: <span class="json-str">"${ts}"</span>`;
+    if (result.approval_id) json += `,\n  <span class="json-key">"approval_id"</span>: <span class="json-str">"${result.approval_id}"</span>`;
+    json += '\n}';
+    document.getElementById('result-json').innerHTML = json;
+
+    // Add audit entry
+    addAuditEntry(action, subjectId, result.effect);
+
+    decisionCount++;
+    animateStat('stat-decisions', decisionCount);
+
+    btn.classList.remove('loading');
+    label.textContent = 'Check permission';
+
+    rc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 900);
+}
+
+function addAuditEntry(action, subject, effect) {
+  const feed = document.getElementById('audit-feed');
+  if (feed.querySelector('div[style]')) feed.innerHTML = '';
+
+  const entry = document.createElement('div');
+  entry.className = 'audit-entry';
+  const dotClass = effect === 'allow' ? 'audit-dot-allow' : effect === 'deny' ? 'audit-dot-deny' : 'audit-dot-approval';
+  const outcomeClass = effect === 'allow' ? 'audit-outcome-allow' : effect === 'deny' ? 'audit-outcome-deny' : 'audit-outcome-approval';
+  const ts = new Date().toLocaleTimeString();
+  entry.innerHTML = `
+    <div class="audit-dot ${dotClass}"></div>
+    <div class="audit-main">
+      <div class="audit-action">${action}</div>
+      <div class="audit-meta">agent: ${subject} · ${ts}</div>
+    </div>
+    <div class="audit-outcome ${outcomeClass}">${effect}</div>
+  `;
+  feed.insertBefore(entry, feed.firstChild);
+
+  auditEntries.unshift({ action, subject, effect, ts });
+  if (auditEntries.length > 8) {
+    auditEntries.pop();
+    if (feed.lastChild) feed.removeChild(feed.lastChild);
+  }
+
+  if (effect === 'require_approval') {
+    const pending = document.getElementById('stat-approvals');
+    const cur = parseInt(pending.textContent) || 0;
+    animateStat('stat-approvals', cur + 1);
+  }
+}
+
+function animateStat(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = parseInt(el.textContent) || 0;
+  const diff = target - start;
+  const steps = 20;
+  let i = 0;
+  const go = () => {
+    i++;
+    el.textContent = Math.round(start + diff * (i / steps));
+    if (i < steps) requestAnimationFrame(go);
+  };
+  requestAnimationFrame(go);
+}
+
+// ══════════════════════════════════════════════════════════
+//  APPROVAL DEMO
+// ══════════════════════════════════════════════════════════
+function resolveApproval(outcome) {
+  document.getElementById('approval-actions').style.display = 'none';
+  const resolved = document.getElementById('approval-resolved');
+  resolved.style.display = 'block';
+  if (outcome === 'approved') {
+    resolved.style.color = 'var(--ok)';
+    resolved.textContent = '✓ Approved — agent resuming refund...';
+    document.getElementById('approval-demo-card').style.borderColor = 'rgba(16,185,129,0.4)';
+  } else {
+    resolved.style.color = 'var(--danger)';
+    resolved.textContent = '✕ Rejected — agent halted, audit recorded';
+    document.getElementById('approval-demo-card').style.borderColor = 'rgba(244,63,94,0.4)';
+  }
+  addAuditEntry('payments.refund.issue (approval resolved)', 'reviewer:human', outcome === 'approved' ? 'allow' : 'deny');
+}
+
+// ══════════════════════════════════════════════════════════
+//  CHAIN VERIFY
+// ══════════════════════════════════════════════════════════
+function verifyChain() {
+  const ok = document.getElementById('chain-ok');
+  ok.style.display = 'none';
+  setTimeout(() => { ok.style.display = 'inline-flex'; }, 800);
+}
+
+// ══════════════════════════════════════════════════════════
+//  COPY CODE
+// ══════════════════════════════════════════════════════════
+function copyCode(btn) {
+  const code = btn.closest('.code-block').querySelector('.code-body').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+//  SCROLL REVEAL
+// ══════════════════════════════════════════════════════════
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ══════════════════════════════════════════════════════════
+//  ANIMATED COUNTERS ON LOAD
+// ══════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  initVoices();
+  buildDots();
+  probeAudio();  // pre-check which ElevenLabs MP3s are available
+  setTimeout(() => animateStat('stat-decisions', 12847), 600);
+  setTimeout(() => animateStat('stat-approvals', 3), 900);
+  setTimeout(() => animateStat('stat-agents', 7), 1200);
+  // Update voice bar hint once probe settles
+  setTimeout(() => {
+    const available = Object.values(audioReady).filter(Boolean).length;
+    if (available > 0) {
+      document.getElementById('voice-label').textContent =
+        `▶ Guided tour — real AI voice (${available}/8 clips ready)`;
+    }
+  }, 2500);
+});
+</script>
+</body>
+</html>
