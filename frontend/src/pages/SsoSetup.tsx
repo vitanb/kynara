@@ -232,10 +232,6 @@ export default function SsoSetupPage() {
             </div>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
 
         {step === 4 && (
           <div className="card p-6 space-y-5">
@@ -276,6 +272,11 @@ export default function SsoSetupPage() {
             </div>
           </div>
         )}
+
+      </div>
+    </div>
+  );
+}
 
 
 function Stepper({ step }: { step: number }) {
