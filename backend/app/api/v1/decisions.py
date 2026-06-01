@@ -12,6 +12,7 @@ from app.auth.dependencies import Principal, get_principal, require_scope
 from app.billing.quota import enforce_decision_quota, record_decision
 from app.core.geoip import resolve_country
 from app.db.session import SessionLocal
+from app.integrations.notify import notify_approval_created
 from app.policy.service import decide
 
 router = APIRouter(prefix="/decisions", tags=["decisions"])
@@ -104,12 +105,25 @@ async def check(
     await record_decision(session, principal.org_id, d.effect, agent_id=agent_id)
     await session.commit()
 
+    # Fire Slack/Teams notification for new approvals (non-fatal, async)
+    approval_id = getattr(d, "approval_id", None)
+    if d.effect == "require_approval" and approval_id:
+        try:
+            from app.models import ApprovalRequest
+            import uuid as _uuid_mod
+            approval_row = await session.get(ApprovalRequest, _uuid_mod.UUID(approval_id))
+            if approval_row:
+                import asyncio
+                asyncio.create_task(notify_approval_created(approval_row))
+        except Exception:
+            pass  # never block the decision response
+
     return DecisionOut(
         effect=d.effect,
         reason=d.reason,
         matched_policy_id=d.matched_policy_id,
         obligations=d.obligations,
-        approval_id=getattr(d, "approval_id", None),
+        approval_id=approval_id,
         granted_scopes=d.granted_scopes,
         rbac_pass=d.rbac_pass,
     )

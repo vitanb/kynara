@@ -132,6 +132,24 @@ class Settings(BaseSettings):
     # Base URL used when building links inside emails (reset / invite).
     app_url: str = "http://localhost:5173"
 
+    # ---- Field-level encryption ----
+    # Used to encrypt per-org tokens (Slack, Teams) stored in the DB.
+    # Generate: openssl rand -hex 32
+    encryption_key: str = ""
+
+    # ---- Chat Approval Integrations ----
+    # Slack — set SLACK_BOT_TOKEN and SLACK_SIGNING_SECRET in Railway env vars
+    # Bot needs: chat:write, chat:write.public scopes
+    slack_bot_token: str = ""            # xoxb-...
+    slack_signing_secret: str = ""       # used to verify callback payloads
+    slack_approval_channel: str = ""     # default channel ID, e.g. C08XXXXXXX
+
+    # Microsoft Teams — set TEAMS_WEBHOOK_URL in Railway env vars
+    # Use a Power Automate HTTP trigger or an Incoming Webhook connector
+    teams_webhook_url: str = ""          # https://...webhook.office.com/...
+    # For interactive buttons in Teams, set a callback secret
+    teams_callback_secret: str = ""      # shared secret for HMAC verification
+
     # ---- Rate limits ----
     rate_limit_authenticated: str = "600/minute"
     rate_limit_anonymous: str = "60/minute"
