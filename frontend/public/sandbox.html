@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kynara Policy Sandbox — Free MCP Permission Inspector</title>
+  <meta name="description" content="Free tool: inspect MCP tool permissions, get risk scores and policy recommendations, and test RBAC + ABAC policies against agent requests — no signup required." />
+  <meta property="og:title" content="Kynara Policy Sandbox — Free MCP Permission Inspector" />
+  <meta property="og:description" content="Paste your MCP tools, get instant risk analysis and Kynara policy recommendations. Test policies live against decision requests. No signup required." />
+  <meta property="og:image" content="https://kynaraai.com/logo-192.png" />
+  <link rel="canonical" href="https://kynaraai.com/sandbox" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Kynara Policy Sandbox","url":"https://kynaraai.com/sandbox","description":"Free MCP permission inspector and ABAC policy sandbox for AI agent developers. No signup required.","applicationCategory":"DeveloperApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+  <style>
+    :root {
+      --bg: #05080F; --surface: #080C14; --surface2: #0D1421; --surface3: #111827;
+      --border: rgba(148,163,184,0.1); --border2: rgba(148,163,184,0.18);
+      --accent: #6366F1; --accent2: #8B5CF6; --teal: #2DD4BF;
+      --text: #CBD5E1; --muted: #64748B; --strong: #F1F5F9;
+      --ok: #10B981; --warn: #F59E0B; --danger: #F43F5E; --info: #38BDF8;
+      --font: 'Inter', system-ui, sans-serif; --mono: 'JetBrains Mono','Fira Code',monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.6; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; height: 52px; border-bottom: 1px solid var(--border);
+      background: var(--surface); flex-shrink: 0;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; color: white; font-size: 14px; text-decoration: none; }
+    .logo-gem { width: 26px; height: 26px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+    .logo-gem svg { width: 14px; height: 14px; color: white; }
+    .topbar-title { font-size: 13px; font-weight: 600; color: var(--strong); }
+    .topbar-badge { font-size: 10px; font-weight: 700; background: rgba(16,185,129,0.12); color: var(--ok); border: 1px solid rgba(16,185,129,0.3); border-radius: 999px; padding: 2px 8px; letter-spacing: .05em; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .btn { padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: white; border-color: var(--border2); }
+    .btn-accent { background: var(--accent); color: white; }
+    .btn-accent:hover { background: #4F46E5; box-shadow: 0 3px 12px rgba(79,70,229,.4); }
+    .btn-sm { padding: 4px 10px; font-size: 11px; }
+
+    /* ── TABS ── */
+    .tabs { display: flex; gap: 2px; padding: 0 20px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .tab-btn { padding: 10px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: var(--muted); border-bottom: 2px solid transparent; transition: all .15s; display: flex; align-items: center; gap: 6px; }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+    /* ── LAYOUT ── */
+    .workspace { flex: 1; display: flex; overflow: hidden; }
+    .panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .panel + .panel { border-left: 1px solid var(--border); }
+    .panel-header { padding: 10px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .panel-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .panel-body { flex: 1; overflow-y: auto; padding: 16px; }
+
+    /* ── EDITOR ── */
+    textarea {
+      width: 100%; height: 100%; min-height: 120px; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px;
+      color: var(--text); font-family: var(--mono); font-size: 12px; line-height: 1.7;
+      resize: none; outline: none; transition: border-color .15s;
+    }
+    textarea:focus { border-color: var(--accent); }
+    textarea.error { border-color: var(--danger); }
+    .editor-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .editor-wrap textarea { flex: 1; }
+
+    /* ── FIELD GROUPS ── */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+    .field-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+    input[type=text], select {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 7px;
+      padding: 8px 12px; color: white; font-size: 12px; font-family: var(--mono);
+      outline: none; transition: border-color .15s; width: 100%;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    select { cursor: pointer; font-family: var(--font); font-size: 12px; }
+
+    /* ── RESULT CARDS ── */
+    .result-card { border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; border: 1px solid; animation: fadeUp .3s ease; }
+    .result-allow { background: rgba(16,185,129,.07); border-color: rgba(16,185,129,.3); }
+    .result-deny { background: rgba(244,63,94,.07); border-color: rgba(244,63,94,.3); }
+    .result-approval { background: rgba(245,158,11,.07); border-color: rgba(245,158,11,.3); }
+    .result-error { background: rgba(248,113,113,.07); border-color: rgba(248,113,113,.3); }
+    .result-info { background: rgba(56,189,248,.07); border-color: rgba(56,189,248,.3); }
+    .effect-label { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+    .allow .effect-label, .result-allow .effect-label { color: var(--ok); }
+    .deny .effect-label, .result-deny .effect-label { color: var(--danger); }
+    .approval .effect-label, .result-approval .effect-label { color: var(--warn); }
+    .result-reason { font-size: 12px; color: var(--muted); }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── RISK BADGE ── */
+    .risk { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: .05em; }
+    .risk-low { background: rgba(16,185,129,.12); color: var(--ok); border: 1px solid rgba(16,185,129,.3); }
+    .risk-medium { background: rgba(245,158,11,.12); color: var(--warn); border: 1px solid rgba(245,158,11,.3); }
+    .risk-high { background: rgba(244,63,94,.12); color: var(--danger); border: 1px solid rgba(244,63,94,.3); }
+    .risk-critical { background: rgba(139,0,0,.2); color: #FF6B6B; border: 1px solid rgba(255,50,50,.4); }
+
+    /* ── TOOL CARD ── */
+    .tool-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; transition: border-color .2s; }
+    .tool-card:hover { border-color: var(--border2); }
+    .tool-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .tool-name { font-size: 13px; font-weight: 700; color: white; font-family: var(--mono); }
+    .tool-desc { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
+    .tool-params { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+    .param-tag { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 2px 7px; font-size: 11px; font-family: var(--mono); color: var(--text); }
+    .param-tag.required { border-color: rgba(99,102,241,.4); color: #A5B4FC; }
+    .policy-snippet { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; font-family: var(--mono); font-size: 11px; color: #94A3B8; line-height: 1.7; margin-top: 8px; }
+    .copy-btn { font-size: 10px; color: var(--muted); cursor: pointer; background: none; border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; transition: all .15s; }
+    .copy-btn:hover { color: white; border-color: var(--border2); }
+
+    /* ── SHARE ── */
+    .share-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .share-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 7px 12px; color: var(--muted); font-size: 11px; font-family: var(--mono); outline: none; }
+
+    /* ── EXAMPLES BAR ── */
+    .examples-bar { padding: 8px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex-shrink: 0; }
+    .examples-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .07em; margin-right: 4px; }
+    .example-chip { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); color: var(--muted); background: transparent; transition: all .15s; white-space: nowrap; }
+    .example-chip:hover { color: white; border-color: var(--border2); background: rgba(148,163,184,.06); }
+
+    /* ── VERDICT ── */
+    .verdict-wrap { padding: 16px; }
+    .verdict-engine { font-size: 11px; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .engine-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 6px var(--ok); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .policy-list { margin-bottom: 12px; }
+    .policy-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 7px; margin-bottom: 4px; background: var(--surface2); font-size: 12px; }
+    .policy-row-name { color: var(--text); font-weight: 500; }
+    .policy-row-result { font-size: 11px; font-weight: 700; }
+    .pr-allow { color: var(--ok); }
+    .pr-deny { color: var(--danger); }
+    .pr-skip { color: var(--muted); }
+    .pr-match { color: var(--warn); }
+    .no-match-note { font-size: 12px; color: var(--muted); padding: 8px 12px; background: var(--surface2); border-radius: 7px; margin-bottom: 12px; }
+
+    /* ── JSON HIGHLIGHT ── */
+    .jk { color: #7DD3FC; } .jv { color: #86EFAC; } .jn { color: #FCA5A5; } .jb { color: #C4B5FD; } .jc { color: #4B5563; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148,163,184,.15); border-radius: 3px; }
+
+    /* ── TAB PANELS ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── EMPTY STATE ── */
+    .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .empty-icon { font-size: 32px; margin-bottom: 10px; }
+    .empty-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .empty-sub { font-size: 12px; line-height: 1.6; }
+
+    /* ── BANNER ── */
+    .cta-banner { margin: 16px; padding: 14px 18px; background: linear-gradient(135deg, rgba(99,102,241,.1), rgba(45,212,191,.07)); border: 1px solid rgba(99,102,241,.25); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .cta-banner-text { font-size: 12px; color: var(--text); line-height: 1.5; }
+    .cta-banner-text strong { color: white; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="/" class="logo">
+      <div class="logo-gem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11.5 2 2 7 2 17 11.5 22 21 17 21 7 11.5 2"/></svg></div>
+      Kynara
+    </a>
+    <span style="color:var(--border2);font-size:16px;">/ </span>
+    <span class="topbar-title">Policy Sandbox</span>
+    <span class="topbar-badge">FREE · NO SIGNUP</span>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-ghost btn-sm" onclick="shareURL()">🔗 Share</button>
+    <a href="/docs.html" class="btn btn-ghost btn-sm">Docs</a>
+    <a href="https://kynaraai.com" class="btn btn-accent btn-sm">Get Kynara free →</a>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('sandbox')" id="tab-sandbox">
+    ⚙️ Policy Sandbox
+  </button>
+  <button class="tab-btn" onclick="switchTab('inspector')" id="tab-inspector">
+    🔍 MCP Inspector
+  </button>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     TAB 1: POLICY SANDBOX
+════════════════════════════════════════════════════════ -->
+<div class="tab-panel active workspace" id="panel-sandbox">
+
+  <!-- LEFT: Policies -->
+  <div class="panel" style="max-width:380px; min-width:280px;">
+    <div class="panel-header">
+      <span class="panel-title">📋 Policies <span id="policy-count" style="color:var(--accent);font-size:10px;background:rgba(99,102,241,.15);padding:1px 6px;border-radius:999px;margin-left:4px;">0</span></span>
+      <button class="btn btn-ghost btn-sm" onclick="addPolicy()">+ Add policy</button>
+    </div>
+    <div class="examples-bar">
+      <span class="examples-label">Examples</span>
+      <button class="example-chip" onclick="loadExample('business-hours')">Business hours</button>
+      <button class="example-chip" onclick="loadExample('geo-block')">Geo block</button>
+      <button class="example-chip" onclick="loadExample('amount-threshold')">Amount gate</button>
+      <button class="example-chip" onclick="loadExample('env-guard')">Prod guard</button>
+    </div>
+    <div class="panel-body" id="policy-list-panel">
+      <div class="empty">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">No policies yet</div>
+        <div class="empty-sub">Click "Add policy" or pick an example above to get started.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIDDLE: Request -->
+  <div class="panel" style="max-width:320px; min-width:260px;">
+    <div class="panel-header">
+      <span class="panel-title">📨 Decision Request</span>
+      <button class="btn btn-accent btn-sm" onclick="evaluate()" id="eval-btn">▶ Evaluate</button>
+    </div>
+    <div class="panel-body">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Subject type</label>
+          <select id="req-subject-type" onchange="evaluate()">
+            <option value="agent">agent</option>
+            <option value="user">user</option>
+            <option value="api_key">api_key</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Subject ID</label>
+          <input type="text" id="req-subject-id" value="agt_billing_01" oninput="evaluate()" />
+        </div>
+      </div>
+      <div class="field-group" style="margin-bottom:10px;">
+        <label class="field-label">Action (scope)</label>
+        <input type="text" id="req-action" value="payments.refund.issue" oninput="evaluate()" />
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Resource type</label>
+          <input type="text" id="req-resource-type" value="payment.refund" oninput="evaluate()" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Resource ID</label>
+          <input type="text" id="req-resource-id" value="ref_8812" oninput="evaluate()" />
+        </div>
+      </div>
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px;">Context</div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">time (HH:MM)</label>
+          <input type="text" id="ctx-time" value="22:30" oninput="evaluate()" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">ip_country</label>
+          <select id="ctx-country" onchange="evaluate()">
+            <option value="US">US</option><option value="GB">GB</option><option value="DE">DE</option>
+            <option value="CN">CN</option><option value="IN">IN</option><option value="FR">FR</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">env</label>
+          <select id="ctx-env" onchange="evaluate()">
+            <option value="production">production</option>
+            <option value="staging">staging</option>
+            <option value="development">development</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">mfa_verified</label>
+          <select id="ctx-mfa" onchange="evaluate()">
+            <option value="false">false</option>
+            <option value="true">true</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group" style="margin-bottom:10px;">
+        <label class="field-label">resource.attrs (JSON)</label>
+        <textarea id="req-attrs" rows="4" oninput="evaluate()" style="min-height:80px;">{"amount_cents": 420000, "currency": "USD"}</textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Extra context (JSON)</label>
+        <textarea id="req-ctx-extra" rows="3" oninput="evaluate()" style="min-height:60px;">{}</textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Result -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">
+        <span class="engine-dot"></span>
+        Live Result
+      </span>
+      <span id="eval-latency" style="font-size:10px;color:var(--muted);"></span>
+    </div>
+    <div class="verdict-wrap" id="verdict-wrap">
+      <div class="empty">
+        <div class="empty-icon">⚡</div>
+        <div class="empty-title">Add a policy and click Evaluate</div>
+        <div class="empty-sub">Results appear here in real time as you edit policies or the request.</div>
+      </div>
+    </div>
+    <div class="cta-banner">
+      <div class="cta-banner-text"><strong>Ready to enforce in production?</strong><br>Connect a real agent in 5 min — free plan, no credit card.</div>
+      <a href="https://kynaraai.com" class="btn btn-accent btn-sm">Get started →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     TAB 2: MCP INSPECTOR
+════════════════════════════════════════════════════════ -->
+<div class="tab-panel workspace" id="panel-inspector">
+
+  <!-- LEFT: Input -->
+  <div class="panel" style="max-width:420px; min-width:300px;">
+    <div class="panel-header">
+      <span class="panel-title">📥 MCP Tool Definition</span>
+      <button class="btn btn-accent btn-sm" onclick="inspectMCP()">🔍 Inspect</button>
+    </div>
+    <div class="examples-bar">
+      <span class="examples-label">Examples</span>
+      <button class="example-chip" onclick="loadMCPExample('filesystem')">Filesystem</button>
+      <button class="example-chip" onclick="loadMCPExample('database')">Database</button>
+      <button class="example-chip" onclick="loadMCPExample('payments')">Payments</button>
+      <button class="example-chip" onclick="loadMCPExample('email')">Email / Comms</button>
+      <button class="example-chip" onclick="loadMCPExample('infra')">Infra / DevOps</button>
+    </div>
+    <div class="panel-body editor-wrap">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.6;">Paste your MCP tools array (the <code style="font-family:var(--mono);font-size:10px;background:rgba(148,163,184,.08);padding:1px 5px;border-radius:3px;">tools</code> field from your MCP server manifest, or a Claude tool_use schema). Get instant risk scores and Kynara policy recommendations.</div>
+      <textarea id="mcp-input" style="flex:1;min-height:300px;" placeholder='[
+  {
+    "name": "read_file",
+    "description": "Read the contents of a file",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" }
+      },
+      "required": ["path"]
+    }
+  }
+]'></textarea>
+    </div>
+  </div>
+
+  <!-- RIGHT: Analysis -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">🛡️ Risk Analysis + Policy Recommendations</span>
+      <button class="btn btn-ghost btn-sm" id="export-btn" onclick="exportPolicies()" style="display:none;">⬇ Export policies</button>
+    </div>
+    <div class="panel-body" id="inspector-results">
+      <div class="empty">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">Paste your MCP tools and click Inspect</div>
+        <div class="empty-sub">Each tool gets a risk score (low / medium / high / critical) and a recommended Kynara policy you can import directly.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════
+let policies = [];
+let policyIdSeq = 1;
+
+// ══════════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ══════════════════════════════════════════════════════════
+function switchTab(name) {
+  ['sandbox','inspector'].forEach(t => {
+    document.getElementById('panel-' + t).classList.toggle('active', t === name);
+    document.getElementById('tab-' + t).classList.toggle('active', t === name);
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+//  POLICY ENGINE  (client-side evaluation)
+// ══════════════════════════════════════════════════════════
+function buildCtx() {
+  let attrs = {};
+  let extra = {};
+  try { attrs = JSON.parse(document.getElementById('req-attrs').value || '{}'); } catch(e){}
+  try { extra = JSON.parse(document.getElementById('req-ctx-extra').value || '{}'); } catch(e){}
+  return {
+    subject: { type: document.getElementById('req-subject-type').value, id: document.getElementById('req-subject-id').value },
+    action: document.getElementById('req-action').value.trim(),
+    resource: { type: document.getElementById('req-resource-type').value.trim(), id: document.getElementById('req-resource-id').value.trim(), attrs },
+    context: {
+      time: document.getElementById('ctx-time').value.trim(),
+      ip_country: document.getElementById('ctx-country').value,
+      env: document.getElementById('ctx-env').value,
+      mfa_verified: document.getElementById('ctx-mfa').value === 'true',
+      ...extra
+    }
+  };
+}
+
+function evalCondition(cond, ctx) {
+  if (!cond || Object.keys(cond).length === 0) return true; // empty = match all
+  const op = cond.op;
+  const args = cond.args || [];
+
+  function resolve(v) {
+    if (typeof v !== 'string' || !v.startsWith('ctx.')) return v;
+    const path = v.slice(4).split('.');
+    let cur = ctx;
+    for (const p of path) { cur = cur?.[p]; if (cur === undefined) return null; }
+    return cur;
+  }
+
+  switch(op) {
+    case 'eq': return resolve(args[0]) == args[1];
+    case 'neq': return resolve(args[0]) != args[1];
+    case 'gt': return Number(resolve(args[0])) > Number(args[1]);
+    case 'lt': return Number(resolve(args[0])) < Number(args[1]);
+    case 'gte': return Number(resolve(args[0])) >= Number(args[1]);
+    case 'lte': return Number(resolve(args[0])) <= Number(args[1]);
+    case 'in': return (args[1] || []).includes(resolve(args[0]));
+    case 'not_in': return !(args[1] || []).includes(resolve(args[0]));
+    case 'contains': return String(resolve(args[0]) || '').includes(String(args[1]));
+    case 'starts_with': return String(resolve(args[0]) || '').startsWith(String(args[1]));
+    case 'and': return args.every(a => evalCondition(a, ctx));
+    case 'or': return args.some(a => evalCondition(a, ctx));
+    case 'not': return !evalCondition(args[0], ctx);
+    case 'time_between': {
+      const t = resolve(args[0]);
+      if (!t) return false;
+      const [h, m] = t.split(':').map(Number);
+      const mins = h * 60 + m;
+      const [sh, sm] = String(args[1]).split(':').map(Number);
+      const [eh, em] = String(args[2]).split(':').map(Number);
+      return mins >= sh * 60 + sm && mins < eh * 60 + em;
+    }
+    case 'exists': { const v = resolve(args[0]); return v !== null && v !== undefined; }
+    default: return false;
+  }
+}
+
+function matchesActions(policy, action) {
+  const actions = policy.actions || [];
+  if (!actions.length || actions.includes('*')) return true;
+  return actions.some(a => {
+    if (a === action) return true;
+    if (a.endsWith('*')) return action.startsWith(a.slice(0, -1));
+    if (a.endsWith('.*')) return action.startsWith(a.slice(0, -2) + '.');
+    return false;
+  });
+}
+
+function decide(ctx) {
+  const sorted = [...policies].filter(p => p.enabled).sort((a,b) => a.priority - b.priority);
+  for (const p of sorted) {
+    if (!matchesActions(p, ctx.action)) continue;
+    if (p.resource_types?.length && !p.resource_types.includes('*') && !p.resource_types.includes(ctx.resource.type)) continue;
+    let condMatch = true;
+    try { condMatch = evalCondition(p.condition, ctx); } catch(e) { condMatch = false; }
+    if (condMatch) return { effect: p.effect, policy: p, reason: `Matched policy: "${p.name}" (priority ${p.priority})` };
+  }
+  return { effect: 'deny', policy: null, reason: 'No policy matched — default deny' };
+}
+
+function evaluate() {
+  if (policies.length === 0) {
+    document.getElementById('verdict-wrap').innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">Add a policy first</div><div class="empty-sub">Click "Add policy" or pick an example.</div></div>`;
+    return;
+  }
+  const t0 = performance.now();
+  const ctx = buildCtx();
+  const result = decide(ctx);
+  const ms = (performance.now() - t0).toFixed(2);
+  document.getElementById('eval-latency').textContent = ms + 'ms';
+  renderVerdict(result, ctx);
+  saveToURL();
+}
+
+function renderVerdict(result, ctx) {
+  const cls = result.effect === 'allow' ? 'result-allow' : result.effect === 'deny' ? 'result-deny' : 'result-approval';
+  const icon = result.effect === 'allow' ? '✅' : result.effect === 'deny' ? '🚫' : '⏳';
+  const sorted = [...policies].filter(p => p.enabled).sort((a,b) => a.priority - b.priority);
+
+  let policyRows = sorted.map(p => {
+    const actionMatch = matchesActions(p, ctx.action);
+    if (!actionMatch) return `<div class="policy-row"><span class="policy-row-name">${p.name}</span><span class="policy-row-result pr-skip">— action mismatch</span></div>`;
+    let condMatch = true;
+    try { condMatch = evalCondition(p.condition, ctx); } catch(e) { condMatch = false; }
+    const isMatch = p === result.policy;
+    const cls2 = isMatch ? 'pr-match' : condMatch ? 'pr-allow' : 'pr-skip';
+    const label = isMatch ? '▶ MATCHED' : condMatch ? 'would match' : '— skipped';
+    return `<div class="policy-row" style="${isMatch?'background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);':''}"><span class="policy-row-name">${p.name} <span style="color:var(--muted);font-size:10px;">(p${p.priority})</span></span><span class="policy-row-result ${cls2}">${label}</span></div>`;
+  }).join('');
+
+  document.getElementById('verdict-wrap').innerHTML = `
+    <div class="result-card ${cls}">
+      <div class="effect-label">${icon} ${result.effect}</div>
+      <div class="result-reason">${result.reason}</div>
+    </div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px;margin-top:4px;">Policy evaluation trace</div>
+    <div class="policy-list">${policyRows}</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;">Context used</div>
+    <div class="policy-snippet">${highlightJSON(ctx)}</div>
+  `;
+}
+
+function highlightJSON(obj) {
+  return JSON.stringify(obj, null, 2)
+    .replace(/"([^"]+)":/g, '<span class="jk">"$1"</span>:')
+    .replace(/: "([^"]*)"/g, ': <span class="jv">"$1"</span>')
+    .replace(/: (true|false)/g, ': <span class="jb">$1</span>')
+    .replace(/: (-?\d+\.?\d*)/g, ': <span class="jn">$1</span>');
+}
+
+// ══════════════════════════════════════════════════════════
+//  POLICY CRUD
+// ══════════════════════════════════════════════════════════
+const DEFAULT_CONDITION = {
+  "op": "not",
+  "args": [{ "op": "time_between", "args": ["ctx.context.time", "09:00", "18:00"] }]
+};
+
+function addPolicy(preset) {
+  const p = preset || {
+    id: policyIdSeq++,
+    name: 'New policy ' + policyIdSeq,
+    priority: (policies.length + 1) * 100,
+    effect: 'deny',
+    actions: [],
+    resource_types: [],
+    condition: {},
+    enabled: true,
+  };
+  if (!p.id) p.id = policyIdSeq++;
+  policies.push(p);
+  renderPolicies();
+  evaluate();
+}
+
+function removePolicy(id) {
+  policies = policies.filter(p => p.id !== id);
+  renderPolicies();
+  evaluate();
+}
+
+function togglePolicy(id) {
+  const p = policies.find(x => x.id === id);
+  if (p) { p.enabled = !p.enabled; renderPolicies(); evaluate(); }
+}
+
+function renderPolicies() {
+  document.getElementById('policy-count').textContent = policies.filter(p=>p.enabled).length + '/' + policies.length;
+  const el = document.getElementById('policy-list-panel');
+  if (!policies.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">No policies</div><div class="empty-sub">Click "Add policy" or pick an example above.</div></div>`;
+    return;
+  }
+  el.innerHTML = policies.map(p => `
+    <div style="background:var(--surface);border:1px solid var(--border${p.enabled?'':'2'});border-radius:10px;padding:12px 14px;margin-bottom:10px;opacity:${p.enabled?1:.55};">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <input type="text" value="${escHtml(p.name)}" onchange="updateField(${p.id},'name',this.value)" style="background:transparent;border:none;color:white;font-weight:600;font-size:13px;padding:0;width:140px;" />
+        <div style="display:flex;gap:5px;align-items:center;">
+          <button class="btn btn-ghost btn-sm" style="padding:2px 7px;font-size:10px;" onclick="togglePolicy(${p.id})">${p.enabled?'Disable':'Enable'}</button>
+          <button class="btn btn-ghost btn-sm" style="padding:2px 7px;font-size:10px;color:var(--danger);border-color:rgba(244,63,94,.3);" onclick="removePolicy(${p.id})">✕</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div>
+          <div class="field-label">Priority</div>
+          <input type="text" value="${p.priority}" onchange="updateField(${p.id},'priority',parseInt(this.value)||100)" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:white;font-family:var(--mono);font-size:11px;width:100%;outline:none;" />
+        </div>
+        <div>
+          <div class="field-label">Effect</div>
+          <select onchange="updateField(${p.id},'effect',this.value)" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:white;font-size:11px;width:100%;outline:none;">
+            <option value="allow" ${p.effect==='allow'?'selected':''}>allow</option>
+            <option value="deny" ${p.effect==='deny'?'selected':''}>deny</option>
+            <option value="require_approval" ${p.effect==='require_approval'?'selected':''}>require_approval</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:6px;">
+        <div class="field-label" style="margin-bottom:3px;">Actions (comma-separated, * for all)</div>
+        <input type="text" value="${(p.actions||[]).join(', ')}" onchange="updateField(${p.id},'actions',this.value.split(',').map(s=>s.trim()).filter(Boolean))" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:white;font-family:var(--mono);font-size:11px;width:100%;outline:none;" placeholder="payments.*, crm:read" />
+      </div>
+      <div style="margin-bottom:6px;">
+        <div class="field-label" style="margin-bottom:3px;">Condition (JSON AST)</div>
+        <textarea onchange="updateCondition(${p.id},this.value)" rows="5" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:11px;line-height:1.6;resize:vertical;outline:none;">${JSON.stringify(p.condition,null,2)}</textarea>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateField(id, field, val) {
+  const p = policies.find(x => x.id === id);
+  if (p) { p[field] = val; evaluate(); saveToURL(); }
+}
+
+function updateCondition(id, raw) {
+  const p = policies.find(x => x.id === id);
+  if (!p) return;
+  try { p.condition = JSON.parse(raw); evaluate(); saveToURL(); }
+  catch(e) { /* invalid JSON — leave as is */ }
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ══════════════════════════════════════════════════════════
+//  EXAMPLES
+// ══════════════════════════════════════════════════════════
+const EXAMPLES = {
+  'business-hours': [
+    { id: policyIdSeq++, name: 'Allow during business hours', priority: 100, effect: 'allow', actions: ['payments.*'], resource_types: [], condition: { op: 'time_between', args: ['ctx.context.time', '09:00', '18:00'] }, enabled: true },
+    { id: policyIdSeq++, name: 'Require approval off-hours', priority: 200, effect: 'require_approval', actions: ['payments.*'], resource_types: [], condition: { op: 'not', args: [{ op: 'time_between', args: ['ctx.context.time', '09:00', '18:00'] }] }, enabled: true },
+  ],
+  'geo-block': [
+    { id: policyIdSeq++, name: 'Deny non-US/EU countries', priority: 100, effect: 'deny', actions: [], resource_types: [], condition: { op: 'not', args: [{ op: 'in', args: ['ctx.context.ip_country', ['US','GB','DE','FR','NL','IE','CA']] }] }, enabled: true },
+    { id: policyIdSeq++, name: 'Allow from approved countries', priority: 200, effect: 'allow', actions: [], resource_types: [], condition: { op: 'in', args: ['ctx.context.ip_country', ['US','GB','DE','FR','NL','IE','CA']] }, enabled: true },
+  ],
+  'amount-threshold': [
+    { id: policyIdSeq++, name: 'Allow small refunds', priority: 100, effect: 'allow', actions: ['payments.refund.issue'], resource_types: [], condition: { op: 'lt', args: ['ctx.resource.attrs.amount_cents', 100000] }, enabled: true },
+    { id: policyIdSeq++, name: 'Require approval for large refunds', priority: 200, effect: 'require_approval', actions: ['payments.refund.issue'], resource_types: [], condition: { op: 'gte', args: ['ctx.resource.attrs.amount_cents', 100000] }, enabled: true },
+  ],
+  'env-guard': [
+    { id: policyIdSeq++, name: 'Deny production without MFA', priority: 100, effect: 'deny', actions: ['infra.*'], resource_types: [], condition: { op: 'and', args: [{ op: 'eq', args: ['ctx.context.env', 'production'] }, { op: 'eq', args: ['ctx.context.mfa_verified', false] }] }, enabled: true },
+    { id: policyIdSeq++, name: 'Allow with MFA', priority: 200, effect: 'allow', actions: ['infra.*'], resource_types: [], condition: { op: 'eq', args: ['ctx.context.mfa_verified', true] }, enabled: true },
+    { id: policyIdSeq++, name: 'Allow staging/dev freely', priority: 300, effect: 'allow', actions: ['infra.*'], resource_types: [], condition: { op: 'neq', args: ['ctx.context.env', 'production'] }, enabled: true },
+  ],
+};
+
+function loadExample(name) {
+  policies = [];
+  policyIdSeq = 1;
+  EXAMPLES[name].forEach(p => { p.id = policyIdSeq++; policies.push({...p}); });
+  renderPolicies();
+  evaluate();
+}
+
+// ══════════════════════════════════════════════════════════
+//  MCP INSPECTOR
+// ══════════════════════════════════════════════════════════
+const RISK_KEYWORDS = {
+  critical: ['delete','destroy','drop','truncate','format','wipe','erase','terminate','kill','shutdown','root','sudo','admin','password','secret','token','key','credential','auth','payment','refund','charge','transfer','wire','bank','ssn','pii','phi','hipaa','gdpr'],
+  high: ['write','update','modify','create','insert','execute','run','deploy','restart','reboot','reset','revoke','grant','elevate','impersonate','send','publish','broadcast','override','bypass'],
+  medium: ['read','list','get','fetch','search','query','scan','download','export','copy','move','rename'],
+  low: ['status','check','ping','health','version','info','describe','help','suggest'],
+};
+
+function scoreRisk(tool) {
+  const text = (tool.name + ' ' + (tool.description || '')).toLowerCase();
+  for (const [level, keywords] of Object.entries(RISK_KEYWORDS)) {
+    if (keywords.some(k => text.includes(k))) return level;
+  }
+  return 'medium';
+}
+
+function buildPolicy(tool, risk) {
+  const effectMap = { low: 'allow', medium: 'allow', high: 'require_approval', critical: 'deny' };
+  const priorityMap = { low: 100, medium: 200, high: 300, critical: 50 };
+  const condition = risk === 'critical'
+    ? {}
+    : risk === 'high'
+      ? { op: 'eq', args: ['ctx.context.mfa_verified', true] }
+      : {};
+  return {
+    display_name: `${tool.name} — ${risk} risk`,
+    effect: effectMap[risk],
+    priority: priorityMap[risk],
+    actions: [`tools.${tool.name}`],
+    resource_types: [],
+    condition,
+    is_enabled: true,
+    _note: risk === 'critical' ? 'Blocked by default — add explicit allow condition to unlock'
+         : risk === 'high' ? 'Requires MFA — adjust condition as needed'
+         : 'Allowed by default — tighten condition for production'
+  };
+}
+
+let inspectedPolicies = [];
+
+function inspectMCP() {
+  const raw = document.getElementById('mcp-input').value.trim();
+  let tools;
+  try {
+    const parsed = JSON.parse(raw);
+    tools = Array.isArray(parsed) ? parsed : parsed.tools || [parsed];
+  } catch(e) {
+    document.getElementById('inspector-results').innerHTML = `<div class="result-card result-error"><div class="effect-label" style="color:var(--danger);font-size:14px;">JSON parse error</div><div class="result-reason">${escHtml(e.message)}</div></div>`;
+    return;
+  }
+
+  inspectedPolicies = [];
+  const html = tools.map(tool => {
+    const risk = scoreRisk(tool);
+    const policy = buildPolicy(tool, risk);
+    inspectedPolicies.push(policy);
+    const params = Object.entries(tool.inputSchema?.properties || {});
+    const required = tool.inputSchema?.required || [];
+    const riskColors = { low: 'risk-low', medium: 'risk-medium', high: 'risk-high', critical: 'risk-critical' };
+    const paramTags = params.map(([name]) =>
+      `<span class="param-tag ${required.includes(name)?'required':''}">${name}${required.includes(name)?'*':''}</span>`
+    ).join('');
+    const policyJson = JSON.stringify({...policy, _note: undefined}, null, 2);
+    return `
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <span class="tool-name">${escHtml(tool.name)}</span>
+          <span class="risk ${riskColors[risk]}">${risk.toUpperCase()}</span>
+        </div>
+        <div class="tool-desc">${escHtml(tool.description || 'No description')}</div>
+        ${params.length ? `<div class="tool-params">${paramTags}</div><div style="font-size:10px;color:var(--muted);margin-bottom:6px;">* = required parameter</div>` : ''}
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;">
+          Recommended Kynara policy
+          <button class="copy-btn" onclick="copyPolicySnippet(this, ${JSON.stringify(JSON.stringify(policyJson)).slice(1,-1)})">Copy</button>
+        </div>
+        <div style="font-size:10px;color:var(--teal);margin-bottom:5px;">💡 ${escHtml(policy._note)}</div>
+        <div class="policy-snippet">${escHtml(policyJson)}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('inspector-results').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">
+      <span style="font-size:20px;">🛡️</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:white;">${tools.length} tool${tools.length!==1?'s':''} analyzed</div>
+        <div style="font-size:11px;color:var(--muted);">${inspectedPolicies.filter(p=>p.effect==='deny').length} blocked · ${inspectedPolicies.filter(p=>p.effect==='require_approval').length} gated · ${inspectedPolicies.filter(p=>p.effect==='allow').length} allowed</div>
+      </div>
+    </div>
+    ${html}
+    <div class="cta-banner" style="margin:0;">
+      <div class="cta-banner-text"><strong>Import these policies directly</strong> into Kynara — free account, no credit card.</div>
+      <a href="https://kynaraai.com" class="btn btn-accent btn-sm">Import →</a>
+    </div>
+  `;
+  document.getElementById('export-btn').style.display = '';
+}
+
+function copyPolicySnippet(btn, json) {
+  navigator.clipboard.writeText(json).then(() => { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1500); });
+}
+
+function exportPolicies() {
+  const blob = new Blob([JSON.stringify(inspectedPolicies.map(({_note,...p})=>p), null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'kynara-policies.json'; a.click();
+}
+
+const MCP_EXAMPLES = {
+  filesystem: `[
+  {
+    "name": "read_file",
+    "description": "Read the full contents of a file at the given path",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "description": "Absolute path to the file" }
+      },
+      "required": ["path"]
+    }
+  },
+  {
+    "name": "write_file",
+    "description": "Create or overwrite a file with new content",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" },
+        "content": { "type": "string" }
+      },
+      "required": ["path", "content"]
+    }
+  },
+  {
+    "name": "delete_file",
+    "description": "Permanently delete a file from the filesystem",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" }
+      },
+      "required": ["path"]
+    }
+  }
+]`,
+  database: `[
+  {
+    "name": "query_database",
+    "description": "Execute a read-only SQL SELECT query",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sql": { "type": "string" },
+        "database": { "type": "string" }
+      },
+      "required": ["sql"]
+    }
+  },
+  {
+    "name": "execute_sql",
+    "description": "Execute an arbitrary SQL statement including INSERT, UPDATE, DELETE",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sql": { "type": "string" },
+        "database": { "type": "string" }
+      },
+      "required": ["sql"]
+    }
+  },
+  {
+    "name": "drop_table",
+    "description": "Permanently drop a database table and all its data",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "table_name": { "type": "string" },
+        "database": { "type": "string" }
+      },
+      "required": ["table_name"]
+    }
+  }
+]`,
+  payments: `[
+  {
+    "name": "get_transaction",
+    "description": "Retrieve details of a payment transaction by ID",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "transaction_id": { "type": "string" }
+      },
+      "required": ["transaction_id"]
+    }
+  },
+  {
+    "name": "create_charge",
+    "description": "Charge a customer's payment method",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "customer_id": { "type": "string" },
+        "amount_cents": { "type": "number" },
+        "currency": { "type": "string" }
+      },
+      "required": ["customer_id", "amount_cents"]
+    }
+  },
+  {
+    "name": "issue_refund",
+    "description": "Issue a full or partial refund for a completed payment",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "payment_id": { "type": "string" },
+        "amount_cents": { "type": "number", "description": "Amount to refund. Omit for full refund." }
+      },
+      "required": ["payment_id"]
+    }
+  }
+]`,
+  email: `[
+  {
+    "name": "search_emails",
+    "description": "Search the user's inbox for emails matching a query",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": { "type": "string" },
+        "max_results": { "type": "number" }
+      },
+      "required": ["query"]
+    }
+  },
+  {
+    "name": "send_email",
+    "description": "Send an email on behalf of the user",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "to": { "type": "string" },
+        "subject": { "type": "string" },
+        "body": { "type": "string" },
+        "cc": { "type": "string" }
+      },
+      "required": ["to", "subject", "body"]
+    }
+  },
+  {
+    "name": "broadcast_announcement",
+    "description": "Send a mass email to all users in an organization",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "subject": { "type": "string" },
+        "body": { "type": "string" },
+        "org_id": { "type": "string" }
+      },
+      "required": ["subject", "body", "org_id"]
+    }
+  }
+]`,
+  infra: `[
+  {
+    "name": "get_service_status",
+    "description": "Check the health and status of a service or container",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "service_name": { "type": "string" },
+        "environment": { "type": "string", "enum": ["production", "staging", "development"] }
+      },
+      "required": ["service_name"]
+    }
+  },
+  {
+    "name": "restart_service",
+    "description": "Restart a running service or container in any environment",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "service_name": { "type": "string" },
+        "environment": { "type": "string", "enum": ["production", "staging", "development"] },
+        "reason": { "type": "string" }
+      },
+      "required": ["service_name", "environment"]
+    }
+  },
+  {
+    "name": "execute_command",
+    "description": "Run an arbitrary shell command on a server with root privileges",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "command": { "type": "string" },
+        "server": { "type": "string" }
+      },
+      "required": ["command", "server"]
+    }
+  }
+]`
+};
+
+function loadMCPExample(name) {
+  document.getElementById('mcp-input').value = MCP_EXAMPLES[name] || '';
+  inspectMCP();
+}
+
+// ══════════════════════════════════════════════════════════
+//  URL STATE SHARING
+// ══════════════════════════════════════════════════════════
+function saveToURL() {
+  try {
+    const state = {
+      policies,
+      req: {
+        subjectType: document.getElementById('req-subject-type').value,
+        subjectId: document.getElementById('req-subject-id').value,
+        action: document.getElementById('req-action').value,
+        resourceType: document.getElementById('req-resource-type').value,
+        resourceId: document.getElementById('req-resource-id').value,
+        attrs: document.getElementById('req-attrs').value,
+        time: document.getElementById('ctx-time').value,
+        country: document.getElementById('ctx-country').value,
+        env: document.getElementById('ctx-env').value,
+        mfa: document.getElementById('ctx-mfa').value,
+        extra: document.getElementById('req-ctx-extra').value,
+      }
+    };
+    const encoded = btoa(encodeURIComponent(JSON.stringify(state)));
+    history.replaceState(null, '', '#' + encoded);
+  } catch(e) {}
+}
+
+function loadFromURL() {
+  try {
+    const hash = location.hash.slice(1);
+    if (!hash) return false;
+    const state = JSON.parse(decodeURIComponent(atob(hash)));
+    if (state.policies) {
+      policies = state.policies;
+      policyIdSeq = Math.max(...policies.map(p => p.id), 0) + 1;
+      renderPolicies();
+    }
+    if (state.req) {
+      const r = state.req;
+      if (r.subjectType) document.getElementById('req-subject-type').value = r.subjectType;
+      if (r.subjectId) document.getElementById('req-subject-id').value = r.subjectId;
+      if (r.action) document.getElementById('req-action').value = r.action;
+      if (r.resourceType) document.getElementById('req-resource-type').value = r.resourceType;
+      if (r.resourceId) document.getElementById('req-resource-id').value = r.resourceId;
+      if (r.attrs) document.getElementById('req-attrs').value = r.attrs;
+      if (r.time) document.getElementById('ctx-time').value = r.time;
+      if (r.country) document.getElementById('ctx-country').value = r.country;
+      if (r.env) document.getElementById('ctx-env').value = r.env;
+      if (r.mfa) document.getElementById('ctx-mfa').value = r.mfa;
+      if (r.extra) document.getElementById('req-ctx-extra').value = r.extra;
+    }
+    evaluate();
+    return true;
+  } catch(e) { return false; }
+}
+
+function shareURL() {
+  saveToURL();
+  const url = location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('[onclick="shareURL()"]');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '🔗 Share', 1800);
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  if (!loadFromURL()) {
+    loadExample('business-hours');
+  }
+});
+</script>
+</body>
+</html>
