@@ -57,10 +57,18 @@ export default function PolicyEditorPage() {
   const [form, setForm] = useState<any>(DEFAULT_POLICY);
   const [isDirty, setIsDirty] = useState(false);
 
+  // Raw text backing the condition editor. Kept separate from form.condition so
+  // the textarea isn't re-serialized on every keystroke (which would reset the
+  // caret to the end and make mid-string edits like "op" impossible).
+  const [conditionText, setConditionText] = useState(() =>
+    JSON.stringify(DEFAULT_POLICY.condition, null, 2)
+  );
+
   // Sync form when existing policy loads; validate condition immediately
   useEffect(() => {
     if (existing && !isDirty) {
       setForm(existing);
+      setConditionText(JSON.stringify(existing.condition ?? {}, null, 2));
       setConditionError(validateConditionNode(existing.condition));
     }
   }, [existing]);
@@ -285,13 +293,16 @@ export default function PolicyEditorPage() {
             </div>
             <textarea
               className={`input font-mono text-xs min-h-[220px] ${conditionError ? "border-danger-500" : ""}`}
-              value={JSON.stringify(form.condition || {}, null, 2)}
+              value={conditionText}
               onChange={(e) => {
+                const text = e.target.value;
+                setConditionText(text);
                 try {
-                  const parsed = JSON.parse(e.target.value);
+                  const parsed = JSON.parse(text);
                   updateForm({ condition: parsed });
                   setConditionError(validateConditionNode(parsed));
                 } catch {
+                  setIsDirty(true);
                   setConditionError("Invalid JSON — fix syntax before saving.");
                 }
               }}
@@ -568,6 +579,7 @@ export default function PolicyEditorPage() {
                   onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(148,163,184,0.08)")}
                   onClick={() => {
                     updateForm({ condition: t.condition });
+                    setConditionText(JSON.stringify(t.condition ?? {}, null, 2));
                     setConditionError(validateConditionNode(t.condition));
                     setTemplateOpen(false);
                   }}
