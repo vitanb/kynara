@@ -739,4 +739,30 @@ export default function PolicyEditorPage() {
                 placeholder="* or agent:<agent-id>"
               />
               <div className="text-xs text-ink-500 space-y-1">
-                <p><code className="font-mono">*</code> — applies to a
+                <p><code className="font-mono">*</code> — applies to all agents in this org</p>
+                <p><code className="font-mono">agent:&lt;id&gt;</code> — applies to one specific agent</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 px-6 py-4"
+              style={{ borderTop: "1px solid var(--s0-border)" }}>
+              <button
+                onClick={() => setBindingOpen(false)}
+                className="btn-secondary"
+                disabled={addBinding.isPending}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => addBinding.mutate()}
+                className="btn-primary"
+                disabled={addBinding.isPending || !newSelector.trim()}
+              >
+                {addBinding.isPending ? "Adding…" : "Add binding"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
