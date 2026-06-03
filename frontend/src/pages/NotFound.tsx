@@ -24,9 +24,8 @@ export default function NotFoundPage() {
       <div
         className="relative mb-8 select-none"
         style={{ fontSize: "9rem", fontWeight: 900, lineHeight: 1, color: "transparent",
-          background: "linear-gradient(135deg, #18181B 0%, #52525B 50%, #312E81 100%)",
+          background: "linear-gradient(135deg, var(--s0-accent) 0%, #93C5FD 100%)",
           WebkitBackgroundClip: "text", backgroundClip: "text",
-          filter: "drop-shadow(0 0 60px var(--s0-accent-ring))",
         }}
       >
         404
@@ -54,7 +53,7 @@ export default function NotFoundPage() {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-ink-50 transition-all"
           style={{
             background: "var(--s0-accent)",
-            boxShadow: "0 0 0 1px var(--s0-accent-ring), 0 4px 20px var(--s0-accent-ring)",
+            boxShadow: "0 1px 2px rgba(2,6,23,0.3)",
           }}
         >
           <Home className="size-4" /> Back to home

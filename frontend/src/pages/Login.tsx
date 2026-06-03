@@ -98,13 +98,7 @@ export default function LoginPage() {
           borderRight: "1px solid rgba(148,163,184,0.07)",
         }}
       >
-        {/* Very subtle top-left indigo gradient */}
-        <div
-          className="absolute top-0 left-0 w-96 h-96 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse at 0% 0%, var(--s0-accent-subtle) 0%, transparent 65%)",
-          }}
-        />
+        {/* Ambient glow removed */}
 
         {/* Logo */}
         <Link to="/" className="relative z-10 flex items-center gap-3 hover:opacity-80 transition-opacity">

@@ -111,7 +111,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link to="/login" className="text-sm text-ink-300 hover:text-ink-50 transition-colors hidden sm:block">Sign in</Link>
-            <button onClick={openContact} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-50 px-4 py-2 rounded-lg transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 0 0 1px var(--s0-accent-ring), 0 4px 16px var(--s0-accent-ring)" }}>
+            <button onClick={openContact} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-50 px-4 py-2 rounded-lg transition-all hover:opacity-90" style={{ background: "var(--s0-accent)", boxShadow: "0 1px 2px rgba(2,6,23,0.3)" }}>
               Book a demo
             </button>
           </div>
@@ -138,7 +138,7 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-ink-50 transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 0 0 1px var(--s0-accent-ring), 0 8px 32px var(--s0-accent-ring)" }}>
+            <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-ink-50 transition-all hover:opacity-90" style={{ background: "var(--s0-accent)", boxShadow: "0 1px 2px rgba(2,6,23,0.3)" }}>
               Book a demo <ArrowRight className="w-4 h-4" />
             </button>
             <Link to="/signup" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-medium text-ink-300 hover:text-ink-50 transition-all" style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}>
@@ -228,7 +228,7 @@ export default function LandingPage() {
 
         {/* Terminal mockup */}
         <section className="max-w-5xl mx-auto px-6 pb-24">
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(148,163,184,0.08)", boxShadow: "0 0 80px var(--s0-accent-subtle)" }}>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(148,163,184,0.08)", boxShadow: "0 8px 24px rgba(2,6,23,0.4)" }}>
             <div className="flex items-center gap-2 px-4 py-3" style={{ background: "#0D1117", borderBottom: "1px solid rgba(148,163,184,0.06)" }}>
               <div className="w-3 h-3 rounded-full" style={{ background: "#FF5F57" }} />
               <div className="w-3 h-3 rounded-full" style={{ background: "#FEBC2E" }} />
@@ -394,7 +394,7 @@ export default function LandingPage() {
         {/* CTA */}
         <section className="max-w-4xl mx-auto px-6 pb-28">
           <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, var(--s0-accent-ring), var(--s0-accent-subtle), var(--s0-accent-ring))" }}>
-            <div className="rounded-[22px] py-16 px-12 text-center" style={{ background: "radial-gradient(ellipse at 50% 0%, var(--s0-accent-ring) 0%, #FFFFFF 60%)" }}>
+            <div className="rounded-[22px] py-16 px-12 text-center" style={{ background: "var(--s0-card-elevated)" }}>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-6" style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)", color: "var(--s0-text-muted)" }}>
                 <span className="w-1.5 h-1.5 rounded-full bg-ink-400 animate-pulse" />
                 Accepting design partners
@@ -407,7 +407,7 @@ export default function LandingPage() {
                 Book a 30-minute call to see Kynara in action.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-                <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-ink-50 hover:opacity-90 transition-all" style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 8px 32px var(--s0-accent-ring)" }}>
+                <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-ink-50 hover:opacity-90 transition-all" style={{ background: "var(--s0-accent)", boxShadow: "0 1px 2px rgba(2,6,23,0.3)" }}>
                   Book a demo <ArrowRight className="w-4 h-4" />
                 </button>
                 <Link to="/signup" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-medium text-ink-300 hover:text-ink-50 transition-all" style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}>
@@ -452,7 +452,7 @@ export default function LandingPage() {
       {contactOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
           onClick={(e) => { if (e.target === e.currentTarget) setContactOpen(false); }}>
-          <div className="w-full max-w-md rounded-2xl p-7 relative" style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,0.1)", boxShadow: "0 0 80px var(--s0-accent-ring)" }}>
+          <div className="w-full max-w-md rounded-2xl p-7 relative" style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,0.1)", boxShadow: "0 16px 48px rgba(2,6,23,0.5)" }}>
             <button onClick={() => setContactOpen(false)} className="absolute top-4 right-4 text-ink-400 hover:text-ink-300 transition-colors">
               <X className="w-4 h-4" />
             </button>
@@ -502,7 +502,7 @@ export default function LandingPage() {
                   {contactState === "error" && <p className="text-xs text-red-400">Something went wrong. Please try again.</p>}
                   <button type="submit" disabled={contactState === "sending"}
                     className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-ink-50 transition-opacity disabled:opacity-60"
-                    style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 4px 16px var(--s0-accent-ring)" }}>
+                    style={{ background: "var(--s0-accent)", boxShadow: "0 1px 2px rgba(2,6,23,0.3)" }}>
                     <Send className="w-3.5 h-3.5" />
                     {contactState === "sending" ? "Sending…" : "Request demo"}
                   </button>
