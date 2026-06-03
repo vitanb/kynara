@@ -9,9 +9,9 @@ const features = [
     icon: ShieldCheck,
     label: "Policy-as-code enforcement",
     sub: "RBAC + ABAC with fail-closed defaults",
-    color: "#6366F1",
-    bg: "rgba(99,102,241,0.1)",
-    border: "rgba(99,102,241,0.2)",
+    color: "#18181B",
+    bg: "rgba(24,24,27,0.1)",
+    border: "rgba(24,24,27,0.2)",
   },
   {
     icon: Activity,
@@ -88,13 +88,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-full" style={{ background: "#05080F" }}>
+    <div className="flex min-h-full" style={{ background: "#FFFFFF" }}>
 
       {/* ── Left panel ───────────────────────────────────── */}
       <div
         className="hidden lg:flex flex-col justify-between w-[46%] p-14 relative"
         style={{
-          background: "#080C14",
+          background: "#FAFAF9",
           borderRight: "1px solid rgba(148,163,184,0.07)",
         }}
       >
@@ -102,7 +102,7 @@ export default function LoginPage() {
         <div
           className="absolute top-0 left-0 w-96 h-96 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse at 0% 0%, rgba(99,102,241,0.08) 0%, transparent 65%)",
+            background: "radial-gradient(ellipse at 0% 0%, rgba(24,24,27,0.08) 0%, transparent 65%)",
           }}
         />
 
@@ -110,8 +110,8 @@ export default function LoginPage() {
         <Link to="/" className="relative z-10 flex items-center gap-3 hover:opacity-80 transition-opacity">
           <img src="/logo.svg" className="size-9 rounded-xl" alt="Kynara" />
           <div>
-            <div className="text-base font-bold text-white tracking-tight leading-none">Kynara</div>
-            <div className="text-[10px] font-medium mt-0.5" style={{ color: "#818CF8", letterSpacing: "0.06em" }}>
+            <div className="text-base font-bold text-ink-50 tracking-tight leading-none">Kynara</div>
+            <div className="text-[10px] font-medium mt-0.5" style={{ color: "#52525B", letterSpacing: "0.06em" }}>
               AI Control Plane
             </div>
           </div>
@@ -123,20 +123,20 @@ export default function LoginPage() {
             <div
               className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold"
               style={{
-                background: "rgba(99,102,241,0.1)",
-                border: "1px solid rgba(99,102,241,0.2)",
-                color: "#818CF8",
+                background: "rgba(24,24,27,0.1)",
+                border: "1px solid rgba(24,24,27,0.2)",
+                color: "#52525B",
                 letterSpacing: "0.04em",
               }}
             >
               <span
                 className="size-1.5 rounded-full"
-                style={{ background: "#6366F1", boxShadow: "0 0 6px #6366F1" }}
+                style={{ background: "#18181B", boxShadow: "0 0 6px #18181B" }}
               />
               Enterprise AI permissions platform
             </div>
 
-            <h1 className="text-3xl font-bold leading-tight text-white">
+            <h1 className="text-3xl font-bold leading-tight text-ink-50">
               Every agent action<br />evaluated in real time.
             </h1>
             <p className="text-sm text-ink-300 leading-relaxed max-w-md">
@@ -193,11 +193,11 @@ export default function LoginPage() {
               className="size-8 rounded-lg"
               alt="Kynara"
             />
-            <span className="text-sm font-bold text-white">Kynara</span>
+            <span className="text-sm font-bold text-ink-50">Kynara</span>
           </Link>
 
           <div className="mb-7">
-            <h2 className="text-2xl font-bold text-white">Sign in</h2>
+            <h2 className="text-2xl font-bold text-ink-50">Sign in</h2>
             <p className="text-sm text-ink-300 mt-1">to your Kynara workspace</p>
           </div>
 
@@ -309,7 +309,7 @@ export default function LoginPage() {
 
           <p className="text-center text-xs text-ink-400 mt-4">
             No account?{" "}
-            <Link to="/signup" className="text-slate-300 hover:text-white transition-colors">Create one free →</Link>
+            <Link to="/signup" className="text-ink-300 hover:text-ink-50 transition-colors">Create one free →</Link>
           </p>
 
         </div>

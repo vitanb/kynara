@@ -12,8 +12,8 @@ const PLANS = [
     price: "$49",
     period: "per seat / month",
     icon: Shield,
-    iconColor: "#6366F1",
-    iconBg: "rgba(99,102,241,0.15)",
+    iconColor: "#18181B",
+    iconBg: "rgba(24,24,27,0.15)",
     features: [
       "Up to 10 seats",
       "50,000 policy decisions / month",
@@ -173,11 +173,11 @@ export default function BillingPage() {
             </div>
             <div className="flex items-center gap-3 mb-4">
               <div className="size-10 rounded-xl flex items-center justify-center"
-                style={{ background: "rgba(99,102,241,0.15)" }}>
-                <Zap className="size-5" style={{ color: "#6366F1" }} />
+                style={{ background: "rgba(24,24,27,0.15)" }}>
+                <Zap className="size-5" style={{ color: "#18181B" }} />
               </div>
               <div>
-                <div className="text-2xl font-bold text-white capitalize">{sub?.plan || "Free"}</div>
+                <div className="text-2xl font-bold text-ink-50 capitalize">{sub?.plan || "Free"}</div>
                 <div className="text-xs text-ink-400 capitalize">status · {sub?.status || "active"}</div>
               </div>
             </div>
@@ -205,7 +205,7 @@ export default function BillingPage() {
               </button>
             ) : isOnPaid ? (
               <button
-                className="w-full justify-center py-2 text-sm text-ink-400 hover:text-white transition-colors disabled:opacity-50"
+                className="w-full justify-center py-2 text-sm text-ink-400 hover:text-ink-50 transition-colors disabled:opacity-50"
                 disabled={portal.isPending}
                 onClick={() => portal.mutate()}
               >
@@ -213,7 +213,7 @@ export default function BillingPage() {
               </button>
             ) : (
               <button
-                className="w-full justify-center py-2 text-sm text-ink-400 hover:text-white transition-colors"
+                className="w-full justify-center py-2 text-sm text-ink-400 hover:text-ink-50 transition-colors"
                 onClick={() => window.open("mailto:sales@kynara.ai", "_blank")}
               >
                 Contact sales
@@ -229,7 +229,7 @@ export default function BillingPage() {
 
             <div className="flex items-end justify-between mb-2">
               <div>
-                <span className="text-3xl font-bold text-white tabular-nums">
+                <span className="text-3xl font-bold text-ink-50 tabular-nums">
                   {usage?.decisions_used?.toLocaleString() ?? "0"}
                 </span>
                 <span className="text-sm text-ink-400 font-normal ml-2">
@@ -258,7 +258,7 @@ export default function BillingPage() {
               <div className="flex items-center gap-2">
                 <Users className="size-3.5 text-ink-500" />
                 <span className="text-sm text-ink-400">
-                  <span className="font-bold text-white tabular-nums">{seatsUsed}</span>
+                  <span className="font-bold text-ink-50 tabular-nums">{seatsUsed}</span>
                   {" "}/ {seatsIncluded} seats used
                 </span>
               </div>
@@ -348,7 +348,7 @@ export default function BillingPage() {
                         )}
                         {inv.pdf_url && (
                           <a href={inv.pdf_url} target="_blank" rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-ink-400 hover:text-white">
+                            className="inline-flex items-center gap-1 text-xs text-ink-400 hover:text-ink-50">
                             PDF <ExternalLink className="size-3" />
                           </a>
                         )}
@@ -378,19 +378,19 @@ export default function BillingPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden"
-            style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
 
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
               <div>
-                <div className="text-lg font-semibold text-white">Upgrade your plan</div>
+                <div className="text-lg font-semibold text-ink-50">Upgrade your plan</div>
                 <div className="text-xs text-ink-400 mt-0.5">
                   Unlock more agents, decisions, and SSO.
                 </div>
               </div>
               <button onClick={() => setUpgradeOpen(false)}
-                className="text-ink-400 hover:text-white transition-colors">
+                className="text-ink-400 hover:text-ink-50 transition-colors">
                 <X className="size-5" />
               </button>
             </div>
@@ -406,9 +406,9 @@ export default function BillingPage() {
                     onClick={() => setSelectedPlan(plan.id)}
                     className="rounded-xl p-5 text-left transition-all"
                     style={{
-                      background: isSelected ? "rgba(99,102,241,0.1)" : "rgba(148,163,184,0.04)",
+                      background: isSelected ? "rgba(24,24,27,0.1)" : "rgba(148,163,184,0.04)",
                       border: isSelected
-                        ? "1px solid rgba(99,102,241,0.4)"
+                        ? "1px solid rgba(24,24,27,0.4)"
                         : "1px solid rgba(148,163,184,0.1)",
                     }}
                   >
@@ -419,14 +419,14 @@ export default function BillingPage() {
                       </div>
                       {isSelected && (
                         <div className="size-5 rounded-full flex items-center justify-center"
-                          style={{ background: "#4F46E5" }}>
-                          <Check className="size-3 text-white" />
+                          style={{ background: "#18181B" }}>
+                          <Check className="size-3 text-ink-50" />
                         </div>
                       )}
                     </div>
-                    <div className="text-base font-bold text-white mb-0.5">{plan.name}</div>
+                    <div className="text-base font-bold text-ink-50 mb-0.5">{plan.name}</div>
                     <div className="text-ink-400 text-xs mb-3">
-                      <span className="text-xl font-bold text-white">{plan.price}</span>
+                      <span className="text-xl font-bold text-ink-50">{plan.price}</span>
                       {" "}{plan.period}
                     </div>
                     <ul className="space-y-1.5">

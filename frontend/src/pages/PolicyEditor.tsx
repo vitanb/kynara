@@ -32,7 +32,7 @@ const RISK_COLORS: Record<string, { bg: string; text: string }> = {
   low:      { bg: "rgba(16,185,129,0.12)",  text: "#34D399" },
   medium:   { bg: "rgba(245,158,11,0.12)",  text: "#FBBF24" },
   high:     { bg: "rgba(244,63,94,0.12)",   text: "#F87171" },
-  critical: { bg: "rgba(168,85,247,0.12)",  text: "#C084FC" },
+  critical: { bg: "rgba(24,24,27,0.12)",  text: "#71717A" },
 };
 
 export default function PolicyEditorPage() {
@@ -265,7 +265,7 @@ export default function PolicyEditorPage() {
                 title="Browse scope catalog"
                 onClick={() => { setCatalogDomain(null); setCatalogOpen(true); }}
                 className="shrink-0 flex items-center gap-1.5 text-xs font-medium px-2.5 py-2 rounded-lg transition-colors"
-                style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.2)" }}
+                style={{ background: "rgba(24,24,27,0.1)", color: "#52525B", border: "1px solid rgba(24,24,27,0.2)" }}
               >
                 <Layers className="size-3.5" /> Catalog
               </button>
@@ -286,7 +286,7 @@ export default function PolicyEditorPage() {
                 type="button"
                 onClick={() => setTemplateOpen(true)}
                 className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-md transition-colors"
-                style={{ background: "rgba(99,102,241,0.08)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.18)" }}
+                style={{ background: "rgba(24,24,27,0.08)", color: "#52525B", border: "1px solid rgba(24,24,27,0.18)" }}
               >
                 <BookOpen className="size-3" /> Load example
               </button>
@@ -557,14 +557,14 @@ export default function PolicyEditorPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[80vh]"
-            style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
             <div className="flex items-center justify-between px-6 py-4"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
               <div>
-                <div className="text-base font-semibold text-white">Condition templates</div>
+                <div className="text-base font-semibold text-ink-50">Condition templates</div>
                 <div className="text-xs text-ink-400 mt-0.5">Pick a template to load into the editor — then customise it.</div>
               </div>
-              <button onClick={() => setTemplateOpen(false)} className="text-ink-400 hover:text-white">
+              <button onClick={() => setTemplateOpen(false)} className="text-ink-400 hover:text-ink-50">
                 <X className="size-5" />
               </button>
             </div>
@@ -575,7 +575,7 @@ export default function PolicyEditorPage() {
                   type="button"
                   className="w-full text-left rounded-xl px-4 py-3 transition-colors group"
                   style={{ background: "rgba(148,163,184,0.04)", border: "1px solid rgba(148,163,184,0.08)" }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.3)")}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(24,24,27,0.3)")}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(148,163,184,0.08)")}
                   onClick={() => {
                     updateForm({ condition: t.condition });
@@ -585,7 +585,7 @@ export default function PolicyEditorPage() {
                   }}
                 >
                   <div className="flex items-center justify-between gap-2 mb-0.5">
-                    <span className="text-sm font-medium text-white">{t.label}</span>
+                    <span className="text-sm font-medium text-ink-50">{t.label}</span>
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
                       style={{
                         background: t.suggested_effect === "allow"
@@ -614,11 +614,11 @@ export default function PolicyEditorPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[85vh]"
-            style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
             <div className="flex items-center justify-between px-6 py-4"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
               <div>
-                <div className="text-base font-semibold text-white">Scope catalog</div>
+                <div className="text-base font-semibold text-ink-50">Scope catalog</div>
                 <div className="text-xs text-ink-400 mt-0.5">
                   {catalogDomain
                     ? "Click a scope to add it to this policy's scope list."
@@ -630,13 +630,13 @@ export default function PolicyEditorPage() {
                   <button
                     type="button"
                     onClick={() => setCatalogDomain(null)}
-                    className="text-xs text-ink-400 hover:text-white flex items-center gap-1 transition-colors"
+                    className="text-xs text-ink-400 hover:text-ink-50 flex items-center gap-1 transition-colors"
                   >
                     ← Back
                   </button>
                 )}
                 <button onClick={() => { setCatalogOpen(false); setCatalogDomain(null); }}
-                  className="text-ink-400 hover:text-white ml-2">
+                  className="text-ink-400 hover:text-ink-50 ml-2">
                   <X className="size-5" />
                 </button>
               </div>
@@ -651,10 +651,10 @@ export default function PolicyEditorPage() {
                       onClick={() => setCatalogDomain(d.domain)}
                       className="text-left rounded-xl px-4 py-3 transition-colors"
                       style={{ background: "rgba(148,163,184,0.04)", border: "1px solid rgba(148,163,184,0.08)" }}
-                      onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.3)")}
+                      onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(24,24,27,0.3)")}
                       onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(148,163,184,0.08)")}
                     >
-                      <div className="text-sm font-medium text-white mb-0.5">{d.label}</div>
+                      <div className="text-sm font-medium text-ink-50 mb-0.5">{d.label}</div>
                       <div className="text-xs text-ink-400">{d.description}</div>
                       <div className="text-[10px] text-ink-600 mt-1">{d.scopes.length} scopes</div>
                     </button>
@@ -667,7 +667,7 @@ export default function PolicyEditorPage() {
                   if (!dom) return null;
                   return (
                     <div className="space-y-1.5">
-                      <div className="text-xs font-semibold text-white mb-3">{dom.label}</div>
+                      <div className="text-xs font-semibold text-ink-50 mb-3">{dom.label}</div>
                       {dom.scopes.map((s: any) => {
                         const rc = RISK_COLORS[s.risk] ?? RISK_COLORS.low;
                         const alreadyAdded = (form.actions || []).includes(s.scope);
@@ -695,7 +695,7 @@ export default function PolicyEditorPage() {
                                 className="text-[10px] font-semibold px-2 py-1 rounded transition-colors"
                                 style={alreadyAdded
                                   ? { background: "rgba(16,185,129,0.1)", color: "#34D399", cursor: "default" }
-                                  : { background: "rgba(99,102,241,0.12)", color: "#818CF8" }}
+                                  : { background: "rgba(24,24,27,0.12)", color: "#52525B" }}
                               >
                                 {alreadyAdded ? "Added ✓" : "+ Add"}
                               </button>
@@ -717,11 +717,11 @@ export default function PolicyEditorPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-md rounded-2xl shadow-2xl"
-            style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
             <div className="flex items-center justify-between px-6 py-4"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
-              <div className="text-base font-semibold text-white">Add binding</div>
-              <button onClick={() => setBindingOpen(false)} className="text-ink-400 hover:text-white">
+              <div className="text-base font-semibold text-ink-50">Add binding</div>
+              <button onClick={() => setBindingOpen(false)} className="text-ink-400 hover:text-ink-50">
                 <X className="size-5" />
               </button>
             </div>
@@ -740,24 +740,4 @@ export default function PolicyEditorPage() {
             </div>
             <div className="flex items-center justify-end gap-3 px-6 py-4"
               style={{ borderTop: "1px solid rgba(148,163,184,0.08)" }}>
-              <button className="btn-ghost" onClick={() => setBindingOpen(false)}>Cancel</button>
-              <button className="btn-primary" disabled={!newSelector || addBinding.isPending}
-                onClick={() => addBinding.mutate()}>
-                {addBinding.isPending ? "Adding…" : "Add binding"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="label">{label}</label>
-      {children}
-    </div>
-  );
-}
+              <bu

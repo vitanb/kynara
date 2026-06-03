@@ -13,7 +13,7 @@ const RISK: Record<string, { bg: string; text: string }> = {
   low:      { bg: "rgba(16,185,129,0.12)",  text: "#34D399" },
   medium:   { bg: "rgba(245,158,11,0.12)",  text: "#FBBF24" },
   high:     { bg: "rgba(244,63,94,0.12)",   text: "#F87171" },
-  critical: { bg: "rgba(168,85,247,0.12)",  text: "#C084FC" },
+  critical: { bg: "rgba(24,24,27,0.12)",  text: "#71717A" },
 };
 
 const EFFECT: Record<string, { bg: string; text: string }> = {
@@ -36,7 +36,7 @@ function CopyButton({ text }: { text: string }) {
       type="button"
       onClick={() => { copyText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
       className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded transition-colors"
-      style={{ background: "rgba(99,102,241,0.1)", color: copied ? "#34D399" : "#818CF8", border: "1px solid rgba(99,102,241,0.2)" }}
+      style={{ background: "rgba(24,24,27,0.1)", color: copied ? "#34D399" : "#52525B", border: "1px solid rgba(24,24,27,0.2)" }}
     >
       {copied ? <CheckCircle2 className="size-3" /> : <Copy className="size-3" />}
       {copied ? "Copied" : "Copy"}
@@ -71,7 +71,7 @@ function ScopeDomainsTab() {
         return (
           <div key={d.domain}
             className="rounded-xl overflow-hidden"
-            style={{ border: `1px solid ${open ? "rgba(99,102,241,0.3)" : "rgba(148,163,184,0.1)"}`, background: "rgba(148,163,184,0.02)" }}>
+            style={{ border: `1px solid ${open ? "rgba(24,24,27,0.3)" : "rgba(148,163,184,0.1)"}`, background: "rgba(148,163,184,0.02)" }}>
 
             {/* Header row */}
             <button
@@ -80,7 +80,7 @@ function ScopeDomainsTab() {
               className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.02]"
             >
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold text-white">{d.label}</div>
+                <div className="text-sm font-semibold text-ink-50">{d.label}</div>
                 <div className="text-xs text-ink-400 mt-0.5">{d.description}</div>
               </div>
 
@@ -155,7 +155,7 @@ function PolicyTemplatesTab() {
         return (
           <div key={t.id}
             className="rounded-xl overflow-hidden"
-            style={{ border: `1px solid ${open ? "rgba(99,102,241,0.3)" : "rgba(148,163,184,0.1)"}`, background: "rgba(148,163,184,0.02)" }}>
+            style={{ border: `1px solid ${open ? "rgba(24,24,27,0.3)" : "rgba(148,163,184,0.1)"}`, background: "rgba(148,163,184,0.02)" }}>
 
             {/* Header row */}
             <button
@@ -165,7 +165,7 @@ function PolicyTemplatesTab() {
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-white">{t.label}</span>
+                  <span className="text-sm font-semibold text-ink-50">{t.label}</span>
                   <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
                     style={{ background: ef.bg, color: ef.text }}>
                     {t.suggested_effect}
@@ -200,7 +200,7 @@ function PolicyTemplatesTab() {
                   </pre>
 
                   <div className="mt-3 rounded-lg px-3 py-2 text-[11px] text-ink-400"
-                    style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.12)" }}>
+                    style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.12)" }}>
                     <span className="font-semibold text-ink-200">How to use: </span>
                     Copy the JSON above, open a policy in the editor, paste it into the
                     <span className="font-mono text-ink-200"> Condition</span> field, and adjust the values
@@ -283,7 +283,7 @@ function LoadToolModal({
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
         <div className="bg-page-dark border border-ink-800 rounded-xl shadow-2xl w-full max-w-sm mx-4 p-8 text-center">
           <CheckCircle2 className="size-10 mx-auto mb-3" style={{ color: "#34D399" }} />
-          <div className="text-base font-semibold text-white mb-1">Tool added to your org</div>
+          <div className="text-base font-semibold text-ink-50 mb-1">Tool added to your org</div>
           <div className="text-xs text-ink-400 mb-5">
             <span className="font-mono text-ink-200">{form.namespace}.{form.name}</span> is now in your scope catalog.
             You can assign its scopes to roles from the{" "}
@@ -301,10 +301,10 @@ function LoadToolModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-ink-800">
           <div>
-            <h2 className="text-base font-semibold text-white">{tool.display_name}</h2>
+            <h2 className="text-base font-semibold text-ink-50">{tool.display_name}</h2>
             <p className="text-xs text-ink-400 mt-0.5">Review and customise before adding to your org</p>
           </div>
-          <button onClick={onClose} className="text-ink-400 hover:text-white shrink-0 ml-4">
+          <button onClick={onClose} className="text-ink-400 hover:text-ink-50 shrink-0 ml-4">
             <X className="size-5" />
           </button>
         </div>
@@ -406,7 +406,7 @@ function ToolTemplatesTab() {
           <Link
             to="/app/tools"
             className="flex items-center gap-1.5 text-[11px] font-medium shrink-0 transition-colors"
-            style={{ color: "#818CF8" }}
+            style={{ color: "#52525B" }}
           >
             <ExternalLink className="size-3" /> View your catalog
           </Link>
@@ -423,7 +423,7 @@ function ToolTemplatesTab() {
             <div
               key={d.domain}
               className="rounded-xl overflow-hidden"
-              style={{ border: `1px solid ${open ? "rgba(99,102,241,0.3)" : "rgba(148,163,184,0.1)"}`, background: "rgba(148,163,184,0.02)" }}
+              style={{ border: `1px solid ${open ? "rgba(24,24,27,0.3)" : "rgba(148,163,184,0.1)"}`, background: "rgba(148,163,184,0.02)" }}
             >
               {/* Domain header */}
               <button
@@ -433,7 +433,7 @@ function ToolTemplatesTab() {
               >
                 <Wrench className="size-4 shrink-0" style={{ color: "var(--s0-accent-text)" }} />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-white">{d.label}</div>
+                  <div className="text-sm font-semibold text-ink-50">{d.label}</div>
                   <div className="text-xs text-ink-500 mt-0.5">{d.tools.length} pre-built tools</div>
                 </div>
 
@@ -479,7 +479,7 @@ function ToolTemplatesTab() {
                           <p className="text-xs text-ink-500 mt-0.5">{t.description}</p>
                           <div className="flex flex-wrap gap-1 mt-1.5">
                             {(t.scopes as string[]).map((s: string) => (
-                              <span key={s} className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(99,102,241,0.08)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.15)" }}>
+                              <span key={s} className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(24,24,27,0.08)", color: "#52525B", border: "1px solid rgba(24,24,27,0.15)" }}>
                                 {s}
                               </span>
                             ))}
@@ -491,7 +491,7 @@ function ToolTemplatesTab() {
                           type="button"
                           onClick={() => setLoadModal(t)}
                           className="btn-ghost shrink-0 text-xs flex items-center gap-1.5"
-                          style={{ color: "#818CF8" }}
+                          style={{ color: "#52525B" }}
                         >
                           <Plus className="size-3.5" /> Load into org
                         </button>
@@ -542,7 +542,7 @@ export default function CatalogPage() {
               onClick={() => setTab(key as any)}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               style={tab === key
-                ? { background: "rgba(99,102,241,0.2)", color: "#818CF8" }
+                ? { background: "rgba(24,24,27,0.2)", color: "#52525B" }
                 : { color: "#64748B" }}
             >
               <Icon className="size-4" />

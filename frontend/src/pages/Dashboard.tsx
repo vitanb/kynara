@@ -17,7 +17,7 @@ const C = {
   allow:   "#10B981",
   approve: "#F59E0B",
   deny:    "#F43F5E",
-  accent:  "#6366F1",
+  accent:  "#18181B",
   teal:    "#2DD4BF",
   quota:   "#2DD4BF",
 };
@@ -27,7 +27,7 @@ const TONE: Record<Tone, { text: string; iconColor: string; bg: string; border: 
   ok:     { text: "text-ok-400",     iconColor: C.allow,   bg: "rgba(16,185,129,0.09)",  border: "rgba(4,120,87,0.25)" },
   warn:   { text: "text-warn-400",   iconColor: C.approve, bg: "rgba(245,158,11,0.09)",  border: "rgba(180,83,9,0.25)" },
   danger: { text: "text-danger-400", iconColor: C.deny,    bg: "rgba(244,63,94,0.09)",   border: "rgba(190,18,60,0.25)" },
-  info:   { text: "text-accent-400", iconColor: C.accent,  bg: "rgba(99,102,241,0.09)",  border: "rgba(67,56,202,0.25)" },
+  info:   { text: "text-accent-400", iconColor: C.accent,  bg: "rgba(24,24,27,0.09)",  border: "rgba(24,24,27,0.25)" },
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -89,10 +89,10 @@ const ChartGradients = () => (
 
 const tooltipStyle = {
   contentStyle: {
-    background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)",
-    borderRadius: "10px", fontSize: "12px", color: "#CBD5E1",
+    background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)",
+    borderRadius: "10px", fontSize: "12px", color: "#3F3F46",
   },
-  cursor: { stroke: "rgba(99,102,241,0.2)", strokeWidth: 1 },
+  cursor: { stroke: "rgba(24,24,27,0.2)", strokeWidth: 1 },
 };
 
 // ── Main ───────────────────────────────────────────────────────────────────
@@ -295,7 +295,7 @@ export default function DashboardPage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="text-[11px] font-medium text-ink-400 mb-2">{s.label}</div>
-                  <div className="text-xl font-bold text-white tabular-nums tracking-tight">
+                  <div className="text-xl font-bold text-ink-50 tabular-nums tracking-tight">
                     {s.value}
                   </div>
                   <div className={`text-xs font-medium mt-1.5 ${t.text}`}>{s.delta}</div>
@@ -313,8 +313,8 @@ export default function DashboardPage() {
       {/* ── Getting started (empty state) ─────────────────────────────────── */}
       {isNew && (
         <div className="mx-6 mb-4 rounded-xl p-4"
-          style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.2)" }}>
-          <div className="text-sm font-semibold text-white mb-3">Get started with Kynara</div>
+          style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.2)" }}>
+          <div className="text-sm font-semibold text-ink-50 mb-3">Get started with Kynara</div>
           <div className="grid md:grid-cols-3 gap-3">
             {[
               { step: "1", icon: Bot,        title: "Register an agent",
@@ -331,17 +331,17 @@ export default function DashboardPage() {
               return (
                 <div key={item.step} className="flex gap-3">
                   <div className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mt-0.5"
-                    style={{ background: "rgba(99,102,241,0.2)", color: "#818CF8" }}>
+                    style={{ background: "rgba(24,24,27,0.2)", color: "#52525B" }}>
                     {item.step}
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-white flex items-center gap-2 mb-0.5">
-                      <Icon className="size-3.5" style={{ color: "#818CF8" }} /> {item.title}
+                    <div className="text-sm font-medium text-ink-50 flex items-center gap-2 mb-0.5">
+                      <Icon className="size-3.5" style={{ color: "#52525B" }} /> {item.title}
                     </div>
                     <p className="text-xs text-ink-400 mb-2">{item.desc}</p>
                     <Link to={item.to}
                       className="inline-flex items-center gap-1 text-xs font-medium"
-                      style={{ color: "#818CF8" }}>
+                      style={{ color: "#52525B" }}>
                       {item.cta} <ArrowRight className="size-3" />
                     </Link>
                   </div>
@@ -359,7 +359,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 card p-4">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <div className="text-sm font-semibold text-white">Decision volume</div>
+              <div className="text-sm font-semibold text-ink-50">Decision volume</div>
               <div className="text-xs text-ink-300 mt-0.5">Allow · require approval · deny</div>
             </div>
             <div className="flex items-center gap-3">
@@ -378,8 +378,8 @@ export default function DashboardPage() {
                     onClick={() => setChartWindow(w)}
                     className="px-2.5 py-1 transition-colors"
                     style={{
-                      background: chartWindow === w ? "rgba(99,102,241,0.2)" : "transparent",
-                      color: chartWindow === w ? "#818CF8" : "#475569",
+                      background: chartWindow === w ? "rgba(24,24,27,0.2)" : "transparent",
+                      color: chartWindow === w ? "#52525B" : "#475569",
                     }}
                   >
                     {w}
@@ -411,10 +411,10 @@ export default function DashboardPage() {
         <div className="card p-5 flex flex-col gap-5">
           <div className="flex items-center gap-2">
             <Zap className="size-4" style={{ color: C.quota }} />
-            <span className="text-sm font-semibold text-white">Plan quota</span>
+            <span className="text-sm font-semibold text-ink-50">Plan quota</span>
             {sub?.plan && (
               <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(99,102,241,0.15)", color: "#818CF8" }}>
+                style={{ background: "rgba(24,24,27,0.15)", color: "#52525B" }}>
                 {sub.plan.toUpperCase()}
               </span>
             )}
@@ -443,7 +443,7 @@ export default function DashboardPage() {
           <div className="mt-auto pt-3 border-t border-ink-700/60 text-xs text-ink-400 flex items-center justify-between">
             <span>Resets <span className="text-ink-200">{periodEnd}</span></span>
             <Link to="/app/billing" className="text-[10px] font-medium"
-              style={{ color: "#818CF8" }}>
+              style={{ color: "#52525B" }}>
               Billing →
             </Link>
           </div>
@@ -456,14 +456,14 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <BarChart2 className="size-4 text-ink-300" />
-              <span className="text-sm font-semibold text-white">Agent decisions report</span>
+              <span className="text-sm font-semibold text-ink-50">Agent decisions report</span>
               <span className="text-xs text-ink-500 ml-1">autonomous vs human approval · 30d</span>
             </div>
             {agentReport.length > 0 && (
               <button
                 onClick={downloadReportCSV}
                 className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors"
-                style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.2)" }}
+                style={{ background: "rgba(24,24,27,0.1)", color: "#52525B", border: "1px solid rgba(24,24,27,0.2)" }}
               >
                 <Download className="size-3" /> Export CSV
               </button>
@@ -541,7 +541,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 card p-4">
           <div className="flex items-center gap-2 mb-4">
             <Bot className="size-4 text-ink-300" />
-            <span className="text-sm font-semibold text-white">Top agents</span>
+            <span className="text-sm font-semibold text-ink-50">Top agents</span>
             <span className="text-xs text-ink-500 ml-1">by decision volume · 30d</span>
           </div>
 
@@ -550,7 +550,7 @@ export default function DashboardPage() {
               <p className="text-xs text-ink-400 mb-3">No agent activity yet.</p>
               <Link to="/app/agents"
                 className="inline-flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5"
-                style={{ background: "rgba(99,102,241,0.12)", color: "#818CF8" }}>
+                style={{ background: "rgba(24,24,27,0.12)", color: "#52525B" }}>
                 <Plus className="size-3" /> Create your first agent
               </Link>
             </div>
@@ -570,9 +570,9 @@ export default function DashboardPage() {
                       stroke="rgba(0,0,0,0)" tick={{ fill: "#94A3B8", fontSize: 10 }}
                       tickLine={false} axisLine={false} />
                     <Tooltip
-                      contentStyle={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)",
-                        borderRadius: "10px", fontSize: "12px", color: "#CBD5E1" }}
-                      cursor={{ fill: "rgba(99,102,241,0.06)" }}
+                      contentStyle={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)",
+                        borderRadius: "10px", fontSize: "12px", color: "#3F3F46" }}
+                      cursor={{ fill: "rgba(24,24,27,0.06)" }}
                     />
                     <Bar dataKey="allow" stackId="a" fill={C.allow} />
                     <Bar dataKey="deny"  stackId="a" fill={C.deny}  radius={[0, 3, 3, 0]} />
@@ -618,7 +618,7 @@ export default function DashboardPage() {
         {/* Live activity feed */}
         <div className="card p-4 flex flex-col">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-semibold text-white">Recent activity</div>
+            <div className="text-sm font-semibold text-ink-50">Recent activity</div>
             <span className="pill pill-teal flex items-center gap-1">
               <span className="size-1.5 rounded-full"
                 style={{ background: C.teal, boxShadow: `0 0 5px ${C.teal}` }} />
@@ -650,7 +650,7 @@ export default function DashboardPage() {
                 <p className="text-xs text-ink-400 mb-3">No activity yet.</p>
                 <Link to="/app/agents"
                   className="inline-flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5"
-                  style={{ background: "rgba(99,102,241,0.12)", color: "#818CF8" }}>
+                  style={{ background: "rgba(24,24,27,0.12)", color: "#52525B" }}>
                   <Plus className="size-3" /> Create your first agent
                 </Link>
               </div>

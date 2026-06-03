@@ -207,7 +207,7 @@ export default function AppShell() {
           alt="Kynara"
         />
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-bold tracking-tight text-white leading-none">Kynara</div>
+          <div className="text-sm font-bold tracking-tight text-ink-50 leading-none">Kynara</div>
           <div className="text-[10px] font-medium mt-0.5" style={{ color: "var(--s0-accent-text)", letterSpacing: "0.06em" }}>
             AI Control Plane
           </div>
@@ -230,10 +230,10 @@ export default function AppShell() {
             style={{ background: "rgba(148,163,184,0.06)", border: "1px solid rgba(148,163,184,0.08)" }}
           >
             <Building2 className="size-3.5 shrink-0" style={{ color: "var(--s0-accent-text)" }} />
-            <span className="flex-1 text-xs text-slate-200 truncate font-medium">
+            <span className="flex-1 text-xs text-ink-100 truncate font-medium">
               {switching ? "Switching…" : (currentOrg?.org_name ?? "Select org")}
             </span>
-            <ChevronDown className={`size-3 text-slate-500 transition-transform ${orgMenuOpen ? "rotate-180" : ""}`} />
+            <ChevronDown className={`size-3 text-ink-400 transition-transform ${orgMenuOpen ? "rotate-180" : ""}`} />
           </button>
           {orgMenuOpen && (
             <div
@@ -244,7 +244,7 @@ export default function AppShell() {
                 <button
                   key={org.org_id}
                   onClick={() => handleSwitchOrg(org.org_id)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/5 transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-ink-700 transition-colors"
                 >
                   <div
                     className="size-6 rounded-md flex items-center justify-center text-[10px] font-bold text-white shrink-0"
@@ -253,8 +253,8 @@ export default function AppShell() {
                     {org.org_name[0].toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs text-slate-200 truncate">{org.org_name}</div>
-                    <div className="text-[10px] text-slate-500">{org.seat_role}</div>
+                    <div className="text-xs text-ink-100 truncate">{org.org_name}</div>
+                    <div className="text-[10px] text-ink-400">{org.seat_role}</div>
                   </div>
                   {org.org_id === me?.org_id && <Check className="size-3 shrink-0" style={{ color: "var(--s0-accent-text)" }} />}
                 </button>
@@ -278,7 +278,7 @@ export default function AppShell() {
           {/* Avatar + name — links to profile */}
           <Link
             to="profile"
-            className="flex items-center gap-2 flex-1 min-w-0 rounded-md hover:bg-white/5 transition-colors px-0.5 py-0.5"
+            className="flex items-center gap-2 flex-1 min-w-0 rounded-md hover:bg-ink-700 transition-colors px-0.5 py-0.5"
             title="My profile"
           >
             {me?.avatar_url ? (
@@ -385,7 +385,7 @@ export default function AppShell() {
               className="size-6 rounded-md"
               alt="Kynara"
             />
-            <span className="text-sm font-bold text-white">Kynara</span>
+            <span className="text-sm font-bold text-ink-50">Kynara</span>
           </Link>
         </header>
 

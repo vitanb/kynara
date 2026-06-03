@@ -12,8 +12,8 @@ export default function ApiExplorerPage() {
       <div className="px-6 py-4 flex items-center justify-between flex-shrink-0"
         style={{ borderBottom: "1px solid rgba(148,163,184,.1)" }}>
         <div>
-          <h1 className="text-base font-bold text-white">API Explorer</h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <h1 className="text-base font-bold text-ink-50">API Explorer</h1>
+          <p className="text-xs text-ink-400 mt-0.5">
             Interactive REST API reference — your session token is pre-filled.
           </p>
         </div>

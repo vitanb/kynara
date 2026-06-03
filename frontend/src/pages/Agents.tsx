@@ -127,16 +127,16 @@ export default function AgentsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-lg rounded-2xl shadow-2xl"
-            style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
               <div>
-                <div className="text-base font-semibold text-white">Register new agent</div>
+                <div className="text-base font-semibold text-ink-50">Register new agent</div>
                 <div className="text-xs text-ink-400 mt-0.5">Define the agent's identity and operating constraints.</div>
               </div>
               <button onClick={() => setOpen(false)}
-                className="text-ink-400 hover:text-white transition-colors">
+                className="text-ink-400 hover:text-ink-50 transition-colors">
                 <X className="size-5" />
               </button>
             </div>

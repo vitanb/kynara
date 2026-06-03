@@ -55,27 +55,27 @@ export default function ChangelogPage() {
   ];
 
   const tagStyle: Record<string, React.CSSProperties> = {
-    new:  { background: "rgba(99,102,241,.12)", color: "#818CF8", border: "1px solid rgba(99,102,241,.25)" },
+    new:  { background: "rgba(24,24,27,.12)", color: "#52525B", border: "1px solid rgba(24,24,27,.25)" },
     fix:  { background: "rgba(16,185,129,.1)",  color: "#34D399", border: "1px solid rgba(16,185,129,.25)" },
     improved: { background: "rgba(245,158,11,.1)", color: "#FCD34D", border: "1px solid rgba(245,158,11,.25)" },
   };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-xl font-bold text-white mb-1">Changelog</h1>
-      <p className="text-sm text-slate-400 mb-8">New features, fixes, and improvements.</p>
+      <h1 className="text-xl font-bold text-ink-50 mb-1">Changelog</h1>
+      <p className="text-sm text-ink-400 mb-8">New features, fixes, and improvements.</p>
       <div className="space-y-10">
         {entries.map((entry) => (
           <div key={entry.version}>
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-base font-bold text-white">v{entry.version}</span>
+              <span className="text-base font-bold text-ink-50">v{entry.version}</span>
               {entry.badge && (
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                   style={{ background: "rgba(45,212,191,.12)", color: "#2DD4BF", border: "1px solid rgba(45,212,191,.3)" }}>
                   {entry.badge}
                 </span>
               )}
-              <span className="text-xs text-slate-500">{entry.date}</span>
+              <span className="text-xs text-ink-400">{entry.date}</span>
             </div>
             <div className="space-y-2 border-l pl-4" style={{ borderColor: "rgba(148,163,184,.1)" }}>
               {entry.items.map((item, i) => (
@@ -84,7 +84,7 @@ export default function ChangelogPage() {
                     style={tagStyle[item.type] || tagStyle.new}>
                     {item.type.toUpperCase()}
                   </span>
-                  <span className="text-sm text-slate-300">{item.text}</span>
+                  <span className="text-sm text-ink-300">{item.text}</span>
                 </div>
               ))}
             </div>

@@ -17,7 +17,7 @@ const ROLE_ICONS: Record<string, React.ElementType> = {
   owner: Crown, admin: Crown, developer: Code2, auditor: Eye, member: UserIcon,
 };
 const ROLE_COLORS: Record<string, string> = {
-  owner: "#F59E0B", admin: "#6366F1", developer: "#10B981", auditor: "#2DD4BF", member: "#94A3B8",
+  owner: "#F59E0B", admin: "#18181B", developer: "#10B981", auditor: "#2DD4BF", member: "#94A3B8",
 };
 
 export default function SettingsPage() {
@@ -141,7 +141,7 @@ function MembersTab() {
       {/* Current members */}
       <div className="card overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-ink-800">
-          <div className="text-sm font-medium text-white">
+          <div className="text-sm font-medium text-ink-50">
             Members <span className="ml-1.5 text-xs text-ink-500 font-normal">{members.length}</span>
           </div>
           <button className="btn-primary text-xs" onClick={() => setShowInvite(s => !s)}>
@@ -163,7 +163,7 @@ function MembersTab() {
                   <td>
                     <div className="flex items-center gap-2.5">
                       <div className="size-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                        style={{ background: "rgba(99,102,241,0.15)", color: "#818CF8" }}>
+                        style={{ background: "rgba(24,24,27,0.15)", color: "#52525B" }}>
                         {(m.display_name || m.email).charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -234,7 +234,7 @@ function MembersTab() {
       {/* Invite form (slide-in) */}
       {showInvite && (
         <div className="card p-5">
-          <div className="text-sm font-medium text-white mb-4">Invite a team member</div>
+          <div className="text-sm font-medium text-ink-50 mb-4">Invite a team member</div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             <div className="md:col-span-2">
               <label className="label">Email <span className="text-ink-500 font-normal">(optional — leave blank for open link)</span></label>
@@ -263,10 +263,10 @@ function MembersTab() {
 
       {/* Freshly generated link */}
       {freshLink && (
-        <div className="card p-4" style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.2)" }}>
+        <div className="card p-4" style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.2)" }}>
           <div className="text-xs text-indigo-300 mb-2 font-medium">Invite link generated — share this with your colleague:</div>
           <div className="flex items-center gap-2">
-            <code className="flex-1 bg-ink-900 border border-ink-800 rounded-lg p-2.5 text-xs font-mono text-slate-300 truncate">
+            <code className="flex-1 bg-ink-900 border border-ink-800 rounded-lg p-2.5 text-xs font-mono text-ink-300 truncate">
               {freshLink}
             </code>
             <button className="btn-primary px-3 py-2 text-xs" onClick={copyLink}>
@@ -279,7 +279,7 @@ function MembersTab() {
       {/* Pending invitations — always visible */}
       <div className="card overflow-hidden">
         <div className="px-5 py-3 border-b border-ink-800 flex items-center justify-between">
-          <span className="text-sm font-medium text-white">
+          <span className="text-sm font-medium text-ink-50">
             Pending invitations
             {pendingInvites.length > 0 && (
               <span className="ml-2 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-accent-600/20 text-accent-400">
@@ -413,11 +413,11 @@ function ApiKeysTab() {
         >
           <div className="flex items-center gap-3">
             <div className="size-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.2)" }}>
-              <Activity className="size-4" style={{ color: "#818CF8" }} />
+              style={{ background: "rgba(24,24,27,0.12)", border: "1px solid rgba(24,24,27,0.2)" }}>
+              <Activity className="size-4" style={{ color: "#52525B" }} />
             </div>
             <div>
-              <div className="text-sm font-medium text-white">SIEM integration — Splunk, Datadog, Elastic, etc.</div>
+              <div className="text-sm font-medium text-ink-50">SIEM integration — Splunk, Datadog, Elastic, etc.</div>
               <div className="text-xs text-ink-400">Pull audit events every 5 minutes using a static API key</div>
             </div>
           </div>
@@ -436,7 +436,7 @@ function ApiKeysTab() {
 
             <div>
               <div className="text-xs font-semibold text-ink-300 uppercase tracking-wider mb-2">Polling endpoint</div>
-              <div className="rounded-lg p-3 font-mono text-xs text-slate-300"
+              <div className="rounded-lg p-3 font-mono text-xs text-ink-300"
                 style={{ background: "#0A0F1A", border: "1px solid rgba(148,163,184,0.1)" }}>
                 GET https://kynara.ai/api/v1/audit/events<br />
                 &nbsp;&nbsp;?since_sequence=&#123;last_sequence&#125;<br />
@@ -447,7 +447,7 @@ function ApiKeysTab() {
 
             <div>
               <div className="text-xs font-semibold text-ink-300 uppercase tracking-wider mb-2">Response shape</div>
-              <div className="rounded-lg p-3 font-mono text-xs text-slate-400"
+              <div className="rounded-lg p-3 font-mono text-xs text-ink-400"
                 style={{ background: "#0A0F1A", border: "1px solid rgba(148,163,184,0.1)" }}>
                 {"[{\n"
                 + '  "sequence": 1042,       // ← save this as your next cursor\n'
@@ -494,12 +494,12 @@ function ApiKeysTab() {
               ].map(({ tool, steps }) => (
                 <div key={tool} className="rounded-lg p-4"
                   style={{ background: "rgba(148,163,184,0.04)", border: "1px solid rgba(148,163,184,0.08)" }}>
-                  <div className="text-sm font-semibold text-white mb-3">{tool}</div>
+                  <div className="text-sm font-semibold text-ink-50 mb-3">{tool}</div>
                   <ol className="space-y-2">
                     {steps.map((s, i) => (
                       <li key={i} className="flex gap-2 text-xs text-ink-400 leading-relaxed">
                         <span className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5"
-                          style={{ background: "rgba(99,102,241,0.15)", color: "#818CF8" }}>
+                          style={{ background: "rgba(24,24,27,0.15)", color: "#52525B" }}>
                           {i + 1}
                         </span>
                         {s}
@@ -802,13 +802,13 @@ function SsoEditModal({ connection, onClose, onSaved, onDeleted }: {
     >
       <div
         className="w-full max-w-xl rounded-2xl flex flex-col max-h-[90vh]"
-        style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.12)" }}
+        style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.12)" }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 shrink-0"
           style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
           <div>
-            <div className="font-semibold text-white flex items-center gap-2">
+            <div className="font-semibold text-ink-50 flex items-center gap-2">
               <Plug className="size-4 text-accent-500" />
               {connection.provider}
             </div>
@@ -1002,7 +1002,7 @@ function DangerModal({
     >
       <div
         className="w-full max-w-md rounded-2xl p-7 relative"
-        style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.12)" }}
+        style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.12)" }}
       >
         <button
           onClick={onClose}
@@ -1020,7 +1020,7 @@ function DangerModal({
             >
               <CheckCircle2 className="size-7" style={{ color: "#34D399" }} />
             </div>
-            <div className="text-lg font-bold text-white mb-2">
+            <div className="text-lg font-bold text-ink-50 mb-2">
               {action === "rotate-keys" && "All API keys revoked"}
               {action === "revoke-sessions" && "All sessions revoked"}
               {action === "delete-org" && "Organization deleted"}
@@ -1044,7 +1044,7 @@ function DangerModal({
                 <Icon className="size-5" style={{ color: m.iconColor }} />
               </div>
               <div>
-                <div className="font-semibold text-white">{m.title}</div>
+                <div className="font-semibold text-ink-50">{m.title}</div>
                 <p className="text-sm text-ink-400 mt-1 leading-relaxed">{m.desc}</p>
               </div>
             </div>
@@ -1249,7 +1249,7 @@ function ProfileTab() {
                     className="absolute top-2.5 right-2.5 size-5 rounded-full flex items-center justify-center"
                     style={{ background: t.accent }}
                   >
-                    <Check className="size-3 text-white" strokeWidth={3} />
+                    <Check className="size-3 text-ink-50" strokeWidth={3} />
                   </span>
                 )}
 

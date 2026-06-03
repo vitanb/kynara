@@ -59,9 +59,9 @@ export default function AcceptInvitePage() {
 
   if (notFound) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#05080F" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#FFFFFF" }}>
         <div className="text-center">
-          <p className="text-slate-400 mb-4">This invite link is invalid or has expired.</p>
+          <p className="text-ink-400 mb-4">This invite link is invalid or has expired.</p>
           <a href="/signup" className="btn-primary px-6 py-2">Create a new account</a>
         </div>
       </div>
@@ -70,7 +70,7 @@ export default function AcceptInvitePage() {
 
   if (!info) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#05080F" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#FFFFFF" }}>
         <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -78,9 +78,9 @@ export default function AcceptInvitePage() {
 
   if (!info.valid) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#05080F" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#FFFFFF" }}>
         <div className="text-center">
-          <p className="text-slate-400 mb-4">This invite has already been used or revoked.</p>
+          <p className="text-ink-400 mb-4">This invite has already been used or revoked.</p>
           <a href="/login" className="btn-primary px-6 py-2">Sign in</a>
         </div>
       </div>
@@ -93,17 +93,17 @@ export default function AcceptInvitePage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#05080F" }}>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#FFFFFF" }}>
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center gap-3 mb-8 hover:opacity-80 transition-opacity">
           <img src="/logo.svg" className="w-9 h-9 rounded-lg" alt="Kynara" />
-          <span className="font-semibold text-white text-lg">Kynara</span>
+          <span className="font-semibold text-ink-50 text-lg">Kynara</span>
         </Link>
 
         <div className="card p-8">
           <div className="mb-6">
-            <p className="text-slate-400 text-sm mb-1">You've been invited to join</p>
-            <h1 className="text-2xl font-bold text-white">{info.org_name}</h1>
+            <p className="text-ink-400 text-sm mb-1">You've been invited to join</p>
+            <h1 className="text-2xl font-bold text-ink-50">{info.org_name}</h1>
             <div className="mt-2">
               <span className="pill-info text-xs">{roleLabel[info.seat_role] ?? info.seat_role}</span>
             </div>
@@ -111,19 +111,19 @@ export default function AcceptInvitePage() {
 
           <form onSubmit={submit} className="space-y-4">
             <div>
-              <label className="block text-sm text-slate-300 mb-1.5">Your name</label>
+              <label className="block text-sm text-ink-300 mb-1.5">Your name</label>
               <input className="input w-full" placeholder="Ada Lovelace"
                 value={form.display_name} onChange={set("display_name")} required />
             </div>
             <div>
-              <label className="block text-sm text-slate-300 mb-1.5">Email</label>
+              <label className="block text-sm text-ink-300 mb-1.5">Email</label>
               <input className="input w-full" type="email"
                 value={form.email} onChange={set("email")}
                 readOnly={!!info.email} required
                 style={info.email ? { opacity: 0.6, cursor: "not-allowed" } : {}} />
             </div>
             <div>
-              <label className="block text-sm text-slate-300 mb-1.5">Password</label>
+              <label className="block text-sm text-ink-300 mb-1.5">Password</label>
               <input className="input w-full" type="password" placeholder="Min. 8 characters"
                 value={form.password} onChange={set("password")} required minLength={8} />
             </div>
@@ -141,9 +141,9 @@ export default function AcceptInvitePage() {
             </button>
           </form>
 
-          <p className="text-slate-500 text-xs text-center mt-4">
+          <p className="text-ink-400 text-xs text-center mt-4">
             Already have an account?{" "}
-            <a href="/login" className="text-slate-300 hover:text-white transition-colors">Sign in instead</a>
+            <a href="/login" className="text-ink-300 hover:text-ink-50 transition-colors">Sign in instead</a>
           </p>
         </div>
       </div>

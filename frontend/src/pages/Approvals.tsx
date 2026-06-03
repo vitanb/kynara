@@ -100,7 +100,7 @@ function ReviewModal({
       />
       <div
         className="relative z-10 w-full max-w-md rounded-2xl p-6 flex flex-col gap-4"
-        style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}
+        style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}
       >
         <div className="flex items-center gap-3">
           <div
@@ -116,31 +116,31 @@ function ReviewModal({
             }
           </div>
           <div>
-            <div className="text-sm font-semibold text-white">
+            <div className="text-sm font-semibold text-ink-50">
               {isApprove ? "Approve" : "Reject"} request
             </div>
-            <div className="text-xs text-slate-400">{item.action}</div>
+            <div className="text-xs text-ink-400">{item.action}</div>
           </div>
         </div>
 
         {/* Summary */}
         <div
-          className="rounded-lg p-3 text-xs font-mono text-slate-300 space-y-1"
+          className="rounded-lg p-3 text-xs font-mono text-ink-300 space-y-1"
           style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.08)" }}
         >
-          <div><span className="text-slate-500">subject  </span>{item.subject_type}:{item.subject_id.slice(0, 8)}…</div>
-          <div><span className="text-slate-500">action   </span>{item.action}</div>
+          <div><span className="text-ink-400">subject  </span>{item.subject_type}:{item.subject_id.slice(0, 8)}…</div>
+          <div><span className="text-ink-400">action   </span>{item.action}</div>
           {item.resource_type && (
-            <div><span className="text-slate-500">resource </span>{item.resource_type}{item.resource_id ? `:${item.resource_id.slice(0, 8)}…` : ""}</div>
+            <div><span className="text-ink-400">resource </span>{item.resource_type}{item.resource_id ? `:${item.resource_id.slice(0, 8)}…` : ""}</div>
           )}
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-slate-400">
+          <label className="text-xs font-medium text-ink-400">
             Review note <span className="text-slate-600">(optional)</span>
           </label>
           <textarea
-            className="w-full rounded-lg px-3 py-2 text-sm text-white resize-none"
+            className="w-full rounded-lg px-3 py-2 text-sm text-ink-50 resize-none"
             style={{
               background: "rgba(148,163,184,0.06)",
               border: "1px solid rgba(148,163,184,0.15)",
@@ -200,7 +200,7 @@ function ApprovalRow({
     <div
       className="rounded-xl overflow-hidden transition-all"
       style={{
-        background: "#0D1421",
+        background: "#FFFFFF",
         border: `1px solid ${isPending ? "rgba(245,158,11,0.2)" : "rgba(148,163,184,0.08)"}`,
       }}
     >
@@ -223,15 +223,15 @@ function ApprovalRow({
         {/* Action + subject */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-white">{item.action}</span>
+            <span className="text-sm font-medium text-ink-50">{item.action}</span>
             {item.resource_type && (
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-ink-400">
                 on {item.resource_type}
                 {item.resource_id ? ` #${item.resource_id.slice(0, 8)}` : ""}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3 mt-0.5 text-xs text-slate-500">
+          <div className="flex items-center gap-3 mt-0.5 text-xs text-ink-400">
             <span className="flex items-center gap-1">
               {item.subject_type === "agent"
                 ? <Bot className="size-3" />
@@ -244,7 +244,7 @@ function ApprovalRow({
               <span style={{ color: "#F59E0B" }}>{expiresIn(item.expires_at)}</span>
             )}
             {item.review_note && (
-              <span className="text-slate-400 truncate max-w-xs italic">"{item.review_note}"</span>
+              <span className="text-ink-400 truncate max-w-xs italic">"{item.review_note}"</span>
             )}
           </div>
         </div>
@@ -274,17 +274,17 @@ function ApprovalRow({
               className="rounded-lg p-3 text-xs font-mono space-y-1"
               style={{ background: "rgba(148,163,184,0.04)", border: "1px solid rgba(148,163,184,0.08)" }}
             >
-              <div className="text-[10px] font-sans font-semibold text-slate-500 uppercase tracking-wider mb-2">Request details</div>
-              <div><span className="text-slate-500">subject  </span><span className="text-slate-300">{item.subject_type}:{item.subject_id}</span></div>
+              <div className="text-[10px] font-sans font-semibold text-ink-400 uppercase tracking-wider mb-2">Request details</div>
+              <div><span className="text-ink-400">subject  </span><span className="text-ink-300">{item.subject_type}:{item.subject_id}</span></div>
               {item.on_behalf_of_user_id && (
-                <div><span className="text-slate-500">on_behalf</span><span className="text-slate-300"> {item.on_behalf_of_user_id}</span></div>
+                <div><span className="text-ink-400">on_behalf</span><span className="text-ink-300"> {item.on_behalf_of_user_id}</span></div>
               )}
-              <div><span className="text-slate-500">action   </span><span className="text-slate-300">{item.action}</span></div>
+              <div><span className="text-ink-400">action   </span><span className="text-ink-300">{item.action}</span></div>
               {item.resource_type && (
-                <div><span className="text-slate-500">resource </span><span className="text-slate-300">{item.resource_type}{item.resource_id ? `:${item.resource_id}` : ""}</span></div>
+                <div><span className="text-ink-400">resource </span><span className="text-ink-300">{item.resource_type}{item.resource_id ? `:${item.resource_id}` : ""}</span></div>
               )}
               {item.matched_policy_id && (
-                <div><span className="text-slate-500">policy   </span><span className="text-slate-300">{item.matched_policy_id.slice(0, 16)}…</span></div>
+                <div><span className="text-ink-400">policy   </span><span className="text-ink-300">{item.matched_policy_id.slice(0, 16)}…</span></div>
               )}
             </div>
 
@@ -293,26 +293,26 @@ function ApprovalRow({
               className="rounded-lg p-3 text-xs space-y-1"
               style={{ background: "rgba(148,163,184,0.04)", border: "1px solid rgba(148,163,184,0.08)" }}
             >
-              <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Review</div>
+              <div className="text-[10px] font-semibold text-ink-400 uppercase tracking-wider mb-2">Review</div>
               <div className="flex gap-2">
-                <span className="text-slate-500">Status</span>
+                <span className="text-ink-400">Status</span>
                 <span style={{ color: meta.color }}>{meta.label}</span>
               </div>
               {item.reviewed_at && (
                 <div className="flex gap-2">
-                  <span className="text-slate-500">Reviewed</span>
-                  <span className="text-slate-300">{new Date(item.reviewed_at).toLocaleString()}</span>
+                  <span className="text-ink-400">Reviewed</span>
+                  <span className="text-ink-300">{new Date(item.reviewed_at).toLocaleString()}</span>
                 </div>
               )}
               {item.review_note && (
                 <div className="flex gap-2">
-                  <span className="text-slate-500 shrink-0">Note</span>
-                  <span className="text-slate-300 italic">"{item.review_note}"</span>
+                  <span className="text-ink-400 shrink-0">Note</span>
+                  <span className="text-ink-300 italic">"{item.review_note}"</span>
                 </div>
               )}
               <div className="flex gap-2">
                 <Calendar className="size-3 text-slate-600 mt-0.5 shrink-0" />
-                <span className="text-slate-500">
+                <span className="text-ink-400">
                   Created {new Date(item.created_at).toLocaleString()}
                 </span>
               </div>
@@ -423,17 +423,17 @@ export default function ApprovalsPage() {
       {/* Content */}
       <div className="px-8 pb-8 space-y-2">
         {isLoading ? (
-          <div className="text-sm text-slate-500 py-8 text-center">Loading…</div>
+          <div className="text-sm text-ink-400 py-8 text-center">Loading…</div>
         ) : items.length === 0 ? (
           <div
             className="rounded-xl py-12 text-center"
-            style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.08)" }}
+            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.08)" }}
           >
             <CheckCircle2 className="size-8 mx-auto mb-3" style={{ color: "#10B981" }} />
-            <div className="text-sm font-medium text-white mb-1">
+            <div className="text-sm font-medium text-ink-50 mb-1">
               {tab === "pending" ? "No pending approvals" : "No approval requests yet"}
             </div>
-            <div className="text-xs text-slate-500">
+            <div className="text-xs text-ink-400">
               {tab === "pending"
                 ? "Requests appear here when a policy returns require_approval."
                 : "Approval requests will appear here once agents start hitting require_approval policies."}

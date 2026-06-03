@@ -43,7 +43,7 @@ export default function OAuthConsentPage() {
         className="min-h-screen flex items-center justify-center"
         style={{ background: "var(--s0-page)" }}
       >
-        <p className="text-sm text-slate-400">Redirecting to sign-in…</p>
+        <p className="text-sm text-ink-400">Redirecting to sign-in…</p>
       </div>
     );
   }
@@ -105,21 +105,21 @@ export default function OAuthConsentPage() {
             className="size-10 rounded-xl"
             alt="Kynara"
           />
-          <div className="text-slate-400 text-lg font-light">+</div>
+          <div className="text-ink-400 text-lg font-light">+</div>
           <div
-            className="size-10 rounded-xl flex items-center justify-center text-sm font-bold text-white"
-            style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)" }}
+            className="size-10 rounded-xl flex items-center justify-center text-sm font-bold text-ink-50"
+            style={{ background: "linear-gradient(135deg, #27272A, #18181B)" }}
           >
             C
           </div>
         </div>
 
-        <h1 className="text-lg font-bold text-white text-center mb-1">
+        <h1 className="text-lg font-bold text-ink-50 text-center mb-1">
           Connect Kynara to Claude
         </h1>
-        <p className="text-sm text-slate-400 text-center mb-6">
+        <p className="text-sm text-ink-400 text-center mb-6">
           Claude is requesting access to your Kynara workspace as{" "}
-          <span className="text-slate-200 font-medium">{me.email}</span>
+          <span className="text-ink-100 font-medium">{me.email}</span>
         </p>
 
         {/* Permissions */}
@@ -127,7 +127,7 @@ export default function OAuthConsentPage() {
           className="rounded-xl p-4 mb-6 space-y-3"
           style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}
         >
-          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+          <div className="text-xs font-semibold text-ink-400 uppercase tracking-wider mb-2">
             Claude will be able to
           </div>
           {scopes.map((s) => {
@@ -138,11 +138,11 @@ export default function OAuthConsentPage() {
               <div key={s} className="flex items-start gap-3">
                 <div
                   className="size-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                  style={{ background: "rgba(99,102,241,0.12)" }}
+                  style={{ background: "rgba(24,24,27,0.12)" }}
                 >
-                  <Icon className="size-3.5" style={{ color: "#818CF8" }} />
+                  <Icon className="size-3.5" style={{ color: "#52525B" }} />
                 </div>
-                <p className="text-sm text-slate-300 leading-snug">{info.label}</p>
+                <p className="text-sm text-ink-300 leading-snug">{info.label}</p>
               </div>
             );
           })}
@@ -153,7 +153,7 @@ export default function OAuthConsentPage() {
             >
               <ShieldCheck className="size-3.5" style={{ color: "#10B981" }} />
             </div>
-            <p className="text-sm text-slate-300 leading-snug">
+            <p className="text-sm text-ink-300 leading-snug">
               All actions are logged in the Kynara audit trail
             </p>
           </div>
@@ -173,7 +173,7 @@ export default function OAuthConsentPage() {
           <button
             onClick={handleDeny}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white transition-colors"
+            className="flex-1 py-2.5 rounded-xl text-sm font-medium text-ink-300 hover:text-ink-50 transition-colors"
             style={{ background: "rgba(148,163,184,0.08)", border: "1px solid rgba(148,163,184,0.12)" }}
           >
             Deny
@@ -181,7 +181,7 @@ export default function OAuthConsentPage() {
           <button
             onClick={handleApprove}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+            className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-ink-50 transition-all"
             style={{
               background: "var(--s0-accent)",
               boxShadow: "0 0 0 1px var(--s0-accent-ring)",
@@ -192,9 +192,9 @@ export default function OAuthConsentPage() {
           </button>
         </div>
 
-        <p className="text-center text-xs text-slate-500 mt-4">
+        <p className="text-center text-xs text-ink-400 mt-4">
           You can revoke this access at any time in{" "}
-          <a href="/app/settings" className="text-slate-400 hover:text-slate-200 underline">
+          <a href="/app/settings" className="text-ink-400 hover:text-ink-100 underline">
             Settings
           </a>
         </p>

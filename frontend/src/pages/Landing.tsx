@@ -7,12 +7,12 @@ import {
 } from "lucide-react";
 
 const features = [
-  { icon: ShieldCheck, color: "#818CF8", bg: "rgba(99,102,241,0.1)", title: "Real-time policy enforcement", desc: "Every tool call, every API action — evaluated against your policy tree in under 5 ms before the agent executes. Allow, deny, or escalate to a human reviewer." },
+  { icon: ShieldCheck, color: "#52525B", bg: "rgba(24,24,27,0.1)", title: "Real-time policy enforcement", desc: "Every tool call, every API action — evaluated against your policy tree in under 5 ms before the agent executes. Allow, deny, or escalate to a human reviewer." },
   { icon: GitBranch, color: "#34D399", bg: "rgba(16,185,129,0.1)", title: "Fine-grained RBAC", desc: "Grant agents the minimum privilege they need. Permissions scoped by org, role, environment, and time window — with JIT grants for elevated access." },
   { icon: Eye, color: "#FBBF24", bg: "rgba(245,158,11,0.1)", title: "Immutable audit trail", desc: "Cryptographically chained log of every decision, actor, context, and outcome. Replay events, investigate incidents, prove compliance to auditors." },
   { icon: Zap, color: "#F472B6", bg: "rgba(236,72,153,0.1)", title: "Guardrails & anomaly detection", desc: "Set spend limits, rate caps, and behavioral thresholds. Kynara auto-revokes agents that exceed them and fires webhook alerts to your SIEM." },
-  { icon: Lock, color: "#60A5FA", bg: "rgba(59,130,246,0.1)", title: "SSO & enterprise identity", desc: "SAML 2.0 and OIDC out of the box. Plug into Okta, Azure AD, or any IdP. Role mappings flow automatically from your directory." },
-  { icon: LineChart, color: "#A78BFA", bg: "rgba(139,92,246,0.1)", title: "Live observability", desc: "Decision dashboards, risk scores, and cost attribution per agent. Know exactly which agent is doing what — and flag the risky ones before they cause damage." },
+  { icon: Lock, color: "#3F3F46", bg: "rgba(59,130,246,0.1)", title: "SSO & enterprise identity", desc: "SAML 2.0 and OIDC out of the box. Plug into Okta, Azure AD, or any IdP. Role mappings flow automatically from your directory." },
+  { icon: LineChart, color: "#71717A", bg: "rgba(24,24,27,0.1)", title: "Live observability", desc: "Decision dashboards, risk scores, and cost attribution per agent. Know exactly which agent is doing what — and flag the risky ones before they cause damage." },
 ];
 
 const steps = [
@@ -61,14 +61,9 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: "#05080F", color: "#CBD5E1" }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ background: "#FFFFFF", color: "#CBD5E1" }}>
 
-      {/* Ambient glow */}
-      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-        <div style={{ position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)", width: "900px", height: "700px", background: "radial-gradient(ellipse, rgba(79,70,229,0.12) 0%, transparent 70%)" }} />
-        <div style={{ position: "absolute", top: "45%", left: "-10%", width: "500px", height: "500px", background: "radial-gradient(ellipse, rgba(99,102,241,0.05) 0%, transparent 70%)" }} />
-        <div style={{ position: "absolute", top: "65%", right: "-10%", width: "500px", height: "500px", background: "radial-gradient(ellipse, rgba(139,92,246,0.05) 0%, transparent 70%)" }} />
-      </div>
+      {/* Ambient glow removed for the light monochrome look */}
 
       <div style={{ position: "relative", zIndex: 1 }}>
 
@@ -76,20 +71,20 @@ export default function LandingPage() {
         <nav className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
             <img src="/logo.svg" className="w-8 h-8 rounded-lg" alt="Kynara" />
-            <span className="font-bold text-white text-base tracking-tight">Kynara</span>
+            <span className="font-bold text-ink-50 text-base tracking-tight">Kynara</span>
           </div>
-          <div className="hidden md:flex items-center gap-7 text-sm text-slate-400">
-            <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
+          <div className="hidden md:flex items-center gap-7 text-sm text-ink-300">
+            <a href="#how-it-works" className="hover:text-ink-50 transition-colors">How it works</a>
+            <a href="#features" className="hover:text-ink-50 transition-colors">Features</a>
             {/* Solutions dropdown */}
             <div className="relative" onMouseEnter={() => setSolutionsOpen(true)} onMouseLeave={() => setSolutionsOpen(false)}>
-              <button className="flex items-center gap-1 hover:text-white transition-colors">
+              <button className="flex items-center gap-1 hover:text-ink-50 transition-colors">
                 Solutions <ChevronRight className="w-3.5 h-3.5 rotate-90 transition-transform" style={{ transform: solutionsOpen ? "rotate(270deg)" : "rotate(90deg)" }} />
               </button>
               {solutionsOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
-                  <div className="rounded-xl p-3 w-72" style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.12)", boxShadow: "0 16px 48px rgba(0,0,0,0.5)" }}>
-                    <div className="text-xs font-semibold uppercase tracking-widest text-slate-600 px-2 pb-2 mb-1">By Industry</div>
+                  <div className="rounded-xl p-3 w-72" style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.12)", boxShadow: "0 16px 48px rgba(0,0,0,0.5)" }}>
+                    <div className="text-xs font-semibold uppercase tracking-widest text-ink-400 px-2 pb-2 mb-1">By Industry</div>
                     {[
                       { href: "/solutions/financial-services.html", icon: "🏦", label: "Financial Services", desc: "SOC 2, HIPAA, regulated agents" },
                       { href: "/solutions/healthcare.html", icon: "🏥", label: "Healthcare", desc: "HIPAA BAA, patient data, clinical AI" },
@@ -98,12 +93,12 @@ export default function LandingPage() {
                       { href: "/solutions/security-operations.html", icon: "🛡️", label: "Security Operations", desc: "SecOps, threat response agents" },
                     ].map((item) => (
                       <a key={item.href} href={item.href}
-                        className="flex items-start gap-3 px-2 py-2.5 rounded-lg hover:bg-white/5 transition-colors group"
+                        className="flex items-start gap-3 px-2 py-2.5 rounded-lg hover:bg-ink-700 transition-colors group"
                         style={{ textDecoration: "none" }}>
                         <span className="text-lg flex-shrink-0 mt-0.5">{item.icon}</span>
                         <div>
-                          <div className="text-sm font-medium text-white group-hover:text-indigo-300 transition-colors">{item.label}</div>
-                          <div className="text-xs text-slate-500 mt-0.5">{item.desc}</div>
+                          <div className="text-sm font-medium text-ink-50 group-hover:text-ink-200 transition-colors">{item.label}</div>
+                          <div className="text-xs text-ink-400 mt-0.5">{item.desc}</div>
                         </div>
                       </a>
                     ))}
@@ -111,12 +106,12 @@ export default function LandingPage() {
                 </div>
               )}
             </div>
-            <Link to="/docs" className="hover:text-white transition-colors">Docs</Link>
-            <button onClick={openContact} className="hover:text-white transition-colors">Contact</button>
+            <Link to="/docs" className="hover:text-ink-50 transition-colors">Docs</Link>
+            <button onClick={openContact} className="hover:text-ink-50 transition-colors">Contact</button>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/login" className="text-sm text-slate-400 hover:text-white transition-colors hidden sm:block">Sign in</Link>
-            <button onClick={openContact} className="inline-flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-2 rounded-lg transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #4F46E5, #6D28D9)", boxShadow: "0 0 0 1px rgba(99,102,241,0.4), 0 4px 16px rgba(79,70,229,0.3)" }}>
+            <Link to="/login" className="text-sm text-ink-300 hover:text-ink-50 transition-colors hidden sm:block">Sign in</Link>
+            <button onClick={openContact} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-50 px-4 py-2 rounded-lg transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 0 0 1px rgba(24,24,27,0.4), 0 4px 16px rgba(24,24,27,0.3)" }}>
               Book a demo
             </button>
           </div>
@@ -124,38 +119,38 @@ export default function LandingPage() {
 
         {/* Hero */}
         <section className="text-center pt-20 pb-20 px-6 max-w-5xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs mb-8" style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", color: "#A5B4FC" }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs mb-8" style={{ background: "rgba(24,24,27,0.08)", border: "1px solid rgba(24,24,27,0.2)", color: "#71717A" }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-ink-400 animate-pulse" />
             AI agent governance infrastructure
           </div>
 
-          <h1 className="text-5xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.08]">
+          <h1 className="text-5xl lg:text-7xl font-bold text-ink-50 mb-6 tracking-tight leading-[1.08]">
             The enterprise permission
             <br />
-            <span style={{ background: "linear-gradient(135deg, #818CF8 0%, #A78BFA 50%, #60A5FA 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            <span style={{ color: "#52525B" }}>
               layer for AI agents
             </span>
           </h1>
 
-          <p className="text-slate-400 text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-ink-300 text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
             Kynara is the control plane that lets enterprises define, enforce, and audit exactly
             what AI agents can do — in real time, before they act.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #4F46E5, #6D28D9)", boxShadow: "0 0 0 1px rgba(99,102,241,0.4), 0 8px 32px rgba(79,70,229,0.4)" }}>
+            <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-ink-50 transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 0 0 1px rgba(24,24,27,0.4), 0 8px 32px rgba(24,24,27,0.4)" }}>
               Book a demo <ArrowRight className="w-4 h-4" />
             </button>
-            <Link to="/signup" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white transition-all" style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}>
+            <Link to="/signup" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-medium text-ink-300 hover:text-ink-50 transition-all" style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}>
               Start free <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
 
           <div className="grid grid-cols-3 gap-px rounded-2xl overflow-hidden max-w-2xl mx-auto" style={{ background: "rgba(148,163,184,0.08)", border: "1px solid rgba(148,163,184,0.08)" }}>
             {stats.map((s, i) => (
-              <div key={i} className="py-6 px-4 text-center" style={{ background: "#07090F" }}>
-                <div className="text-3xl font-bold text-white mb-1">{s.value}</div>
-                <div className="text-xs text-slate-500">{s.label}</div>
+              <div key={i} className="py-6 px-4 text-center" style={{ background: "#FFFFFF" }}>
+                <div className="text-3xl font-bold text-ink-50 mb-1">{s.value}</div>
+                <div className="text-xs text-ink-400">{s.label}</div>
               </div>
             ))}
           </div>
@@ -163,21 +158,21 @@ export default function LandingPage() {
 
         {/* Problem */}
         <section className="max-w-6xl mx-auto px-6 pb-24">
-          <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.05), rgba(99,102,241,0.1))" }}>
-            <div className="rounded-[22px] p-12 lg:p-16" style={{ background: "#07090F" }}>
+          <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, rgba(24,24,27,0.2), rgba(24,24,27,0.05), rgba(24,24,27,0.1))" }}>
+            <div className="rounded-[22px] p-12 lg:p-16" style={{ background: "#FFFFFF" }}>
               <div className="grid lg:grid-cols-2 gap-12 items-center">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-6" style={{ background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.15)", color: "#FCD34D" }}>
                     <AlertTriangle className="w-3 h-3" /> The problem
                   </div>
-                  <h2 className="text-3xl lg:text-4xl font-bold text-white mb-5 leading-tight">
+                  <h2 className="text-3xl lg:text-4xl font-bold text-ink-50 mb-5 leading-tight">
                     AI agents are operating without guardrails
                   </h2>
-                  <p className="text-slate-400 leading-relaxed mb-5">
+                  <p className="text-ink-300 leading-relaxed mb-5">
                     Enterprises are deploying AI agents that call APIs, read databases, send emails,
                     and execute code — but have no centralized system to control what they're allowed to do.
                   </p>
-                  <p className="text-slate-400 leading-relaxed">
+                  <p className="text-ink-300 leading-relaxed">
                     When an agent exceeds its scope or gets compromised, companies lack the visibility
                     to detect it and the infrastructure to stop it. That's a compliance failure waiting to happen.
                   </p>
@@ -187,13 +182,13 @@ export default function LandingPage() {
                     { color: "#F87171", label: "No audit trail", desc: "Can't prove what agents did during an incident or compliance review" },
                     { color: "#FBBF24", label: "Overprivileged agents", desc: "Agents granted broad access 'just in case' — violating least-privilege" },
                     { color: "#F472B6", label: "Zero runtime enforcement", desc: "Permissions set once at deploy time, never checked per-action" },
-                    { color: "#60A5FA", label: "Compliance blind spots", desc: "No SOC 2, ISO 27001, or GDPR controls for AI agent activity" },
+                    { color: "#3F3F46", label: "Compliance blind spots", desc: "No SOC 2, ISO 27001, or GDPR controls for AI agent activity" },
                   ].map((item) => (
                     <div key={item.label} className="flex gap-4 p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(148,163,184,0.06)" }}>
                       <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: item.color }} />
                       <div>
-                        <div className="text-sm font-semibold text-white mb-0.5">{item.label}</div>
-                        <div className="text-xs text-slate-500 leading-relaxed">{item.desc}</div>
+                        <div className="text-sm font-semibold text-ink-50 mb-0.5">{item.label}</div>
+                        <div className="text-xs text-ink-400 leading-relaxed">{item.desc}</div>
                       </div>
                     </div>
                   ))}
@@ -206,11 +201,11 @@ export default function LandingPage() {
         {/* How it works */}
         <section id="how-it-works" className="max-w-6xl mx-auto px-6 pb-24">
           <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-5" style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)", color: "#A5B4FC" }}>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-5" style={{ background: "rgba(24,24,27,0.08)", border: "1px solid rgba(24,24,27,0.15)", color: "#71717A" }}>
               How it works
             </div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">Up and running in under an hour</h2>
-            <p className="text-slate-400 max-w-lg mx-auto text-sm leading-relaxed">
+            <h2 className="text-3xl lg:text-4xl font-bold text-ink-50 mb-4">Up and running in under an hour</h2>
+            <p className="text-ink-300 max-w-lg mx-auto text-sm leading-relaxed">
               Kynara sits between your AI agents and the systems they access. No changes to your existing infrastructure required.
             </p>
           </div>
@@ -218,13 +213,13 @@ export default function LandingPage() {
             {steps.map((step) => {
               const Icon = step.icon;
               return (
-                <div key={step.num} className="rounded-2xl p-8" style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.07)" }}>
-                  <div className="text-xs font-mono font-bold mb-5" style={{ color: "rgba(99,102,241,0.5)" }}>{step.num}</div>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.15)" }}>
-                    <Icon className="w-5 h-5" style={{ color: "#818CF8" }} />
+                <div key={step.num} className="rounded-2xl p-8" style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.07)" }}>
+                  <div className="text-xs font-mono font-bold mb-5" style={{ color: "rgba(24,24,27,0.5)" }}>{step.num}</div>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(24,24,27,0.1)", border: "1px solid rgba(24,24,27,0.15)" }}>
+                    <Icon className="w-5 h-5" style={{ color: "#52525B" }} />
                   </div>
-                  <h3 className="text-white font-semibold mb-3 text-base">{step.title}</h3>
-                  <p className="text-slate-500 text-sm leading-relaxed">{step.desc}</p>
+                  <h3 className="text-ink-50 font-semibold mb-3 text-base">{step.title}</h3>
+                  <p className="text-ink-400 text-sm leading-relaxed">{step.desc}</p>
                 </div>
               );
             })}
@@ -233,25 +228,25 @@ export default function LandingPage() {
 
         {/* Terminal mockup */}
         <section className="max-w-5xl mx-auto px-6 pb-24">
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(148,163,184,0.08)", boxShadow: "0 0 80px rgba(79,70,229,0.07)" }}>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(148,163,184,0.08)", boxShadow: "0 0 80px rgba(24,24,27,0.07)" }}>
             <div className="flex items-center gap-2 px-4 py-3" style={{ background: "#0D1117", borderBottom: "1px solid rgba(148,163,184,0.06)" }}>
               <div className="w-3 h-3 rounded-full" style={{ background: "#FF5F57" }} />
               <div className="w-3 h-3 rounded-full" style={{ background: "#FEBC2E" }} />
               <div className="w-3 h-3 rounded-full" style={{ background: "#28C840" }} />
-              <span className="ml-3 text-xs text-slate-600 font-mono">kynara · policy decision engine</span>
+              <span className="ml-3 text-xs text-ink-400 font-mono">kynara · policy decision engine</span>
             </div>
-            <div className="p-7 font-mono text-sm" style={{ background: "#080C14" }}>
-              <div className="space-y-3 text-slate-500">
-                <div><span className="text-slate-600">POST </span><span style={{ color: "#818CF8" }}>/api/v1/decisions/check</span></div>
+            <div className="p-7 font-mono text-sm" style={{ background: "#FAFAF9" }}>
+              <div className="space-y-3 text-ink-400">
+                <div><span className="text-ink-400">POST </span><span style={{ color: "#52525B" }}>/api/v1/decisions/check</span></div>
                 <div className="pl-4 space-y-1">
-                  <div><span style={{ color: "#60A5FA" }}>"agent_id"</span>{': '}<span style={{ color: "#34D399" }}>"agent_billing_processor"</span></div>
-                  <div><span style={{ color: "#60A5FA" }}>"tool"</span>{': '}<span style={{ color: "#34D399" }}>"stripe.charge_customer"</span></div>
-                  <div><span style={{ color: "#60A5FA" }}>"context"</span>{': { '}<span style={{ color: "#60A5FA" }}>"amount_usd"</span>{': '}<span style={{ color: "#FBBF24" }}>4200</span>{' }'}</div>
+                  <div><span style={{ color: "#3F3F46" }}>"agent_id"</span>{': '}<span style={{ color: "#34D399" }}>"agent_billing_processor"</span></div>
+                  <div><span style={{ color: "#3F3F46" }}>"tool"</span>{': '}<span style={{ color: "#34D399" }}>"stripe.charge_customer"</span></div>
+                  <div><span style={{ color: "#3F3F46" }}>"context"</span>{': { '}<span style={{ color: "#3F3F46" }}>"amount_usd"</span>{': '}<span style={{ color: "#FBBF24" }}>4200</span>{' }'}</div>
                 </div>
                 <div className="border-t pt-3" style={{ borderColor: "rgba(148,163,184,0.06)" }}>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full" style={{ background: "#F87171" }} />
-                    <span className="text-white font-semibold">DENY</span>
+                    <span className="text-ink-50 font-semibold">DENY</span>
                     <span className="text-slate-700">·</span>
                     <span>policy: <span style={{ color: "#FBBF24" }}>max_charge_usd = 1000</span></span>
                     <span className="text-slate-700">·</span>
@@ -259,10 +254,10 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div className="pl-4 space-y-1">
-                  <div><span style={{ color: "#60A5FA" }}>"decision"</span>{': '}<span style={{ color: "#F87171" }}>"deny"</span></div>
-                  <div><span style={{ color: "#60A5FA" }}>"reason"</span>{': '}<span style={{ color: "#34D399" }}>"charge_amount exceeds policy limit"</span></div>
-                  <div><span style={{ color: "#60A5FA" }}>"escalate_to"</span>{': '}<span style={{ color: "#34D399" }}>"finance-approvals@company.com"</span></div>
-                  <div><span style={{ color: "#60A5FA" }}>"audit_id"</span>{': '}<span style={{ color: "#A78BFA" }}>"evt_01HXYZ..."</span></div>
+                  <div><span style={{ color: "#3F3F46" }}>"decision"</span>{': '}<span style={{ color: "#F87171" }}>"deny"</span></div>
+                  <div><span style={{ color: "#3F3F46" }}>"reason"</span>{': '}<span style={{ color: "#34D399" }}>"charge_amount exceeds policy limit"</span></div>
+                  <div><span style={{ color: "#3F3F46" }}>"escalate_to"</span>{': '}<span style={{ color: "#34D399" }}>"finance-approvals@company.com"</span></div>
+                  <div><span style={{ color: "#3F3F46" }}>"audit_id"</span>{': '}<span style={{ color: "#71717A" }}>"evt_01HXYZ..."</span></div>
                 </div>
               </div>
             </div>
@@ -272,11 +267,11 @@ export default function LandingPage() {
         {/* Features */}
         <section id="features" className="max-w-6xl mx-auto px-6 pb-24">
           <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-5" style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)", color: "#A5B4FC" }}>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-5" style={{ background: "rgba(24,24,27,0.08)", border: "1px solid rgba(24,24,27,0.15)", color: "#71717A" }}>
               Full-stack governance
             </div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">Everything security teams need</h2>
-            <p className="text-slate-400 max-w-lg mx-auto text-sm leading-relaxed">
+            <h2 className="text-3xl lg:text-4xl font-bold text-ink-50 mb-4">Everything security teams need</h2>
+            <p className="text-ink-300 max-w-lg mx-auto text-sm leading-relaxed">
               From developer-facing API keys to org-wide audit exports — Kynara covers the full lifecycle of AI agent authorization and compliance.
             </p>
           </div>
@@ -284,12 +279,12 @@ export default function LandingPage() {
             {features.map((f) => {
               const Icon = f.icon;
               return (
-                <div key={f.title} className="rounded-2xl p-6" style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.07)" }}>
+                <div key={f.title} className="rounded-2xl p-6" style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.07)" }}>
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: f.bg }}>
                     <Icon className="w-5 h-5" style={{ color: f.color }} />
                   </div>
-                  <h3 className="text-white font-semibold mb-2 text-sm">{f.title}</h3>
-                  <p className="text-slate-500 text-sm leading-relaxed">{f.desc}</p>
+                  <h3 className="text-ink-50 font-semibold mb-2 text-sm">{f.title}</h3>
+                  <p className="text-ink-400 text-sm leading-relaxed">{f.desc}</p>
                 </div>
               );
             })}
@@ -298,21 +293,21 @@ export default function LandingPage() {
 
         {/* Trust signals */}
         <section className="max-w-6xl mx-auto px-6 pb-24">
-          <div className="rounded-2xl p-10" style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.07)" }}>
+          <div className="rounded-2xl p-10" style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.07)" }}>
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(99,102,241,0.1)" }}>
-                <Building2 className="w-4 h-4" style={{ color: "#818CF8" }} />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(24,24,27,0.1)" }}>
+                <Building2 className="w-4 h-4" style={{ color: "#52525B" }} />
               </div>
               <div>
-                <div className="text-white font-semibold text-sm">Built for enterprise compliance</div>
-                <div className="text-slate-500 text-xs mt-0.5">Controls aligned with SOC 2, ISO 27001, and NIST AI RMF</div>
+                <div className="text-ink-50 font-semibold text-sm">Built for enterprise compliance</div>
+                <div className="text-ink-400 text-xs mt-0.5">Controls aligned with SOC 2, ISO 27001, and NIST AI RMF</div>
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {trustSignals.map((signal) => (
                 <div key={signal} className="flex items-center gap-2">
                   <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#34D399" }} />
-                  <span className="text-slate-400 text-xs">{signal}</span>
+                  <span className="text-ink-300 text-xs">{signal}</span>
                 </div>
               ))}
             </div>
@@ -325,7 +320,7 @@ export default function LandingPage() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-4" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)", color: "#34D399" }}>
               Early access
             </div>
-            <h2 className="text-2xl lg:text-3xl font-bold text-white">Trusted by teams building with AI agents</h2>
+            <h2 className="text-2xl lg:text-3xl font-bold text-ink-50">Trusted by teams building with AI agents</h2>
           </div>
 
           {/* Quotes */}
@@ -336,7 +331,7 @@ export default function LandingPage() {
                 name: "Head of Platform Security",
                 company: "Series B FinTech",
                 initial: "S",
-                color: "#818CF8",
+                color: "#52525B",
               },
               {
                 quote: "We evaluated OPA and Casbin. Kynara was the only option that had the human approval flow built in — not as an afterthought. That's what our compliance team actually wanted.",
@@ -348,12 +343,12 @@ export default function LandingPage() {
             ].map((t, i) => (
               <div key={i} className="rounded-2xl p-7" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(148,163,184,0.08)" }}>
                 <div className="text-2xl mb-4" style={{ color: "rgba(148,163,184,0.2)", fontFamily: "Georgia, serif" }}>"</div>
-                <p className="text-slate-300 leading-relaxed mb-6 text-sm">{t.quote}</p>
+                <p className="text-ink-300 leading-relaxed mb-6 text-sm">{t.quote}</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: `linear-gradient(135deg, ${t.color}40, ${t.color}20)`, border: `1px solid ${t.color}40` }}>{t.initial}</div>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-ink-50" style={{ background: `linear-gradient(135deg, ${t.color}40, ${t.color}20)`, border: `1px solid ${t.color}40` }}>{t.initial}</div>
                   <div>
-                    <div className="text-sm font-semibold text-white">{t.name}</div>
-                    <div className="text-xs text-slate-500">{t.company}</div>
+                    <div className="text-sm font-semibold text-ink-50">{t.name}</div>
+                    <div className="text-xs text-ink-400">{t.company}</div>
                   </div>
                 </div>
               </div>
@@ -362,9 +357,9 @@ export default function LandingPage() {
 
           {/* Ask AI section */}
           <div className="rounded-2xl p-8 text-center" style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(148,163,184,0.07)" }}>
-            <div className="text-sm font-semibold text-slate-400 mb-2">Still researching?</div>
-            <div className="text-white font-bold text-lg mb-1">Ask your AI assistant about Kynara</div>
-            <div className="text-slate-500 text-sm mb-6">Get a plain-English explanation from the AI you already use.</div>
+            <div className="text-sm font-semibold text-ink-300 mb-2">Still researching?</div>
+            <div className="text-ink-50 font-bold text-lg mb-1">Ask your AI assistant about Kynara</div>
+            <div className="text-ink-400 text-sm mb-6">Get a plain-English explanation from the AI you already use.</div>
             <div className="flex flex-wrap items-center justify-center gap-3">
               {[
                 {
@@ -382,7 +377,7 @@ export default function LandingPage() {
                 {
                   label: "Ask Perplexity",
                   href: "https://www.perplexity.ai/?q=Explain+what+Kynara+(kynaraai.com)+does+and+how+it+helps+enterprises+govern+AI+agents.+Use+https://kynaraai.com+as+the+source.",
-                  bg: "rgba(99,102,241,0.1)", border: "rgba(99,102,241,0.25)", color: "#818CF8",
+                  bg: "rgba(24,24,27,0.1)", border: "rgba(24,24,27,0.25)", color: "#52525B",
                   icon: "⬡"
                 },
               ].map((ai) => (
@@ -398,28 +393,28 @@ export default function LandingPage() {
 
         {/* CTA */}
         <section className="max-w-4xl mx-auto px-6 pb-28">
-          <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.35), rgba(139,92,246,0.1), rgba(79,70,229,0.25))" }}>
-            <div className="rounded-[22px] py-16 px-12 text-center" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(79,70,229,0.15) 0%, #07090F 60%)" }}>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-6" style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)", color: "#A5B4FC" }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+          <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, rgba(24,24,27,0.35), rgba(24,24,27,0.1), rgba(24,24,27,0.25))" }}>
+            <div className="rounded-[22px] py-16 px-12 text-center" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(24,24,27,0.15) 0%, #FFFFFF 60%)" }}>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-6" style={{ background: "rgba(24,24,27,0.1)", border: "1px solid rgba(24,24,27,0.2)", color: "#71717A" }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-ink-400 animate-pulse" />
                 Accepting design partners
               </div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight">
+              <h2 className="text-3xl lg:text-4xl font-bold text-ink-50 mb-4 leading-tight">
                 Ready to govern your AI agents?
               </h2>
-              <p className="text-slate-400 mb-8 max-w-md mx-auto leading-relaxed">
+              <p className="text-ink-300 mb-8 max-w-md mx-auto leading-relaxed">
                 We're working with a select group of enterprises to shape the product.
                 Book a 30-minute call to see Kynara in action.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-                <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition-all" style={{ background: "linear-gradient(135deg, #4F46E5, #6D28D9)", boxShadow: "0 8px 32px rgba(79,70,229,0.4)" }}>
+                <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-ink-50 hover:opacity-90 transition-all" style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 8px 32px rgba(24,24,27,0.4)" }}>
                   Book a demo <ArrowRight className="w-4 h-4" />
                 </button>
-                <Link to="/signup" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white transition-all" style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}>
+                <Link to="/signup" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-medium text-ink-300 hover:text-ink-50 transition-all" style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}>
                   Start free
                 </Link>
               </div>
-              <div className="flex items-center justify-center gap-6 text-xs text-slate-600">
+              <div className="flex items-center justify-center gap-6 text-xs text-ink-400">
                 {["Free to start", "No credit card", "Dedicated onboarding"].map((t) => (
                   <span key={t} className="flex items-center gap-1.5">
                     <Check className="w-3.5 h-3.5 text-emerald-500" /> {t}
@@ -432,21 +427,21 @@ export default function LandingPage() {
 
         {/* Footer */}
         <footer className="border-t px-8 py-8 max-w-6xl mx-auto" style={{ borderColor: "rgba(148,163,184,0.07)" }}>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-ink-400">
             <div className="flex items-center gap-2.5">
               <img src="/logo.svg" className="w-6 h-6 rounded-md" alt="Kynara" />
-              <span className="text-slate-500 font-medium">Kynara</span>
+              <span className="text-ink-400 font-medium">Kynara</span>
               <span className="text-slate-700">·</span>
               <span>© {new Date().getFullYear()}. All rights reserved.</span>
             </div>
             <div className="flex items-center gap-6">
-              <a href="#features" className="hover:text-slate-400 transition-colors">Features</a>
-              <a href="#how-it-works" className="hover:text-slate-400 transition-colors">How it works</a>
-              <Link to="/docs" className="hover:text-slate-400 transition-colors">Docs</Link>
-              <a href="/sandbox.html" className="hover:text-slate-400 transition-colors">Policy Sandbox</a>
-              <a href="/solutions/financial-services.html" className="hover:text-slate-400 transition-colors">FinServ</a>
-              <Link to="/login" className="hover:text-slate-400 transition-colors">Sign in</Link>
-              <button onClick={openContact} className="hover:text-slate-400 transition-colors">Contact</button>
+              <a href="#features" className="hover:text-ink-300 transition-colors">Features</a>
+              <a href="#how-it-works" className="hover:text-ink-300 transition-colors">How it works</a>
+              <Link to="/docs" className="hover:text-ink-300 transition-colors">Docs</Link>
+              <a href="/sandbox.html" className="hover:text-ink-300 transition-colors">Policy Sandbox</a>
+              <a href="/solutions/financial-services.html" className="hover:text-ink-300 transition-colors">FinServ</a>
+              <Link to="/login" className="hover:text-ink-300 transition-colors">Sign in</Link>
+              <button onClick={openContact} className="hover:text-ink-300 transition-colors">Contact</button>
             </div>
           </div>
         </footer>
@@ -457,8 +452,8 @@ export default function LandingPage() {
       {contactOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
           onClick={(e) => { if (e.target === e.currentTarget) setContactOpen(false); }}>
-          <div className="w-full max-w-md rounded-2xl p-7 relative" style={{ background: "#080C14", border: "1px solid rgba(148,163,184,0.1)", boxShadow: "0 0 80px rgba(79,70,229,0.15)" }}>
-            <button onClick={() => setContactOpen(false)} className="absolute top-4 right-4 text-slate-500 hover:text-slate-300 transition-colors">
+          <div className="w-full max-w-md rounded-2xl p-7 relative" style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.1)", boxShadow: "0 0 80px rgba(24,24,27,0.15)" }}>
+            <button onClick={() => setContactOpen(false)} className="absolute top-4 right-4 text-ink-400 hover:text-ink-300 transition-colors">
               <X className="w-4 h-4" />
             </button>
             {contactState === "sent" ? (
@@ -466,19 +461,19 @@ export default function LandingPage() {
                 <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)" }}>
                   <Check className="w-6 h-6" style={{ color: "#34D399" }} />
                 </div>
-                <div className="text-xl font-bold text-white mb-2">We'll be in touch</div>
-                <p className="text-sm text-slate-400 mb-6">Expect a reply within one business day.</p>
-                <button onClick={() => setContactOpen(false)} className="text-sm font-medium px-5 py-2.5 rounded-lg text-white" style={{ background: "#4F46E5" }}>Close</button>
+                <div className="text-xl font-bold text-ink-50 mb-2">We'll be in touch</div>
+                <p className="text-sm text-ink-300 mb-6">Expect a reply within one business day.</p>
+                <button onClick={() => setContactOpen(false)} className="text-sm font-medium px-5 py-2.5 rounded-lg text-ink-50" style={{ background: "#18181B" }}>Close</button>
               </div>
             ) : (
               <>
                 <div className="mb-6">
                   <div className="flex items-center gap-2.5 mb-3">
                     <img src="/logo.svg" className="w-7 h-7 rounded-lg" alt="Kynara" />
-                    <span className="font-bold text-white text-sm">Kynara</span>
+                    <span className="font-bold text-ink-50 text-sm">Kynara</span>
                   </div>
-                  <h2 className="text-xl font-bold text-white mb-1">Book a demo</h2>
-                  <p className="text-sm text-slate-400">We'll walk you through the product and discuss your use case.</p>
+                  <h2 className="text-xl font-bold text-ink-50 mb-1">Book a demo</h2>
+                  <p className="text-sm text-ink-300">We'll walk you through the product and discuss your use case.</p>
                 </div>
                 <form onSubmit={submitContact} className="space-y-4">
                   {[
@@ -487,27 +482,27 @@ export default function LandingPage() {
                     { label: "Company", key: "company", placeholder: "Acme Corp", type: "text" },
                   ].map(({ label, key, placeholder, type }) => (
                     <div key={key}>
-                      <label className="block text-xs font-medium text-slate-400 mb-1.5">{label}</label>
+                      <label className="block text-xs font-medium text-ink-300 mb-1.5">{label}</label>
                       <input required type={type} value={form[key as keyof typeof form]}
                         onChange={(e) => setForm({ ...form, [key]: e.target.value })}
                         placeholder={placeholder}
-                        className="w-full rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 outline-none"
+                        className="w-full rounded-lg px-3 py-2.5 text-sm text-ink-100 placeholder:text-ink-400 outline-none"
                         style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}
                       />
                     </div>
                   ))}
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">What are you trying to solve? <span className="text-slate-600">(optional)</span></label>
+                    <label className="block text-xs font-medium text-ink-300 mb-1.5">What are you trying to solve? <span className="text-ink-400">(optional)</span></label>
                     <textarea rows={3} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })}
                       placeholder="e.g. We need to audit what our AI assistants are doing in production…"
-                      className="w-full rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 outline-none resize-none"
+                      className="w-full rounded-lg px-3 py-2.5 text-sm text-ink-100 placeholder:text-ink-400 outline-none resize-none"
                       style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}
                     />
                   </div>
                   {contactState === "error" && <p className="text-xs text-red-400">Something went wrong. Please try again.</p>}
                   <button type="submit" disabled={contactState === "sending"}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-60"
-                    style={{ background: "linear-gradient(135deg, #4F46E5, #6D28D9)", boxShadow: "0 4px 16px rgba(79,70,229,0.3)" }}>
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-ink-50 transition-opacity disabled:opacity-60"
+                    style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 4px 16px rgba(24,24,27,0.3)" }}>
                     <Send className="w-3.5 h-3.5" />
                     {contactState === "sending" ? "Sending…" : "Request demo"}
                   </button>

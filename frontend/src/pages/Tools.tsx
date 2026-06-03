@@ -121,7 +121,7 @@ export default function ToolsPage() {
           <Link
             to="/app/catalog"
             className="flex items-center gap-1.5 text-sm font-medium transition-colors"
-            style={{ color: "#818CF8" }}
+            style={{ color: "#52525B" }}
           >
             <BookOpen className="size-4" /> Browse Library
           </Link>
@@ -203,10 +203,10 @@ export default function ToolsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-page-dark border border-ink-800 rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-ink-800">
-              <h2 className="text-base font-semibold text-white">
+              <h2 className="text-base font-semibold text-ink-50">
                 {mode === "edit" ? "Edit Tool" : "New Tool"}
               </h2>
-              <button onClick={closeModal} className="text-ink-400 hover:text-white">
+              <button onClick={closeModal} className="text-ink-400 hover:text-ink-50">
                 <X className="size-5" />
               </button>
             </div>

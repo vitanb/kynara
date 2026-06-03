@@ -290,8 +290,8 @@ function Stepper({ step }: { step: number }) {
         return (
           <div key={label} className="flex items-center gap-3">
             <div className={`size-7 rounded-full text-xs flex items-center justify-center font-medium
-              ${active ? "bg-accent-500 text-white"
-                : done ? "bg-ok-500 text-white"
+              ${active ? "bg-accent-500 text-ink-50"
+                : done ? "bg-ok-500 text-ink-50"
                 : "bg-ink-800 text-ink-400"}`}>
               {done ? <Check className="size-3" /> : idx}
             </div>

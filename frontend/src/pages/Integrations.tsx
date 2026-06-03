@@ -58,18 +58,18 @@ function SecretInput({ label, placeholder, value, onChange, helpText }: {
   const [show, setShow] = useState(false);
   return (
     <div>
-      <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wide">{label}</label>
+      <label className="block text-xs font-semibold text-ink-400 mb-1.5 uppercase tracking-wide">{label}</label>
       <div className="relative">
         <input
           type={show ? "text" : "password"}
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-lg px-3 pr-10 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 outline-none font-mono"
+          className="w-full rounded-lg px-3 pr-10 py-2.5 text-sm text-ink-100 placeholder:text-slate-600 outline-none font-mono"
           style={{ background: "rgba(148,163,184,.05)", border: "1px solid rgba(148,163,184,.12)" }}
         />
         <button type="button" onClick={() => setShow(s => !s)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-300">
           {show ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
         </button>
       </div>
@@ -149,10 +149,10 @@ export default function IntegrationsPage() {
   }
 
   const card = "rounded-2xl p-7";
-  const cardStyle = { background: "var(--s0-surface, #080C14)", border: "1px solid rgba(148,163,184,.1)" };
+  const cardStyle = { background: "var(--s0-surface, #FAFAF9)", border: "1px solid rgba(148,163,184,.1)" };
   const sectionTag = "text-xs font-bold uppercase tracking-widest text-indigo-400 mb-3";
-  const inputLabel = "block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wide";
-  const input = "w-full rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 outline-none";
+  const inputLabel = "block text-xs font-semibold text-ink-400 mb-1.5 uppercase tracking-wide";
+  const input = "w-full rounded-lg px-3 py-2.5 text-sm text-ink-100 placeholder:text-slate-600 outline-none";
   const inputStyle = { background: "rgba(148,163,184,.05)", border: "1px solid rgba(148,163,184,.12)" };
 
   return (
@@ -162,12 +162,12 @@ export default function IntegrationsPage() {
       <div>
         <div className="flex items-center gap-3 mb-2">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: "rgba(99,102,241,.15)", border: "1px solid rgba(99,102,241,.25)" }}>
+            style={{ background: "rgba(24,24,27,.15)", border: "1px solid rgba(24,24,27,.25)" }}>
             <MessageSquare className="w-4.5 h-4.5 text-indigo-400" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Integrations</h1>
+          <h1 className="text-2xl font-bold text-ink-50">Integrations</h1>
         </div>
-        <p className="text-sm text-slate-400 ml-12">
+        <p className="text-sm text-ink-400 ml-12">
           When an agent action requires human approval, Kynara posts a notification to your
           Slack channel or Teams workspace so reviewers can approve or reject directly from chat.
         </p>
@@ -181,7 +181,7 @@ export default function IntegrationsPage() {
             <StatusPill ok={cfg.slack_enabled && cfg.slack_bot_token_set} label={cfg.slack_enabled ? "Slack connected" : "Slack not configured"} />
             <StatusPill ok={cfg.teams_enabled && cfg.teams_webhook_url_set} label={cfg.teams_enabled ? "Teams connected" : "Teams not configured"} />
             {cfg.slack_channel_id && (
-              <span className="text-xs text-slate-500 self-center">Channel: <code className="text-slate-400">{cfg.slack_channel_id}</code></span>
+              <span className="text-xs text-ink-400 self-center">Channel: <code className="text-ink-400">{cfg.slack_channel_id}</code></span>
             )}
           </div>
         </div>
@@ -191,16 +191,16 @@ export default function IntegrationsPage() {
       <div className={card} style={cardStyle}>
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#4A154B] flex items-center justify-center text-white font-bold text-sm">S</div>
+            <div className="w-8 h-8 rounded-lg bg-[#4A154B] flex items-center justify-center text-ink-50 font-bold text-sm">S</div>
             <div>
-              <div className="font-semibold text-white">Slack</div>
-              <div className="text-xs text-slate-500">Interactive approve/reject buttons in your channel</div>
+              <div className="font-semibold text-ink-50">Slack</div>
+              <div className="text-xs text-ink-400">Interactive approve/reject buttons in your channel</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {cfg?.slack_bot_token_set && (
               <button onClick={() => delSlackMutation.mutate()}
-                className="text-xs text-slate-500 hover:text-red-400 flex items-center gap-1 transition-colors"
+                className="text-xs text-ink-400 hover:text-red-400 flex items-center gap-1 transition-colors"
                 disabled={delSlackMutation.isPending}>
                 <Trash2 className="w-3 h-3" /> Remove
               </button>
@@ -210,19 +210,19 @@ export default function IntegrationsPage() {
                 onClick={() => setSlackEnabled(e => !e)}>
                 <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${slackEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
               </div>
-              <span className="text-xs text-slate-400">Enabled</span>
+              <span className="text-xs text-ink-400">Enabled</span>
             </label>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className={`text-xs text-slate-500 p-3 rounded-lg mb-2`} style={{ background: "rgba(99,102,241,.06)", border: "1px solid rgba(99,102,241,.15)" }}>
-            <strong className="text-slate-400">Setup:</strong> Create a Slack app at{" "}
+          <div className={`text-xs text-ink-400 p-3 rounded-lg mb-2`} style={{ background: "rgba(24,24,27,.06)", border: "1px solid rgba(24,24,27,.15)" }}>
+            <strong className="text-ink-400">Setup:</strong> Create a Slack app at{" "}
             <a href="https://api.slack.com/apps" target="_blank" rel="noopener" className="text-indigo-400 hover:underline">
               api.slack.com/apps <ExternalLink className="inline w-2.5 h-2.5" />
             </a>
             {" "}with <code>chat:write</code> scope. Enable Interactivity → set Request URL to{" "}
-            <code className="text-slate-300">https://kynaraai.com/api/v1/integrations/slack/callback</code>
+            <code className="text-ink-300">https://kynaraai.com/api/v1/integrations/slack/callback</code>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -239,7 +239,7 @@ export default function IntegrationsPage() {
           </div>
           <div className="relative">
             <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-slate-800" />
-            <div className="relative text-center"><span className="text-xs text-slate-600 bg-[#080C14] px-3">or use an Incoming Webhook instead of a Bot Token</span></div>
+            <div className="relative text-center"><span className="text-xs text-slate-600 bg-[#FAFAF9] px-3">or use an Incoming Webhook instead of a Bot Token</span></div>
           </div>
           <SecretInput label="Incoming Webhook URL (optional)" placeholder="https://hooks.slack.com/services/..." value={slackWebhook} onChange={setSlackWebhook}
             helpText={cfg?.slack_webhook_url_set ? "✓ Webhook saved — simpler but no interactive buttons" : "Simpler setup — no interactive buttons"} />
@@ -250,16 +250,16 @@ export default function IntegrationsPage() {
       <div className={card} style={cardStyle}>
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#4B53BC] flex items-center justify-center text-white font-bold text-sm">T</div>
+            <div className="w-8 h-8 rounded-lg bg-[#4B53BC] flex items-center justify-center text-ink-50 font-bold text-sm">T</div>
             <div>
-              <div className="font-semibold text-white">Microsoft Teams</div>
-              <div className="text-xs text-slate-500">Post approval cards to a Teams channel</div>
+              <div className="font-semibold text-ink-50">Microsoft Teams</div>
+              <div className="text-xs text-ink-400">Post approval cards to a Teams channel</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {cfg?.teams_webhook_url_set && (
               <button onClick={() => delTeamsMutation.mutate()}
-                className="text-xs text-slate-500 hover:text-red-400 flex items-center gap-1 transition-colors"
+                className="text-xs text-ink-400 hover:text-red-400 flex items-center gap-1 transition-colors"
                 disabled={delTeamsMutation.isPending}>
                 <Trash2 className="w-3 h-3" /> Remove
               </button>
@@ -269,14 +269,14 @@ export default function IntegrationsPage() {
                 onClick={() => setTeamsEnabled(e => !e)}>
                 <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${teamsEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
               </div>
-              <span className="text-xs text-slate-400">Enabled</span>
+              <span className="text-xs text-ink-400">Enabled</span>
             </label>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="text-xs text-slate-500 p-3 rounded-lg" style={{ background: "rgba(75,83,188,.06)", border: "1px solid rgba(75,83,188,.2)" }}>
-            <strong className="text-slate-400">Setup:</strong> In Teams, open the channel → ··· → Connectors → Incoming Webhook → Create → copy the URL below.
+          <div className="text-xs text-ink-400 p-3 rounded-lg" style={{ background: "rgba(75,83,188,.06)", border: "1px solid rgba(75,83,188,.2)" }}>
+            <strong className="text-ink-400">Setup:</strong> In Teams, open the channel → ··· → Connectors → Incoming Webhook → Create → copy the URL below.
           </div>
           <SecretInput label="Incoming Webhook URL" placeholder="https://...webhook.office.com/webhookb2/..." value={teamsWebhook} onChange={setTeamsWebhook}
             helpText={cfg?.teams_webhook_url_set ? "✓ Webhook saved — enter new value to rotate" : "Required"} />
@@ -290,15 +290,15 @@ export default function IntegrationsPage() {
         <button
           onClick={() => { setTestResult(null); testMutation.mutate(); }}
           disabled={testMutation.isPending || (!cfg?.slack_bot_token_set && !cfg?.slack_webhook_url_set && !cfg?.teams_webhook_url_set)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white transition-colors disabled:opacity-40"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-ink-300 hover:text-ink-50 transition-colors disabled:opacity-40"
           style={{ border: "1px solid rgba(148,163,184,.15)" }}>
           {testMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
           Send test notification
         </button>
 
         <button onClick={handleSave} disabled={saveStatus === "saving"}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all disabled:opacity-60"
-          style={{ background: "linear-gradient(135deg,#4F46E5,#6D28D9)", boxShadow: "0 4px 14px rgba(79,70,229,.3)" }}>
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-ink-50 transition-all disabled:opacity-60"
+          style={{ background: "linear-gradient(135deg,#18181B,#27272A)", boxShadow: "0 4px 14px rgba(24,24,27,.3)" }}>
           {saveStatus === "saving" && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
           {saveStatus === "saved" ? "✓ Saved" : saveStatus === "error" ? "Error — retry" : "Save integration"}
         </button>
@@ -306,13 +306,13 @@ export default function IntegrationsPage() {
 
       {/* Test result */}
       {testResult && (
-        <div className="rounded-xl p-4 text-sm" style={{ background: "rgba(99,102,241,.06)", border: "1px solid rgba(99,102,241,.2)" }}>
-          <div className="font-semibold text-white mb-2">Test result</div>
+        <div className="rounded-xl p-4 text-sm" style={{ background: "rgba(24,24,27,.06)", border: "1px solid rgba(24,24,27,.2)" }}>
+          <div className="font-semibold text-ink-50 mb-2">Test result</div>
           {Object.entries(testResult).map(([k, v]) => (
             <div key={k} className="flex items-center gap-2">
-              {v === "ok" ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <AlertCircle className="w-3.5 h-3.5 text-slate-500" />}
-              <span className="text-slate-400 capitalize">{k}:</span>
-              <span className={v === "ok" ? "text-emerald-400" : "text-slate-500"}>{v === "ok" ? "Message sent successfully" : v}</span>
+              {v === "ok" ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <AlertCircle className="w-3.5 h-3.5 text-ink-400" />}
+              <span className="text-ink-400 capitalize">{k}:</span>
+              <span className={v === "ok" ? "text-emerald-400" : "text-ink-400"}>{v === "ok" ? "Message sent successfully" : v}</span>
             </div>
           ))}
         </div>
@@ -321,10 +321,10 @@ export default function IntegrationsPage() {
       {/* How it works */}
       <div className={card} style={{ ...cardStyle, padding: "20px 24px" }}>
         <div className={sectionTag}>How it works</div>
-        <ol className="space-y-2 text-sm text-slate-400">
-          <li className="flex gap-3"><span className="text-indigo-400 font-bold flex-shrink-0">1.</span>An AI agent calls an action that matches a <code className="text-slate-300">require_approval</code> policy.</li>
+        <ol className="space-y-2 text-sm text-ink-400">
+          <li className="flex gap-3"><span className="text-indigo-400 font-bold flex-shrink-0">1.</span>An AI agent calls an action that matches a <code className="text-ink-300">require_approval</code> policy.</li>
           <li className="flex gap-3"><span className="text-indigo-400 font-bold flex-shrink-0">2.</span>Kynara posts a notification to your Slack channel or Teams workspace with the agent, action, resource, and expiry time.</li>
-          <li className="flex gap-3"><span className="text-indigo-400 font-bold flex-shrink-0">3.</span><span>In Slack, reviewers click <strong className="text-white">✓ Approve</strong> or <strong className="text-white">✗ Reject</strong> directly in the message — no need to open Kynara. In Teams, buttons open the Kynara approval page.</span></li>
+          <li className="flex gap-3"><span className="text-indigo-400 font-bold flex-shrink-0">3.</span><span>In Slack, reviewers click <strong className="text-ink-50">✓ Approve</strong> or <strong className="text-ink-50">✗ Reject</strong> directly in the message — no need to open Kynara. In Teams, buttons open the Kynara approval page.</span></li>
           <li className="flex gap-3"><span className="text-indigo-400 font-bold flex-shrink-0">4.</span>The message updates to show who approved or rejected, and the agent either continues or is halted.</li>
         </ol>
       </div>

@@ -18,7 +18,7 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#05080F" }}>
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#FFFFFF" }}>
         <div className="card p-8 text-center w-full max-w-md">
           <p className="text-ink-300 mb-4">Invalid or missing reset token.</p>
           <Link to="/forgot-password" className="btn-primary inline-flex">
@@ -64,11 +64,11 @@ export default function ResetPasswordPage() {
     if (password.length < 8) return { label: "Too short", color: "#F43F5E", width: "25%" };
     if (password.length < 12) return { label: "Fair", color: "#F59E0B", width: "50%" };
     if (/[A-Z]/.test(password) && /[0-9]/.test(password)) return { label: "Strong", color: "#10B981", width: "100%" };
-    return { label: "Good", color: "#6366F1", width: "75%" };
+    return { label: "Good", color: "#18181B", width: "75%" };
   })();
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#05080F" }}>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#FFFFFF" }}>
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 mb-8 hover:opacity-80 transition-opacity">
@@ -78,8 +78,8 @@ export default function ResetPasswordPage() {
             alt="Kynara"
           />
           <div>
-            <div className="text-base font-bold text-white tracking-tight leading-none">Kynara</div>
-            <div className="text-[10px] font-medium mt-0.5" style={{ color: "#818CF8", letterSpacing: "0.06em" }}>
+            <div className="text-base font-bold text-ink-50 tracking-tight leading-none">Kynara</div>
+            <div className="text-[10px] font-medium mt-0.5" style={{ color: "#52525B", letterSpacing: "0.06em" }}>
               AI Control Plane
             </div>
           </div>
@@ -95,7 +95,7 @@ export default function ResetPasswordPage() {
               >
                 <CheckCircle2 className="size-7 text-ok-400" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">Password updated</h2>
+              <h2 className="text-xl font-bold text-ink-50 mb-2">Password updated</h2>
               <p className="text-sm text-ink-300 mb-6">
                 Your password has been changed. All other sessions have been signed out for security.
               </p>
@@ -110,7 +110,7 @@ export default function ResetPasswordPage() {
             /* ── Form state ── */
             <>
               <div className="mb-6">
-                <h2 className="text-xl font-bold text-white">Set a new password</h2>
+                <h2 className="text-xl font-bold text-ink-50">Set a new password</h2>
                 <p className="text-sm text-ink-300 mt-1">
                   Choose a strong password for your Kynara account.
                 </p>
@@ -188,7 +188,7 @@ export default function ResetPasswordPage() {
                   >
                     {error}{" "}
                     {(error.includes("expired") || error.includes("invalid")) && (
-                      <Link to="/forgot-password" className="underline text-red-200 hover:text-white">
+                      <Link to="/forgot-password" className="underline text-red-200 hover:text-ink-50">
                         Request a new link
                       </Link>
                     )}

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-export type ThemeId = "midnight" | "slate" | "google";
+export type ThemeId = "linen" | "midnight";
 
 export interface ThemeDef {
   id: ThemeId;
@@ -14,42 +14,36 @@ export interface ThemeDef {
 
 export const THEMES: ThemeDef[] = [
   {
-    id: "midnight",
-    label: "Midnight",
-    description: "Deep navy · Indigo",
-    sidebar: "#080C14",
-    accent:  "#4F46E5",
-    card:    "#0D1421",
-  },
-  {
-    id: "slate",
-    label: "Slate",
-    description: "Corporate dark · Blue",
-    sidebar: "#162032",
-    accent:  "#2563EB",
-    card:    "#1A2744",
-  },
-  {
-    id: "google",
-    label: "Google",
-    description: "Light · Google Blue",
-    sidebar: "#F8F9FA",
-    accent:  "#1A73E8",
+    id: "linen",
+    label: "Linen",
+    description: "Light · Monochrome",
+    sidebar: "#FAFAF9",
+    accent:  "#18181B",
     card:    "#FFFFFF",
   },
+  {
+    id: "midnight",
+    label: "Midnight",
+    description: "Dark · Ink",
+    sidebar: "#0E0E10",
+    accent:  "#FAFAFA",
+    card:    "#141416",
+  },
 ];
+
+const VALID: ThemeId[] = ["linen", "midnight"];
 
 interface ThemeCtx {
   theme: ThemeId;
   setTheme: (t: ThemeId) => void;
 }
 
-const Ctx = createContext<ThemeCtx>({ theme: "midnight", setTheme: () => {} });
+const Ctx = createContext<ThemeCtx>({ theme: "linen", setTheme: () => {} });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<ThemeId>(() => {
-    const saved = localStorage.getItem("kynara_theme");
-    return (saved as ThemeId) || "midnight";
+    const saved = localStorage.getItem("kynara_theme") as ThemeId | null;
+    return saved && VALID.includes(saved) ? saved : "linen";
   });
 
   function setTheme(t: ThemeId) {

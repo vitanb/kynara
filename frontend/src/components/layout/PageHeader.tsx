@@ -9,7 +9,7 @@ export default function PageHeader({
       style={{ borderBottom: "1px solid var(--s0-border)" }}
     >
       <div className="min-w-0">
-        <h1 className="text-base font-semibold tracking-tight text-white leading-none">{title}</h1>
+        <h1 className="text-base font-semibold tracking-tight text-ink-50 leading-none">{title}</h1>
         {subtitle ? (
           <p className="text-xs text-ink-400 mt-1 max-w-xl leading-relaxed">{subtitle}</p>
         ) : null}

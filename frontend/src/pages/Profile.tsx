@@ -73,7 +73,7 @@ function AvatarCircle({ name, email, url, size = 80 }: { name?: string | null; e
   }
   return (
     <div
-      className="rounded-full flex items-center justify-center shrink-0 font-bold text-white select-none"
+      className="rounded-full flex items-center justify-center shrink-0 font-bold text-ink-50 select-none"
       style={{
         width: size, height: size,
         background: "var(--s0-accent)",

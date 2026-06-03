@@ -46,7 +46,7 @@ export default function HowItWorksPage() {
 
         {/* ── Setup steps ── */}
         <div className="card p-6">
-          <h2 className="text-sm font-semibold text-white mb-6">Setting up access control</h2>
+          <h2 className="text-sm font-semibold text-ink-50 mb-6">Setting up access control</h2>
 
           <Step n={1} icon={Bot} title="Register an Agent" color={accentHex} description={
             <>
@@ -97,7 +97,7 @@ export default function HowItWorksPage() {
 
         {/* ── Runtime pipeline ── */}
         <div className="card p-6">
-          <h2 className="text-sm font-semibold text-white mb-1">What happens at runtime</h2>
+          <h2 className="text-sm font-semibold text-ink-50 mb-1">What happens at runtime</h2>
           <p className="text-[13px] text-ink-500 mb-5">Every time an agent tries to perform an action, the engine runs this pipeline in order:</p>
 
           <div className="space-y-3">
@@ -146,7 +146,7 @@ export default function HowItWorksPage() {
 
         {/* ── Quick links ── */}
         <div className="card p-5">
-          <h2 className="text-sm font-semibold text-white mb-3">Jump to a section</h2>
+          <h2 className="text-sm font-semibold text-ink-50 mb-3">Jump to a section</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {[
               { label: "Agents",           path: "/app/agents" },

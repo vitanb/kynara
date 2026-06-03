@@ -296,10 +296,10 @@ export default function RolesPage() {
 
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-ink-800 shrink-0">
-              <h2 className="text-base font-semibold text-white">
+              <h2 className="text-base font-semibold text-ink-50">
                 {mode === "edit" ? "Edit Role" : "New Role"}
               </h2>
-              <button onClick={closeModal} className="text-ink-400 hover:text-white">
+              <button onClick={closeModal} className="text-ink-400 hover:text-ink-50">
                 <X className="size-5" />
               </button>
             </div>
@@ -364,7 +364,7 @@ export default function RolesPage() {
                         <button
                           type="button"
                           onClick={() => toggleScope(s)}
-                          className="text-accent-400 hover:text-white ml-0.5"
+                          className="text-accent-400 hover:text-ink-50 ml-0.5"
                         >
                           <X className="size-3" />
                         </button>
@@ -377,7 +377,7 @@ export default function RolesPage() {
                 <div className="border border-ink-800 rounded-lg overflow-hidden">
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between px-3 py-2.5 bg-ink-900 text-xs text-ink-300 hover:text-white transition-colors"
+                    className="w-full flex items-center justify-between px-3 py-2.5 bg-ink-900 text-xs text-ink-300 hover:text-ink-50 transition-colors"
                     onClick={() => setCatalogOpen(v => !v)}
                   >
                     <span className="font-medium">Browse Scope Catalog</span>
@@ -417,7 +417,7 @@ export default function RolesPage() {
                               >
                                 {/* Checkbox */}
                                 <div className={`mt-0.5 size-3.5 rounded border shrink-0 flex items-center justify-center ${checked ? "bg-accent-500 border-accent-500" : "border-ink-600"}`}>
-                                  {checked && <span className="text-white text-[8px] font-bold leading-none">✓</span>}
+                                  {checked && <span className="text-ink-50 text-[8px] font-bold leading-none">✓</span>}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 flex-wrap">

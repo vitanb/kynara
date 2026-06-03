@@ -18,13 +18,13 @@ const CATEGORY_COLORS: Record<string, string> = {
   "compliance": "rgba(245,158,11,.12)",
   "finserv":    "rgba(16,185,129,.12)",
   "healthcare": "rgba(52,211,153,.12)",
-  "devops":     "rgba(99,102,241,.12)",
+  "devops":     "rgba(24,24,27,.12)",
   "default":    "rgba(148,163,184,.08)",
 };
 const CATEGORY_TEXT: Record<string, string> = {
   "security": "#F43F5E", "compliance": "#FCD34D",
   "finserv": "#34D399", "healthcare": "#2DD4BF",
-  "devops": "#818CF8", "default": "#94A3B8",
+  "devops": "#52525B", "default": "#94A3B8",
 };
 
 export default function PolicyTemplatesPage() {
@@ -62,20 +62,20 @@ export default function PolicyTemplatesPage() {
     installMutation.mutate(slug);
   }
 
-  const cardStyle = { background: "var(--s0-surface,#080C14)", border: "1px solid rgba(148,163,184,.1)" };
+  const cardStyle = { background: "var(--s0-surface,#FAFAF9)", border: "1px solid rgba(148,163,184,.1)" };
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-white">Policy Templates</h1>
-          <p className="text-sm text-slate-400 mt-0.5">Pre-built policies for common use cases — install with one click.</p>
+          <h1 className="text-xl font-bold text-ink-50">Policy Templates</h1>
+          <p className="text-sm text-ink-400 mt-0.5">Pre-built policies for common use cases — install with one click.</p>
         </div>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-400" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search templates…"
-            className="pl-8 pr-4 py-2 text-sm rounded-lg text-slate-200 placeholder:text-slate-600 outline-none w-52"
+            className="pl-8 pr-4 py-2 text-sm rounded-lg text-ink-100 placeholder:text-slate-600 outline-none w-52"
             style={{ background: "rgba(148,163,184,.06)", border: "1px solid rgba(148,163,184,.12)" }} />
         </div>
       </div>
@@ -93,7 +93,7 @@ export default function PolicyTemplatesPage() {
                 style={cardStyle} onClick={() => setSelected(t as TemplateDetail)}>
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-white text-sm mb-1">{t.display_name}</div>
+                    <div className="font-semibold text-ink-50 text-sm mb-1">{t.display_name}</div>
                     <span className="inline-flex text-[10px] font-bold px-2 py-0.5 rounded"
                       style={{ background: bg, color: tc }}>
                       {t.category}
@@ -105,16 +105,16 @@ export default function PolicyTemplatesPage() {
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex-shrink-0"
                     style={isInstalled
                       ? { background: "rgba(16,185,129,.12)", color: "#34D399", border: "1px solid rgba(16,185,129,.3)" }
-                      : { background: "rgba(99,102,241,.15)", color: "#818CF8", border: "1px solid rgba(99,102,241,.3)" }
+                      : { background: "rgba(24,24,27,.15)", color: "#52525B", border: "1px solid rgba(24,24,27,.3)" }
                     }>
                     {installing === t.slug ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
                     {isInstalled ? "Installed" : "Install"}
                   </button>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed mb-3">{t.description}</p>
+                <p className="text-xs text-ink-400 leading-relaxed mb-3">{t.description}</p>
                 <div className="flex items-center gap-2 flex-wrap">
                   {t.tags.slice(0, 4).map(tag => (
-                    <span key={tag} className="inline-flex items-center gap-1 text-[10px] text-slate-500 px-1.5 py-0.5 rounded"
+                    <span key={tag} className="inline-flex items-center gap-1 text-[10px] text-ink-400 px-1.5 py-0.5 rounded"
                       style={{ background: "rgba(148,163,184,.06)" }}>
                       <Tag className="w-2.5 h-2.5" />{tag}
                     </span>
@@ -127,7 +127,7 @@ export default function PolicyTemplatesPage() {
             );
           })}
           {filtered.length === 0 && (
-            <div className="col-span-2 text-center py-16 text-slate-500">
+            <div className="col-span-2 text-center py-16 text-ink-400">
               No templates match "{search}"
             </div>
           )}
@@ -140,22 +140,22 @@ export default function PolicyTemplatesPage() {
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }}
           onClick={() => setSelected(null)}>
           <div className="w-full max-w-2xl rounded-2xl p-7 overflow-y-auto max-h-[80vh]"
-            style={{ background: "#080C14", border: "1px solid rgba(148,163,184,.12)" }}
+            style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,.12)" }}
             onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-4">
-              <h2 className="text-lg font-bold text-white">{selected.display_name}</h2>
-              <button onClick={() => setSelected(null)} className="text-slate-500 hover:text-white text-xl leading-none">×</button>
+              <h2 className="text-lg font-bold text-ink-50">{selected.display_name}</h2>
+              <button onClick={() => setSelected(null)} className="text-ink-400 hover:text-ink-50 text-xl leading-none">×</button>
             </div>
-            <p className="text-sm text-slate-400 mb-4">{selected.description}</p>
+            <p className="text-sm text-ink-400 mb-4">{selected.description}</p>
             <div className="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-2">Policies included</div>
-            <pre className="text-xs text-slate-400 rounded-lg p-4 overflow-x-auto mb-5"
+            <pre className="text-xs text-ink-400 rounded-lg p-4 overflow-x-auto mb-5"
               style={{ background: "rgba(148,163,184,.05)", border: "1px solid rgba(148,163,184,.1)" }}>
               {JSON.stringify(selected.policies || [], null, 2)}
             </pre>
             <button onClick={() => { handleInstall(selected.slug); setSelected(null); }}
               disabled={installed.has(selected.slug)}
-              className="w-full py-2.5 rounded-xl text-sm font-semibold text-white"
-              style={{ background: "linear-gradient(135deg,#4F46E5,#6D28D9)" }}>
+              className="w-full py-2.5 rounded-xl text-sm font-semibold text-ink-50"
+              style={{ background: "linear-gradient(135deg,#18181B,#27272A)" }}>
               {installed.has(selected.slug) ? "Already installed" : "Install to my org"}
             </button>
           </div>

@@ -4,55 +4,60 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Carbon-slate dark — neutral, enterprise-grade (Linear / GitHub Dark / Stripe)
+        // ── Neutral ramp (light monochrome — WorkOS / Notion family) ──────────
+        // NOTE: scale is intentionally "inverted" vs a dark theme so existing
+        // usage (bg-ink-950 = page, text-ink-50 = primary text) renders light.
+        // Low indices = dark ink for TEXT. High indices = light surfaces for BG.
         ink: {
-          50:  "#F1F5F9",   // slate-100
-          100: "#CBD5E1",   // slate-300
-          200: "#94A3B8",   // slate-400
-          300: "#64748B",   // slate-500
-          400: "#475569",   // slate-600
-          500: "#334155",   // slate-700
-          600: "#1E293B",   // slate-800
-          700: "#141D2E",   // custom deep slate
-          800: "#0D1421",   // card surface
-          900: "#080C14",   // sidebar / elevated
-          950: "#05080F",   // page background
+          50:  "#18181B",   // primary text — near black
+          100: "#27272A",   // strong text
+          200: "#3F3F46",   // body text
+          300: "#52525B",   // muted text
+          400: "#71717A",   // faint text / icons
+          500: "#A1A1AA",   // placeholder / disabled
+          600: "#D4D4D8",   // strong hairline / hover border
+          700: "#E7E5E4",   // hairline border / secondary surface
+          800: "#FFFFFF",   // card surface
+          900: "#FAFAF9",   // sidebar / elevated rail
+          950: "#FFFFFF",   // page background
         },
-        // Brand — electric indigo (Stripe / Linear / Notion family)
+        // ── Brand accent — monochrome ink (no purple). Reserved for primary
+        // actions and active states; color is otherwise semantic only. ────────
         accent: {
-          50:  "#EEF2FF",
-          100: "#E0E7FF",
-          300: "#A5B4FC",
-          400: "#818CF8",
-          500: "#6366F1",   // primary interactive
-          600: "#4F46E5",   // button resting
-          700: "#4338CA",   // button hover
-          800: "#3730A3",
+          50:  "#F4F4F5",
+          100: "#E7E5E4",
+          300: "#A1A1AA",
+          400: "#52525B",   // "info" text / subtle links
+          500: "#27272A",   // primary hover
+          600: "#18181B",   // primary resting (near black)
+          700: "#000000",
+          800: "#000000",
         },
-        // Secondary data accent — teal (charts, live indicators)
+        // Secondary data accent — muted teal for charts / live indicators
         teal: {
           300: "#5EEAD4",
-          400: "#2DD4BF",
-          500: "#14B8A6",
-          600: "#0D9488",
-          700: "#0F766E",
+          400: "#0D9488",
+          500: "#0F766E",
+          600: "#115E59",
+          700: "#134E4A",
         },
-        // Status palette — vivid, high contrast
-        ok:     { 300: "#6EE7B7", 400: "#34D399", 500: "#10B981", 700: "#047857" },
-        warn:   { 300: "#FCD34D", 400: "#FBBF24", 500: "#F59E0B", 700: "#B45309" },
-        danger: { 300: "#FDA4AF", 400: "#FB7185", 500: "#F43F5E", 700: "#BE123C" },
+        // ── Status palette — tuned for contrast on white surfaces ─────────────
+        ok:     { 300: "#6EE7B7", 400: "#059669", 500: "#047857", 700: "#065F46" },
+        warn:   { 300: "#FCD34D", 400: "#B45309", 500: "#92400E", 700: "#78350F" },
+        danger: { 300: "#FDA4AF", 400: "#DC2626", 500: "#B91C1C", 700: "#991B1B" },
       },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui"],
         mono: ["ui-monospace", "Menlo", "monospace"],
       },
       boxShadow: {
-        "card":        "0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3)",
-        "card-hover":  "0 4px 16px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.3)",
-        "glow-accent": "0 0 0 3px rgba(99,102,241,0.25)",
-        "glow-sm":     "0 0 16px rgba(99,102,241,0.2)",
-        "btn":         "0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)",
-        "btn-hover":   "0 2px 8px rgba(79,70,229,0.45), inset 0 1px 0 rgba(255,255,255,0.06)",
+        // Soft, low-contrast elevation — no colored glows.
+        "card":        "0 1px 2px rgba(24,24,27,0.04), 0 1px 3px rgba(24,24,27,0.04)",
+        "card-hover":  "0 4px 16px rgba(24,24,27,0.08), 0 1px 3px rgba(24,24,27,0.05)",
+        "glow-accent": "0 0 0 3px rgba(24,24,27,0.08)",
+        "glow-sm":     "0 1px 2px rgba(24,24,27,0.05)",
+        "btn":         "0 1px 2px rgba(24,24,27,0.08)",
+        "btn-hover":   "0 2px 6px rgba(24,24,27,0.12)",
       },
     },
   },

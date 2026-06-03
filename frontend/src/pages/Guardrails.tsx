@@ -189,7 +189,7 @@ def handler(event, context):
 };
 
 const SEV_COLORS = {
-  info:     { bg: "rgba(99,102,241,0.12)",  text: "#818CF8", border: "rgba(99,102,241,0.25)" },
+  info:     { bg: "rgba(24,24,27,0.12)",  text: "#52525B", border: "rgba(24,24,27,0.25)" },
   warn:     { bg: "rgba(245,158,11,0.12)",  text: "#FCD34D", border: "rgba(245,158,11,0.25)" },
   critical: { bg: "rgba(239,68,68,0.12)",   text: "#F87171", border: "rgba(239,68,68,0.25)" },
 };
@@ -232,29 +232,29 @@ function CreateModal({ onClose }: { onClose: () => void }) {
     mutationFn: (data: typeof form) => api.post("/api/v1/guardrails", data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["guardrails"] }); onClose(); },
   });
-  const inp = "w-full rounded-lg px-3 py-2 text-sm text-white border outline-none focus:border-indigo-500 transition-colors";
-  const bdr = { border: "1px solid rgba(148,163,184,0.15)", background: "#0D1421", color: "#F1F5F9" };
+  const inp = "w-full rounded-lg px-3 py-2 text-sm text-ink-50 border outline-none focus:border-indigo-500 transition-colors";
+  const bdr = { border: "1px solid rgba(148,163,184,0.15)", background: "#FFFFFF", color: "#18181B" };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
       <div className="w-full max-w-lg rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto"
-        style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}>
-        <h2 className="text-base font-bold text-white">Add Integration</h2>
+        style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
+        <h2 className="text-base font-bold text-ink-50">Add Integration</h2>
         <div className="space-y-3">
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Name</label>
+            <label className="block text-xs text-ink-400 mb-1">Name</label>
             <input className={inp} style={bdr} placeholder="e.g. Grafana Production Alerts" value={form.name}
               onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Platform</label>
+            <label className="block text-xs text-ink-400 mb-1">Platform</label>
             <select className={inp} style={bdr} value={form.provider}
               onChange={e => setForm(f => ({ ...f, provider: e.target.value }))}>
               {PROVIDER_GROUPS.map(g => (
-                <optgroup key={g.label} label={g.label} style={{ background: "#0D1421", color: "#94A3B8" }}>
+                <optgroup key={g.label} label={g.label} style={{ background: "#FFFFFF", color: "#94A3B8" }}>
                   {g.providers.map(p => (
-                    <option key={p} value={p} style={{ background: "#0D1421", color: "#F1F5F9" }}>
+                    <option key={p} value={p} style={{ background: "#FFFFFF", color: "#18181B" }}>
                       {PROVIDER_LABELS[p as Provider]}
                     </option>
                   ))}
@@ -263,16 +263,16 @@ function CreateModal({ onClose }: { onClose: () => void }) {
             </select>
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Default action (when no rule matches)</label>
+            <label className="block text-xs text-ink-400 mb-1">Default action (when no rule matches)</label>
             <select className={inp} style={bdr} value={form.default_action}
               onChange={e => setForm(f => ({ ...f, default_action: e.target.value }))}>
               {Object.entries(ACTION_LABELS)
                 .filter(([v]) => v !== "suspend_agent")
-                .map(([v, l]) => <option key={v} value={v} style={{ background: "#0D1421", color: "#F1F5F9" }}>{l}</option>)}
+                .map(([v, l]) => <option key={v} value={v} style={{ background: "#FFFFFF", color: "#18181B" }}>{l}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Webhook secret <span className="text-slate-600">(optional — used to verify requests)</span></label>
+            <label className="block text-xs text-ink-400 mb-1">Webhook secret <span className="text-slate-600">(optional — used to verify requests)</span></label>
             <input className={inp} style={bdr} placeholder="Shared secret for HMAC verification"
               value={form.webhook_secret}
               onChange={e => setForm(f => ({ ...f, webhook_secret: e.target.value }))} />
@@ -280,9 +280,9 @@ function CreateModal({ onClose }: { onClose: () => void }) {
 
           {/* Format reminder */}
           <div className="rounded-xl p-3 space-y-1"
-            style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.18)" }}>
+            style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.18)" }}>
             <p className="text-xs font-semibold text-indigo-300">After creating, expand the integration card to get:</p>
-            <ul className="text-xs text-slate-400 space-y-0.5 pl-3">
+            <ul className="text-xs text-ink-400 space-y-0.5 pl-3">
               <li>• The inbound URL to paste into {PROVIDER_TEMPLATES[form.provider as Provider]?.label ?? form.provider}</li>
               <li>• The Kynara JSON payload format your platform must send</li>
               <li>• A copy-paste webhook template for {PROVIDER_TEMPLATES[form.provider as Provider]?.label ?? form.provider}</li>
@@ -318,12 +318,12 @@ function IntegrationCard({ item }: { item: GuardrailIntegration }) {
   });
   return (
     <div className="rounded-xl overflow-hidden"
-      style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.10)" }}>
+      style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.10)" }}>
       <div className="px-4 py-3 flex items-center gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold text-white">{item.name}</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded font-medium text-slate-400"
+            <span className="text-sm font-semibold text-ink-50">{item.name}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded font-medium text-ink-400"
               style={{ background: "rgba(148,163,184,0.08)" }}>
               {PROVIDER_LABELS[item.provider]}
             </span>
@@ -337,16 +337,16 @@ function IntegrationCard({ item }: { item: GuardrailIntegration }) {
         <div className="flex items-center gap-1 shrink-0">
           <button onClick={() => toggle.mutate()}
             className="p-1 rounded hover:bg-white/8 transition-colors"
-            style={{ color: item.is_enabled ? "#818CF8" : "#475569" }}
+            style={{ color: item.is_enabled ? "#52525B" : "#475569" }}
             title={item.is_enabled ? "Disable" : "Enable"}>
             {item.is_enabled ? <ToggleRight className="size-4" /> : <ToggleLeft className="size-4" />}
           </button>
           <button onClick={() => del.mutate()}
-            className="p-1 rounded hover:bg-red-500/10 transition-colors text-slate-500 hover:text-red-400">
+            className="p-1 rounded hover:bg-red-500/10 transition-colors text-ink-400 hover:text-red-400">
             <Trash2 className="size-3.5" />
           </button>
           <button onClick={() => setOpen(o => !o)}
-            className="p-1 rounded hover:bg-white/8 transition-colors text-slate-500">
+            className="p-1 rounded hover:bg-white/8 transition-colors text-ink-400">
             {open ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
           </button>
         </div>
@@ -357,7 +357,7 @@ function IntegrationCard({ item }: { item: GuardrailIntegration }) {
 
           {/* Step 1 — Inbound URL */}
           <div>
-            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+            <p className="text-[10px] font-semibold text-ink-400 uppercase tracking-wider mb-1.5">
               Step 1 — Paste this URL into {PROVIDER_TEMPLATES[item.provider]?.label ?? PROVIDER_LABELS[item.provider]}
             </p>
             <div className="flex items-center gap-2 rounded-lg px-3 py-2"
@@ -366,24 +366,24 @@ function IntegrationCard({ item }: { item: GuardrailIntegration }) {
               <CopyButton text={item.webhook_inbound_url} />
             </div>
             {PROVIDER_TEMPLATES[item.provider] && (
-              <p className="text-[10px] text-slate-500 mt-1.5">
-                Where: <span className="text-slate-400">{PROVIDER_TEMPLATES[item.provider]!.where}</span>
+              <p className="text-[10px] text-ink-400 mt-1.5">
+                Where: <span className="text-ink-400">{PROVIDER_TEMPLATES[item.provider]!.where}</span>
               </p>
             )}
           </div>
 
           {/* Step 2 — Kynara payload format */}
           <div>
-            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+            <p className="text-[10px] font-semibold text-ink-400 uppercase tracking-wider mb-1.5">
               Step 2 — Kynara inbound format <span className="normal-case font-normal text-slate-600">(stable — never changes)</span>
             </p>
             <div className="rounded-lg overflow-hidden" style={{ border: "1px solid rgba(148,163,184,0.1)" }}>
               <div className="flex items-center justify-between px-3 py-1.5"
                 style={{ background: "rgba(148,163,184,0.05)", borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
-                <span className="text-[10px] font-mono text-slate-500">application/json</span>
+                <span className="text-[10px] font-mono text-ink-400">application/json</span>
                 <CopyButton text={KYNARA_PAYLOAD_SCHEMA} />
               </div>
-              <pre className="text-[10px] font-mono text-slate-300 px-3 py-2.5 overflow-x-auto leading-relaxed"
+              <pre className="text-[10px] font-mono text-ink-300 px-3 py-2.5 overflow-x-auto leading-relaxed"
                 style={{ background: "#080E1A" }}>
                 {KYNARA_PAYLOAD_SCHEMA}
               </pre>
@@ -393,12 +393,12 @@ function IntegrationCard({ item }: { item: GuardrailIntegration }) {
           {/* Step 3 — Provider-specific template */}
           {PROVIDER_TEMPLATES[item.provider] && (
             <div>
-              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+              <p className="text-[10px] font-semibold text-ink-400 uppercase tracking-wider mb-1.5">
                 Step 3 — Configure {PROVIDER_TEMPLATES[item.provider]!.label} to send in Kynara format
               </p>
-              <div className="rounded-lg overflow-hidden" style={{ border: "1px solid rgba(99,102,241,0.2)" }}>
+              <div className="rounded-lg overflow-hidden" style={{ border: "1px solid rgba(24,24,27,0.2)" }}>
                 <div className="flex items-center justify-between px-3 py-1.5"
-                  style={{ background: "rgba(99,102,241,0.06)", borderBottom: "1px solid rgba(99,102,241,0.12)" }}>
+                  style={{ background: "rgba(24,24,27,0.06)", borderBottom: "1px solid rgba(24,24,27,0.12)" }}>
                   <span className="text-[10px] font-medium text-indigo-300">
                     {PROVIDER_TEMPLATES[item.provider]!.templateLabel}
                   </span>
@@ -410,7 +410,7 @@ function IntegrationCard({ item }: { item: GuardrailIntegration }) {
                 </pre>
               </div>
               {PROVIDER_TEMPLATES[item.provider]!.note && (
-                <p className="text-[10px] text-slate-500 mt-1.5 flex items-start gap-1">
+                <p className="text-[10px] text-ink-400 mt-1.5 flex items-start gap-1">
                   <span className="shrink-0 mt-px">💡</span>
                   {PROVIDER_TEMPLATES[item.provider]!.note}
                 </p>
@@ -420,7 +420,7 @@ function IntegrationCard({ item }: { item: GuardrailIntegration }) {
 
           {/* Generic fallback for providers without a template */}
           {!PROVIDER_TEMPLATES[item.provider] && (
-            <p className="text-[10px] text-slate-500">
+            <p className="text-[10px] text-ink-400">
               Configure your platform's webhook to POST the Kynara format above to the inbound URL.
               The format is stable — Kynara will never change it to match provider-specific schemas.
             </p>
@@ -491,8 +491,8 @@ function RuleModal({ onClose }: { onClose: () => void }) {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["guardrail-rules"] }); onClose(); },
   });
 
-  const inp = "w-full rounded-lg px-3 py-2 text-sm text-white border outline-none focus:border-indigo-500 transition-colors";
-  const bdr = { border: "1px solid rgba(148,163,184,0.15)", background: "#0D1421", color: "#F1F5F9" };
+  const inp = "w-full rounded-lg px-3 py-2 text-sm text-ink-50 border outline-none focus:border-indigo-500 transition-colors";
+  const bdr = { border: "1px solid rgba(148,163,184,0.15)", background: "#FFFFFF", color: "#18181B" };
 
   function toggleSev(s: string) {
     setForm(f => ({
@@ -514,17 +514,17 @@ function RuleModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
       <div className="w-full max-w-lg rounded-2xl p-6 space-y-5"
-        style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.12)" }}>
+        style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
         <div>
-          <h2 className="text-base font-bold text-white">New Rule</h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <h2 className="text-base font-bold text-ink-50">New Rule</h2>
+          <p className="text-xs text-ink-400 mt-0.5">
             Define when Kynara should act — only after enough events accumulate in a time window.
           </p>
         </div>
 
         {/* Quick presets */}
         <div>
-          <p className="text-xs text-slate-500 mb-2">Quick setup</p>
+          <p className="text-xs text-ink-400 mb-2">Quick setup</p>
           <div className="grid grid-cols-2 gap-2">
             {RULE_PRESETS.map(preset => (
               <button
@@ -532,10 +532,10 @@ function RuleModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={() => setForm(f => ({ ...f, ...preset.patch, name: f.name || preset.label }))}
                 className="text-left rounded-xl px-3 py-2.5 transition-colors hover:bg-white/5"
-                style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.15)" }}
+                style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.15)" }}
               >
-                <div className="text-sm mb-0.5">{preset.icon} <span className="text-xs font-semibold text-slate-200">{preset.label}</span></div>
-                <p className="text-[10px] text-slate-500 leading-snug">{preset.description}</p>
+                <div className="text-sm mb-0.5">{preset.icon} <span className="text-xs font-semibold text-ink-100">{preset.label}</span></div>
+                <p className="text-[10px] text-ink-400 leading-snug">{preset.description}</p>
               </button>
             ))}
           </div>
@@ -544,14 +544,14 @@ function RuleModal({ onClose }: { onClose: () => void }) {
         <div className="space-y-3">
           {/* Name */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Rule name</label>
+            <label className="block text-xs text-ink-400 mb-1">Rule name</label>
             <input className={inp} style={bdr} placeholder="e.g. Disable agent on critical alert"
               value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Description (optional)</label>
+            <label className="block text-xs text-ink-400 mb-1">Description (optional)</label>
             <input className={inp} style={bdr} placeholder="What does this rule protect against?"
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
@@ -559,25 +559,25 @@ function RuleModal({ onClose }: { onClose: () => void }) {
 
           {/* Threshold condition */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Trigger condition</label>
+            <label className="block text-xs text-ink-400 mb-1">Trigger condition</label>
             <div className="rounded-xl p-4 space-y-3"
-              style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.18)" }}>
+              style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.18)" }}>
               <p className="text-xs text-indigo-300 font-medium">
                 Fire when{" "}
-                <strong className="text-white">{form.event_count_threshold}</strong>{" "}
+                <strong className="text-ink-50">{form.event_count_threshold}</strong>{" "}
                 or more matching events arrive within{" "}
-                <strong className="text-white">{formatWindow(form.time_window_seconds)}</strong>
+                <strong className="text-ink-50">{formatWindow(form.time_window_seconds)}</strong>
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] text-slate-500 mb-1">Event count</label>
+                  <label className="block text-[10px] text-ink-400 mb-1">Event count</label>
                   <input type="number" min={1} max={1000}
                     className={inp} style={bdr}
                     value={form.event_count_threshold}
                     onChange={e => setForm(f => ({ ...f, event_count_threshold: parseInt(e.target.value) || 1 }))} />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-slate-500 mb-1">Time window (seconds)</label>
+                  <label className="block text-[10px] text-ink-400 mb-1">Time window (seconds)</label>
                   <input type="number" min={10} max={86400}
                     className={inp} style={bdr}
                     value={form.time_window_seconds}
@@ -592,9 +592,9 @@ function RuleModal({ onClose }: { onClose: () => void }) {
                     className="text-[10px] px-2 py-1 rounded-md transition-colors"
                     style={{
                       background: form.time_window_seconds === p.value
-                        ? "rgba(99,102,241,0.25)" : "rgba(148,163,184,0.06)",
-                      color: form.time_window_seconds === p.value ? "#818CF8" : "#64748B",
-                      border: `1px solid ${form.time_window_seconds === p.value ? "rgba(99,102,241,0.4)" : "rgba(148,163,184,0.1)"}`,
+                        ? "rgba(24,24,27,0.25)" : "rgba(148,163,184,0.06)",
+                      color: form.time_window_seconds === p.value ? "#52525B" : "#64748B",
+                      border: `1px solid ${form.time_window_seconds === p.value ? "rgba(24,24,27,0.4)" : "rgba(148,163,184,0.1)"}`,
                     }}>
                     {p.label}
                   </button>
@@ -605,12 +605,12 @@ function RuleModal({ onClose }: { onClose: () => void }) {
 
           {/* Action */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Action to take when rule fires</label>
+            <label className="block text-xs text-ink-400 mb-1">Action to take when rule fires</label>
             <select className={inp} style={bdr} value={form.action}
               onChange={e => setForm(f => ({ ...f, action: e.target.value as Action }))}>
               {Object.entries(ACTION_LABELS)
                 .filter(([v]) => v !== "suspend_agent")
-                .map(([v, l]) => <option key={v} value={v} style={{ background: "#0D1421", color: "#F1F5F9" }}>{l}</option>)}
+                .map(([v, l]) => <option key={v} value={v} style={{ background: "#FFFFFF", color: "#18181B" }}>{l}</option>)}
             </select>
             {form.action === "disable_agent" && (
               <p className="text-[10px] text-orange-400 mt-1 flex items-center gap-1">
@@ -622,7 +622,7 @@ function RuleModal({ onClose }: { onClose: () => void }) {
 
           {/* Severity filter */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1 flex items-center gap-1">
+            <label className="block text-xs text-ink-400 mb-1 flex items-center gap-1">
               <Filter className="size-3" /> Filter by severity (optional — leave blank for any)
             </label>
             <div className="flex gap-2">
@@ -646,7 +646,7 @@ function RuleModal({ onClose }: { onClose: () => void }) {
 
           {/* Rule name filter */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1 flex items-center gap-1">
+            <label className="block text-xs text-ink-400 mb-1 flex items-center gap-1">
               <Filter className="size-3" /> Filter by rule names (optional — comma-separated)
             </label>
             <input className={inp} style={bdr}
@@ -695,28 +695,28 @@ function RulesSection() {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-ink-100 flex items-center gap-2">
             <Zap className="size-4 text-yellow-400" />
             Threshold Rules
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-ink-400 mt-0.5">
             Rules only fire when enough events accumulate — preventing false positives from single-event noise.
           </p>
         </div>
         <button onClick={() => setShowCreate(true)}
           className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors"
-          style={{ background: "rgba(99,102,241,0.12)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.25)" }}>
+          style={{ background: "rgba(24,24,27,0.12)", color: "#52525B", border: "1px solid rgba(24,24,27,0.25)" }}>
           <Plus className="size-3.5" /> Add Rule
         </button>
       </div>
 
-      {isLoading && <p className="text-xs text-slate-500">Loading…</p>}
+      {isLoading && <p className="text-xs text-ink-400">Loading…</p>}
 
       {!isLoading && rules.length === 0 && (
         <div className="rounded-xl p-6 text-center"
-          style={{ background: "#0D1421", border: "1px dashed rgba(148,163,184,0.12)" }}>
+          style={{ background: "#FFFFFF", border: "1px dashed rgba(148,163,184,0.12)" }}>
           <Zap className="size-6 mx-auto mb-2 text-slate-600" />
-          <p className="text-sm text-slate-400">No threshold rules yet</p>
+          <p className="text-sm text-ink-400">No threshold rules yet</p>
           <p className="text-xs text-slate-600 mt-1">
             Add a rule to auto-revoke access only when a pattern repeats — e.g. 5 critical events in 5 minutes.
           </p>
@@ -726,19 +726,19 @@ function RulesSection() {
       <div className="space-y-2">
         {rules.map(rule => (
           <div key={rule.id} className="rounded-xl px-4 py-3 flex items-start gap-3"
-            style={{ background: "#0D1421", border: `1px solid ${rule.is_enabled ? "rgba(148,163,184,0.10)" : "rgba(148,163,184,0.05)"}`, opacity: rule.is_enabled ? 1 : 0.55 }}>
+            style={{ background: "#FFFFFF", border: `1px solid ${rule.is_enabled ? "rgba(148,163,184,0.10)" : "rgba(148,163,184,0.05)"}`, opacity: rule.is_enabled ? 1 : 0.55 }}>
             <div className="flex-1 min-w-0 space-y-1.5">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-semibold text-white">{rule.name}</span>
+                <span className="text-sm font-semibold text-ink-50">{rule.name}</span>
                 <ActionBadge action={rule.action} />
               </div>
               {rule.description && (
-                <p className="text-xs text-slate-500">{rule.description}</p>
+                <p className="text-xs text-ink-400">{rule.description}</p>
               )}
               {/* Threshold pill */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full"
-                  style={{ background: "rgba(99,102,241,0.10)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.2)" }}>
+                  style={{ background: "rgba(24,24,27,0.10)", color: "#52525B", border: "1px solid rgba(24,24,27,0.2)" }}>
                   <Clock className="size-3" />
                   {rule.event_count_threshold} events in {formatWindow(rule.time_window_seconds)}
                 </span>
@@ -759,12 +759,12 @@ function RulesSection() {
             <div className="flex items-center gap-1 shrink-0">
               <button onClick={() => toggle.mutate(rule)}
                 className="p-1 rounded hover:bg-white/8 transition-colors"
-                style={{ color: rule.is_enabled ? "#818CF8" : "#475569" }}
+                style={{ color: rule.is_enabled ? "#52525B" : "#475569" }}
                 title={rule.is_enabled ? "Disable" : "Enable"}>
                 {rule.is_enabled ? <ToggleRight className="size-4" /> : <ToggleLeft className="size-4" />}
               </button>
               <button onClick={() => del.mutate(rule.id)}
-                className="p-1 rounded hover:bg-red-500/10 transition-colors text-slate-500 hover:text-red-400">
+                className="p-1 rounded hover:bg-red-500/10 transition-colors text-ink-400 hover:text-red-400">
                 <Trash2 className="size-3.5" />
               </button>
             </div>
@@ -794,7 +794,7 @@ function EventsTable() {
   if (!events.length) return (
     <div className="px-4 py-8 text-center">
       <CheckCircle2 className="size-6 mx-auto mb-2 text-slate-700" />
-      <p className="text-xs text-slate-500">No guardrail events yet</p>
+      <p className="text-xs text-ink-400">No guardrail events yet</p>
     </div>
   );
 
@@ -803,24 +803,24 @@ function EventsTable() {
       <thead>
         <tr style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
           {["Time", "Rule", "Severity", "Agent", "Action taken"].map(h => (
-            <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">{h}</th>
+            <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-400">{h}</th>
           ))}
         </tr>
       </thead>
       <tbody>
         {events.map((e, i) => (
           <tr key={e.id} style={{ borderBottom: i < events.length - 1 ? "1px solid rgba(148,163,184,0.05)" : "none" }}>
-            <td className="px-4 py-2.5 text-slate-500 whitespace-nowrap">
+            <td className="px-4 py-2.5 text-ink-400 whitespace-nowrap">
               {new Date(e.created_at).toLocaleTimeString()}
             </td>
-            <td className="px-4 py-2.5 text-slate-300 max-w-[180px] truncate">{e.rule_name}</td>
+            <td className="px-4 py-2.5 text-ink-300 max-w-[180px] truncate">{e.rule_name}</td>
             <td className="px-4 py-2.5">
               <span className="flex items-center gap-1.5">
-                {SEV_ICON[e.severity] ?? <Clock className="size-3.5 text-slate-500" />}
-                <span className="capitalize text-slate-400">{e.severity}</span>
+                {SEV_ICON[e.severity] ?? <Clock className="size-3.5 text-ink-400" />}
+                <span className="capitalize text-ink-400">{e.severity}</span>
               </span>
             </td>
-            <td className="px-4 py-2.5 font-mono text-slate-500 max-w-[120px] truncate">
+            <td className="px-4 py-2.5 font-mono text-ink-400 max-w-[120px] truncate">
               {e.agent_id ? e.agent_id.slice(0, 8) + "…" : "—"}
             </td>
             <td className="px-4 py-2.5">
@@ -847,11 +847,11 @@ export default function GuardrailsPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-xl font-bold text-ink-50 flex items-center gap-2">
             <ShieldAlert className="size-5 text-indigo-400" />
             Guardrail Integrations
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-ink-400 mt-1">
             Connect Grafana, Datadog, PagerDuty, Prometheus, Arize AI, Langfuse, and more.
             Define threshold rules to automatically disable agents or revoke access when alerts fire.
           </p>
@@ -864,15 +864,15 @@ export default function GuardrailsPage() {
 
       {/* How it works callout */}
       <div className="rounded-xl p-4 flex gap-3"
-        style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.18)" }}>
+        style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.18)" }}>
         <Zap className="size-4 text-yellow-400 mt-0.5 shrink-0" />
         <div className="space-y-1">
           <p className="text-xs font-semibold text-indigo-300">Threshold-based enforcement</p>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-ink-400">
             Events flow in from Grafana, Datadog, PagerDuty, or any monitoring platform via webhook.
-            Kynara evaluates your <strong className="text-slate-200">threshold rules</strong> — acting only
+            Kynara evaluates your <strong className="text-ink-100">threshold rules</strong> — acting only
             when the event count within a time window reaches your limit. You can{" "}
-            <strong className="text-slate-200">disable an agent instantly</strong> on a single critical alert,
+            <strong className="text-ink-100">disable an agent instantly</strong> on a single critical alert,
             or only after repeated violations. Every enforcement is recorded in the tamper-evident audit log.
           </p>
         </div>
@@ -883,13 +883,13 @@ export default function GuardrailsPage() {
 
       {/* Integrations */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-slate-200">Active Integrations</h2>
-        {isLoading && <p className="text-xs text-slate-500">Loading…</p>}
+        <h2 className="text-sm font-semibold text-ink-100">Active Integrations</h2>
+        {isLoading && <p className="text-xs text-ink-400">Loading…</p>}
         {!isLoading && integrations.length === 0 && (
           <div className="rounded-xl p-8 text-center"
-            style={{ background: "#0D1421", border: "1px dashed rgba(148,163,184,0.15)" }}>
+            style={{ background: "#FFFFFF", border: "1px dashed rgba(148,163,184,0.15)" }}>
             <ShieldAlert className="size-8 mx-auto mb-2 text-slate-600" />
-            <p className="text-sm text-slate-400">No integrations yet</p>
+            <p className="text-sm text-ink-400">No integrations yet</p>
             <p className="text-xs text-slate-600 mt-1">Add your first guardrail integration above.</p>
           </div>
         )}
@@ -898,9 +898,9 @@ export default function GuardrailsPage() {
 
       {/* Recent Events */}
       <div>
-        <h2 className="text-sm font-semibold text-slate-200 mb-3">Recent Guardrail Events</h2>
+        <h2 className="text-sm font-semibold text-ink-100 mb-3">Recent Guardrail Events</h2>
         <div className="rounded-xl overflow-hidden"
-          style={{ background: "#0D1421", border: "1px solid rgba(148,163,184,0.10)" }}>
+          style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.10)" }}>
           <EventsTable />
         </div>
       </div>

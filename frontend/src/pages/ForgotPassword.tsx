@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#05080F" }}>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#FFFFFF" }}>
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 mb-8 hover:opacity-80 transition-opacity">
@@ -39,8 +39,8 @@ export default function ForgotPasswordPage() {
             alt="Kynara"
           />
           <div>
-            <div className="text-base font-bold text-white tracking-tight leading-none">Kynara</div>
-            <div className="text-[10px] font-medium mt-0.5" style={{ color: "#818CF8", letterSpacing: "0.06em" }}>
+            <div className="text-base font-bold text-ink-50 tracking-tight leading-none">Kynara</div>
+            <div className="text-[10px] font-medium mt-0.5" style={{ color: "#52525B", letterSpacing: "0.06em" }}>
               AI Control Plane
             </div>
           </div>
@@ -52,21 +52,21 @@ export default function ForgotPasswordPage() {
             <div className="text-center py-4">
               <div
                 className="size-14 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.25)" }}
+                style={{ background: "rgba(24,24,27,0.12)", border: "1px solid rgba(24,24,27,0.25)" }}
               >
-                <Mail className="size-7" style={{ color: "#818CF8" }} />
+                <Mail className="size-7" style={{ color: "#52525B" }} />
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">Check your email</h2>
+              <h2 className="text-xl font-bold text-ink-50 mb-2">Check your email</h2>
               <p className="text-sm text-ink-300 mb-1">
                 We sent a password reset link to
               </p>
-              <p className="text-sm font-semibold text-white mb-5">{email}</p>
+              <p className="text-sm font-semibold text-ink-50 mb-5">{email}</p>
               <p className="text-xs text-ink-400 mb-6">
                 The link expires in 1 hour. If you don't see the email, check your spam folder.
               </p>
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 text-sm text-ink-300 hover:text-white transition-colors"
+                className="inline-flex items-center gap-2 text-sm text-ink-300 hover:text-ink-50 transition-colors"
               >
                 <ArrowLeft className="size-4" /> Back to sign in
               </Link>
@@ -75,7 +75,7 @@ export default function ForgotPasswordPage() {
             /* ── Form state ── */
             <>
               <div className="mb-6">
-                <h2 className="text-xl font-bold text-white">Forgot your password?</h2>
+                <h2 className="text-xl font-bold text-ink-50">Forgot your password?</h2>
                 <p className="text-sm text-ink-300 mt-1">
                   Enter your email and we'll send you a reset link.
                 </p>
