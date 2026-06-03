@@ -740,4 +740,24 @@ export default function PolicyEditorPage() {
             </div>
             <div className="flex items-center justify-end gap-3 px-6 py-4"
               style={{ borderTop: "1px solid rgba(148,163,184,0.08)" }}>
-              <bu
+              <button
+                onClick={() => setBindingOpen(false)}
+                className="btn-secondary"
+                disabled={addBinding.isPending}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => addBinding.mutate()}
+                className="btn-primary"
+                disabled={addBinding.isPending || !newSelector.trim()}
+              >
+                {addBinding.isPending ? "Adding…" : "Add binding"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
