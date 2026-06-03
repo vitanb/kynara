@@ -1223,7 +1223,7 @@ function ProfileTab() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {THEMES.map(t => {
             const active = theme === t.id;
-            const isLight = t.id === "google";
+            const isLight = t.id === "linen";
             const cardBorder = isLight ? "1px solid #DADCE0" : "1px solid rgba(255,255,255,0.06)";
             const labelColor = isLight ? "#202124" : "#FFFFFF";
             const swatchBorder = isLight ? "1px solid #DADCE0" : "1px solid rgba(255,255,255,0.15)";

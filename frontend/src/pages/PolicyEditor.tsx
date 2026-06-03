@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import PageHeader from "@/components/layout/PageHeader";
@@ -8,6 +8,11 @@ import {
   ChevronDown, ChevronUp, Info, Plus, Trash2, Link2, X,
   BookOpen, Layers, Mail,
 } from "lucide-react";
+
+// ── Small labelled form field wrapper ──────────────────────────────────────────
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return <div><label className="label">{label}</label>{children}</div>;
+}
 
 const DEFAULT_POLICY = {
   slug: "",
