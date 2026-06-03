@@ -17,7 +17,7 @@ const ROLE_ICONS: Record<string, React.ElementType> = {
   owner: Crown, admin: Crown, developer: Code2, auditor: Eye, member: UserIcon,
 };
 const ROLE_COLORS: Record<string, string> = {
-  owner: "#F59E0B", admin: "#18181B", developer: "#10B981", auditor: "#2DD4BF", member: "#94A3B8",
+  owner: "#F59E0B", admin: "var(--s0-accent)", developer: "#10B981", auditor: "#2DD4BF", member: "#94A3B8",
 };
 
 export default function SettingsPage() {
@@ -163,7 +163,7 @@ function MembersTab() {
                   <td>
                     <div className="flex items-center gap-2.5">
                       <div className="size-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                        style={{ background: "rgba(24,24,27,0.15)", color: "#52525B" }}>
+                        style={{ background: "var(--s0-accent-ring)", color: "var(--s0-accent-text)" }}>
                         {(m.display_name || m.email).charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -263,7 +263,7 @@ function MembersTab() {
 
       {/* Freshly generated link */}
       {freshLink && (
-        <div className="card p-4" style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.2)" }}>
+        <div className="card p-4" style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}>
           <div className="text-xs text-indigo-300 mb-2 font-medium">Invite link generated — share this with your colleague:</div>
           <div className="flex items-center gap-2">
             <code className="flex-1 bg-ink-900 border border-ink-800 rounded-lg p-2.5 text-xs font-mono text-ink-300 truncate">
@@ -413,8 +413,8 @@ function ApiKeysTab() {
         >
           <div className="flex items-center gap-3">
             <div className="size-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: "rgba(24,24,27,0.12)", border: "1px solid rgba(24,24,27,0.2)" }}>
-              <Activity className="size-4" style={{ color: "#52525B" }} />
+              style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}>
+              <Activity className="size-4" style={{ color: "var(--s0-accent-text)" }} />
             </div>
             <div>
               <div className="text-sm font-medium text-ink-50">SIEM integration — Splunk, Datadog, Elastic, etc.</div>
@@ -499,7 +499,7 @@ function ApiKeysTab() {
                     {steps.map((s, i) => (
                       <li key={i} className="flex gap-2 text-xs text-ink-400 leading-relaxed">
                         <span className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5"
-                          style={{ background: "rgba(24,24,27,0.15)", color: "#52525B" }}>
+                          style={{ background: "var(--s0-accent-ring)", color: "var(--s0-accent-text)" }}>
                           {i + 1}
                         </span>
                         {s}
@@ -802,7 +802,7 @@ function SsoEditModal({ connection, onClose, onSaved, onDeleted }: {
     >
       <div
         className="w-full max-w-xl rounded-2xl flex flex-col max-h-[90vh]"
-        style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.12)" }}
+        style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,0.12)" }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 shrink-0"
@@ -1002,7 +1002,7 @@ function DangerModal({
     >
       <div
         className="w-full max-w-md rounded-2xl p-7 relative"
-        style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.12)" }}
+        style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,0.12)" }}
       >
         <button
           onClick={onClose}
@@ -1223,9 +1223,9 @@ function ProfileTab() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {THEMES.map(t => {
             const active = theme === t.id;
-            const isLight = t.id === "linen";
-            const cardBorder = isLight ? "1px solid #DADCE0" : "1px solid rgba(255,255,255,0.06)";
-            const labelColor = isLight ? "#202124" : "#FFFFFF";
+            const isLight = t.id === "mercury-light";
+            const cardBorder = isLight ? "1px solid #E3E9F1" : "1px solid rgba(255,255,255,0.08)";
+            const labelColor = isLight ? "#0F172A" : "#E8EDF5";
             const swatchBorder = isLight ? "1px solid #DADCE0" : "1px solid rgba(255,255,255,0.15)";
             const shadow = active
               ? `0 0 0 3px ${t.accent}33, 0 4px 20px ${isLight ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.4)"}`
@@ -1298,3 +1298,4 @@ function ProfileTab() {
     </div>
   );
 }
+ 

@@ -425,7 +425,7 @@ export default function AgentDetailPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-md rounded-2xl shadow-2xl"
-            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)" }}>
             <div className="flex items-center justify-between px-6 py-4"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
               <div>
@@ -480,7 +480,7 @@ export default function AgentDetailPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-md rounded-2xl shadow-2xl"
-            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)" }}>
             <div className="flex items-center justify-between px-6 py-4"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
               <div>
@@ -539,7 +539,7 @@ export default function AgentDetailPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-md rounded-2xl shadow-2xl"
-            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)" }}>
             <div className="flex items-center justify-between px-6 py-4"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
               <div>
@@ -562,7 +562,7 @@ export default function AgentDetailPage() {
               </select>
               {selectedPolicy && (
                 <div className="rounded-lg px-4 py-3 text-xs text-ink-300"
-                  style={{ background: "rgba(24,24,27,0.08)", border: "1px solid rgba(24,24,27,0.15)" }}>
+                  style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}>
                   This will create a binding with selector{" "}
                   <code className="font-mono text-accent-400">agent:{id}</code>.
                   The policy will be evaluated for all actions taken by this agent.

@@ -18,13 +18,13 @@ const CATEGORY_COLORS: Record<string, string> = {
   "compliance": "rgba(245,158,11,.12)",
   "finserv":    "rgba(16,185,129,.12)",
   "healthcare": "rgba(52,211,153,.12)",
-  "devops":     "rgba(24,24,27,.12)",
+  "devops":     "var(--s0-accent-subtle)",
   "default":    "rgba(148,163,184,.08)",
 };
 const CATEGORY_TEXT: Record<string, string> = {
   "security": "#F43F5E", "compliance": "#FCD34D",
   "finserv": "#34D399", "healthcare": "#2DD4BF",
-  "devops": "#52525B", "default": "#94A3B8",
+  "devops": "var(--s0-accent-text)", "default": "#94A3B8",
 };
 
 export default function PolicyTemplatesPage() {
@@ -105,7 +105,7 @@ export default function PolicyTemplatesPage() {
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex-shrink-0"
                     style={isInstalled
                       ? { background: "rgba(16,185,129,.12)", color: "#34D399", border: "1px solid rgba(16,185,129,.3)" }
-                      : { background: "rgba(24,24,27,.15)", color: "#52525B", border: "1px solid rgba(24,24,27,.3)" }
+                      : { background: "var(--s0-accent-ring)", color: "var(--s0-accent-text)", border: "1px solid var(--s0-accent-ring)" }
                     }>
                     {installing === t.slug ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
                     {isInstalled ? "Installed" : "Install"}
@@ -140,7 +140,7 @@ export default function PolicyTemplatesPage() {
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }}
           onClick={() => setSelected(null)}>
           <div className="w-full max-w-2xl rounded-2xl p-7 overflow-y-auto max-h-[80vh]"
-            style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,.12)" }}
+            style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,.12)" }}
             onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-4">
               <h2 className="text-lg font-bold text-ink-50">{selected.display_name}</h2>

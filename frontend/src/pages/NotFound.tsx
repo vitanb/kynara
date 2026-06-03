@@ -7,14 +7,14 @@ export default function NotFoundPage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center p-8 text-center"
-      style={{ background: "#FFFFFF" }}
+      style={{ background: "var(--s0-card)" }}
     >
       {/* Logo */}
       <Link to="/" className="flex items-center gap-3 mb-16 hover:opacity-80 transition-opacity">
         <img src="/logo.svg" className="size-9 rounded-xl" alt="Kynara" />
         <div className="text-left">
           <div className="text-base font-bold text-ink-50 tracking-tight leading-none">Kynara</div>
-          <div className="text-[10px] font-medium mt-0.5" style={{ color: "#52525B", letterSpacing: "0.06em" }}>
+          <div className="text-[10px] font-medium mt-0.5" style={{ color: "var(--s0-accent-text)", letterSpacing: "0.06em" }}>
             AI Control Plane
           </div>
         </div>
@@ -26,7 +26,7 @@ export default function NotFoundPage() {
         style={{ fontSize: "9rem", fontWeight: 900, lineHeight: 1, color: "transparent",
           background: "linear-gradient(135deg, #18181B 0%, #52525B 50%, #312E81 100%)",
           WebkitBackgroundClip: "text", backgroundClip: "text",
-          filter: "drop-shadow(0 0 60px rgba(24,24,27,0.3))",
+          filter: "drop-shadow(0 0 60px var(--s0-accent-ring))",
         }}
       >
         404
@@ -53,8 +53,8 @@ export default function NotFoundPage() {
           to="/"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-ink-50 transition-all"
           style={{
-            background: "#18181B",
-            boxShadow: "0 0 0 1px rgba(24,24,27,0.5), 0 4px 20px rgba(24,24,27,0.35)",
+            background: "var(--s0-accent)",
+            boxShadow: "0 0 0 1px var(--s0-accent-ring), 0 4px 20px var(--s0-accent-ring)",
           }}
         >
           <Home className="size-4" /> Back to home
@@ -66,7 +66,7 @@ export default function NotFoundPage() {
         className="fixed inset-0 pointer-events-none -z-10"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(24,24,27,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(24,24,27,0.03) 1px, transparent 1px)",
+            "linear-gradient(var(--s0-accent-subtle) 1px, transparent 1px), linear-gradient(90deg, var(--s0-accent-subtle) 1px, transparent 1px)",
           backgroundSize: "48px 48px",
         }}
       />

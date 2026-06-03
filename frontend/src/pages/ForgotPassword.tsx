@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#FFFFFF" }}>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--s0-card)" }}>
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 mb-8 hover:opacity-80 transition-opacity">
@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
           />
           <div>
             <div className="text-base font-bold text-ink-50 tracking-tight leading-none">Kynara</div>
-            <div className="text-[10px] font-medium mt-0.5" style={{ color: "#52525B", letterSpacing: "0.06em" }}>
+            <div className="text-[10px] font-medium mt-0.5" style={{ color: "var(--s0-accent-text)", letterSpacing: "0.06em" }}>
               AI Control Plane
             </div>
           </div>
@@ -52,9 +52,9 @@ export default function ForgotPasswordPage() {
             <div className="text-center py-4">
               <div
                 className="size-14 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ background: "rgba(24,24,27,0.12)", border: "1px solid rgba(24,24,27,0.25)" }}
+                style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}
               >
-                <Mail className="size-7" style={{ color: "#52525B" }} />
+                <Mail className="size-7" style={{ color: "var(--s0-accent-text)" }} />
               </div>
               <h2 className="text-xl font-bold text-ink-50 mb-2">Check your email</h2>
               <p className="text-sm text-ink-300 mb-1">

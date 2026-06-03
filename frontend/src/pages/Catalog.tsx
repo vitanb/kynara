@@ -13,7 +13,7 @@ const RISK: Record<string, { bg: string; text: string }> = {
   low:      { bg: "rgba(16,185,129,0.12)",  text: "#34D399" },
   medium:   { bg: "rgba(245,158,11,0.12)",  text: "#FBBF24" },
   high:     { bg: "rgba(244,63,94,0.12)",   text: "#F87171" },
-  critical: { bg: "rgba(24,24,27,0.12)",  text: "#71717A" },
+  critical: { bg: "var(--s0-accent-subtle)",  text: "var(--s0-text-muted)" },
 };
 
 const EFFECT: Record<string, { bg: string; text: string }> = {
@@ -36,7 +36,7 @@ function CopyButton({ text }: { text: string }) {
       type="button"
       onClick={() => { copyText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
       className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded transition-colors"
-      style={{ background: "rgba(24,24,27,0.1)", color: copied ? "#34D399" : "#52525B", border: "1px solid rgba(24,24,27,0.2)" }}
+      style={{ background: "var(--s0-accent-subtle)", color: copied ? "#34D399" : "var(--s0-accent-text)", border: "1px solid var(--s0-accent-ring)" }}
     >
       {copied ? <CheckCircle2 className="size-3" /> : <Copy className="size-3" />}
       {copied ? "Copied" : "Copy"}
@@ -71,7 +71,7 @@ function ScopeDomainsTab() {
         return (
           <div key={d.domain}
             className="rounded-xl overflow-hidden"
-            style={{ border: `1px solid ${open ? "rgba(24,24,27,0.3)" : "rgba(148,163,184,0.1)"}`, background: "rgba(148,163,184,0.02)" }}>
+            style={{ border: `1px solid ${open ? "var(--s0-accent-ring)" : "rgba(148,163,184,0.1)"}`, background: "rgba(148,163,184,0.02)" }}>
 
             {/* Header row */}
             <button
@@ -155,7 +155,7 @@ function PolicyTemplatesTab() {
         return (
           <div key={t.id}
             className="rounded-xl overflow-hidden"
-            style={{ border: `1px solid ${open ? "rgba(24,24,27,0.3)" : "rgba(148,163,184,0.1)"}`, background: "rgba(148,163,184,0.02)" }}>
+            style={{ border: `1px solid ${open ? "var(--s0-accent-ring)" : "rgba(148,163,184,0.1)"}`, background: "rgba(148,163,184,0.02)" }}>
 
             {/* Header row */}
             <button
@@ -200,7 +200,7 @@ function PolicyTemplatesTab() {
                   </pre>
 
                   <div className="mt-3 rounded-lg px-3 py-2 text-[11px] text-ink-400"
-                    style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.12)" }}>
+                    style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-subtle)" }}>
                     <span className="font-semibold text-ink-200">How to use: </span>
                     Copy the JSON above, open a policy in the editor, paste it into the
                     <span className="font-mono text-ink-200"> Condition</span> field, and adjust the values
@@ -406,7 +406,7 @@ function ToolTemplatesTab() {
           <Link
             to="/app/tools"
             className="flex items-center gap-1.5 text-[11px] font-medium shrink-0 transition-colors"
-            style={{ color: "#52525B" }}
+            style={{ color: "var(--s0-accent-text)" }}
           >
             <ExternalLink className="size-3" /> View your catalog
           </Link>
@@ -423,7 +423,7 @@ function ToolTemplatesTab() {
             <div
               key={d.domain}
               className="rounded-xl overflow-hidden"
-              style={{ border: `1px solid ${open ? "rgba(24,24,27,0.3)" : "rgba(148,163,184,0.1)"}`, background: "rgba(148,163,184,0.02)" }}
+              style={{ border: `1px solid ${open ? "var(--s0-accent-ring)" : "rgba(148,163,184,0.1)"}`, background: "rgba(148,163,184,0.02)" }}
             >
               {/* Domain header */}
               <button
@@ -479,7 +479,7 @@ function ToolTemplatesTab() {
                           <p className="text-xs text-ink-500 mt-0.5">{t.description}</p>
                           <div className="flex flex-wrap gap-1 mt-1.5">
                             {(t.scopes as string[]).map((s: string) => (
-                              <span key={s} className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(24,24,27,0.08)", color: "#52525B", border: "1px solid rgba(24,24,27,0.15)" }}>
+                              <span key={s} className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "var(--s0-accent-subtle)", color: "var(--s0-accent-text)", border: "1px solid var(--s0-accent-ring)" }}>
                                 {s}
                               </span>
                             ))}
@@ -491,7 +491,7 @@ function ToolTemplatesTab() {
                           type="button"
                           onClick={() => setLoadModal(t)}
                           className="btn-ghost shrink-0 text-xs flex items-center gap-1.5"
-                          style={{ color: "#52525B" }}
+                          style={{ color: "var(--s0-accent-text)" }}
                         >
                           <Plus className="size-3.5" /> Load into org
                         </button>
@@ -542,7 +542,7 @@ export default function CatalogPage() {
               onClick={() => setTab(key as any)}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               style={tab === key
-                ? { background: "rgba(24,24,27,0.2)", color: "#52525B" }
+                ? { background: "var(--s0-accent-ring)", color: "var(--s0-accent-text)" }
                 : { color: "#64748B" }}
             >
               <Icon className="size-4" />

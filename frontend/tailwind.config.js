@@ -4,60 +4,56 @@ export default {
   theme: {
     extend: {
       colors: {
-        // ── Neutral ramp (light monochrome — WorkOS / Notion family) ──────────
-        // NOTE: scale is intentionally "inverted" vs a dark theme so existing
-        // usage (bg-ink-950 = page, text-ink-50 = primary text) renders light.
-        // Low indices = dark ink for TEXT. High indices = light surfaces for BG.
+        // ── Neutral ramp — slate-tinted, DARK orientation (default theme is dark)
+        // bg-ink-950 = page (darkest), text-ink-50 = primary text (lightest).
         ink: {
-          50:  "#18181B",   // primary text — near black
-          100: "#27272A",   // strong text
-          200: "#3F3F46",   // body text
-          300: "#52525B",   // muted text
-          400: "#71717A",   // faint text / icons
-          500: "#A1A1AA",   // placeholder / disabled
-          600: "#D4D4D8",   // strong hairline / hover border
-          700: "#E7E5E4",   // hairline border / secondary surface
-          800: "#FFFFFF",   // card surface
-          900: "#FAFAF9",   // sidebar / elevated rail
-          950: "#FFFFFF",   // page background
+          50:  "#F8FAFC",   // primary text
+          100: "#E8EDF5",   // strong text
+          200: "#CBD5E1",   // body text
+          300: "#94A3B8",   // muted text
+          400: "#64748B",   // faint text / icons
+          500: "#475569",   // subtle / disabled
+          600: "#334155",   // strong hairline
+          700: "#1E2533",   // hairline / secondary surface
+          800: "#151A24",   // card surface
+          900: "#0F131B",   // sidebar / elevated rail
+          950: "#0B0E14",   // page background
         },
-        // ── Brand accent — monochrome ink (no purple). Reserved for primary
-        // actions and active states; color is otherwise semantic only. ────────
+        // ── Brand accent — Mercury blue ───────────────────────────────────────
         accent: {
-          50:  "#F4F4F5",
-          100: "#E7E5E4",
-          300: "#A1A1AA",
-          400: "#52525B",   // "info" text / subtle links
-          500: "#27272A",   // primary hover
-          600: "#18181B",   // primary resting (near black)
-          700: "#000000",
-          800: "#000000",
+          50:  "#EFF6FF",
+          100: "#DBEAFE",
+          300: "#93C5FD",
+          400: "#60A5FA",   // accent text / links on dark
+          500: "#3B82F6",   // primary interactive (dark)
+          600: "#2563EB",   // primary resting (light) / button
+          700: "#1D4ED8",   // hover
+          800: "#1E40AF",
         },
-        // Secondary data accent — muted teal for charts / live indicators
+        // Secondary data accent — cyan/teal for charts / live indicators
         teal: {
-          300: "#5EEAD4",
-          400: "#0D9488",
-          500: "#0F766E",
-          600: "#115E59",
-          700: "#134E4A",
+          300: "#7DD3FC",
+          400: "#38BDF8",
+          500: "#0EA5E9",
+          600: "#0284C7",
+          700: "#0369A1",
         },
-        // ── Status palette — tuned for contrast on white surfaces ─────────────
-        ok:     { 300: "#6EE7B7", 400: "#059669", 500: "#047857", 700: "#065F46" },
-        warn:   { 300: "#FCD34D", 400: "#B45309", 500: "#92400E", 700: "#78350F" },
-        danger: { 300: "#FDA4AF", 400: "#DC2626", 500: "#B91C1C", 700: "#991B1B" },
+        // ── Status palette — readable on dark and light surfaces ──────────────
+        ok:     { 300: "#6EE7B7", 400: "#10B981", 500: "#059669", 700: "#047857" },
+        warn:   { 300: "#FCD34D", 400: "#F59E0B", 500: "#D97706", 700: "#B45309" },
+        danger: { 300: "#FDA4AF", 400: "#F43F5E", 500: "#E11D48", 700: "#BE123C" },
       },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui"],
         mono: ["ui-monospace", "Menlo", "monospace"],
       },
       boxShadow: {
-        // Soft, low-contrast elevation — no colored glows.
-        "card":        "0 1px 2px rgba(24,24,27,0.04), 0 1px 3px rgba(24,24,27,0.04)",
-        "card-hover":  "0 4px 16px rgba(24,24,27,0.08), 0 1px 3px rgba(24,24,27,0.05)",
-        "glow-accent": "0 0 0 3px rgba(24,24,27,0.08)",
-        "glow-sm":     "0 1px 2px rgba(24,24,27,0.05)",
-        "btn":         "0 1px 2px rgba(24,24,27,0.08)",
-        "btn-hover":   "0 2px 6px rgba(24,24,27,0.12)",
+        "card":        "0 1px 2px rgba(2,6,23,0.20), 0 1px 3px rgba(2,6,23,0.16)",
+        "card-hover":  "0 6px 24px rgba(2,6,23,0.28), 0 1px 3px rgba(2,6,23,0.20)",
+        "glow-accent": "0 0 0 3px rgba(59,130,246,0.22)",
+        "glow-sm":     "0 0 12px rgba(59,130,246,0.18)",
+        "btn":         "0 1px 2px rgba(2,6,23,0.30)",
+        "btn-hover":   "0 4px 14px rgba(37,99,235,0.35)",
       },
     },
   },

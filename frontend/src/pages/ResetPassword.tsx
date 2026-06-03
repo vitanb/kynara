@@ -18,7 +18,7 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#FFFFFF" }}>
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--s0-card)" }}>
         <div className="card p-8 text-center w-full max-w-md">
           <p className="text-ink-300 mb-4">Invalid or missing reset token.</p>
           <Link to="/forgot-password" className="btn-primary inline-flex">
@@ -64,11 +64,11 @@ export default function ResetPasswordPage() {
     if (password.length < 8) return { label: "Too short", color: "#F43F5E", width: "25%" };
     if (password.length < 12) return { label: "Fair", color: "#F59E0B", width: "50%" };
     if (/[A-Z]/.test(password) && /[0-9]/.test(password)) return { label: "Strong", color: "#10B981", width: "100%" };
-    return { label: "Good", color: "#18181B", width: "75%" };
+    return { label: "Good", color: "var(--s0-accent)", width: "75%" };
   })();
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#FFFFFF" }}>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--s0-card)" }}>
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 mb-8 hover:opacity-80 transition-opacity">
@@ -79,7 +79,7 @@ export default function ResetPasswordPage() {
           />
           <div>
             <div className="text-base font-bold text-ink-50 tracking-tight leading-none">Kynara</div>
-            <div className="text-[10px] font-medium mt-0.5" style={{ color: "#52525B", letterSpacing: "0.06em" }}>
+            <div className="text-[10px] font-medium mt-0.5" style={{ color: "var(--s0-accent-text)", letterSpacing: "0.06em" }}>
               AI Control Plane
             </div>
           </div>

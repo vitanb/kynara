@@ -9,9 +9,9 @@ const features = [
     icon: ShieldCheck,
     label: "Policy-as-code enforcement",
     sub: "RBAC + ABAC with fail-closed defaults",
-    color: "#18181B",
-    bg: "rgba(24,24,27,0.1)",
-    border: "rgba(24,24,27,0.2)",
+    color: "var(--s0-accent)",
+    bg: "var(--s0-accent-subtle)",
+    border: "var(--s0-accent-ring)",
   },
   {
     icon: Activity,
@@ -88,13 +88,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-full" style={{ background: "#FFFFFF" }}>
+    <div className="flex min-h-full" style={{ background: "var(--s0-card)" }}>
 
       {/* ── Left panel ───────────────────────────────────── */}
       <div
         className="hidden lg:flex flex-col justify-between w-[46%] p-14 relative"
         style={{
-          background: "#FAFAF9",
+          background: "var(--s0-card-elevated)",
           borderRight: "1px solid rgba(148,163,184,0.07)",
         }}
       >
@@ -102,7 +102,7 @@ export default function LoginPage() {
         <div
           className="absolute top-0 left-0 w-96 h-96 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse at 0% 0%, rgba(24,24,27,0.08) 0%, transparent 65%)",
+            background: "radial-gradient(ellipse at 0% 0%, var(--s0-accent-subtle) 0%, transparent 65%)",
           }}
         />
 
@@ -111,7 +111,7 @@ export default function LoginPage() {
           <img src="/logo.svg" className="size-9 rounded-xl" alt="Kynara" />
           <div>
             <div className="text-base font-bold text-ink-50 tracking-tight leading-none">Kynara</div>
-            <div className="text-[10px] font-medium mt-0.5" style={{ color: "#52525B", letterSpacing: "0.06em" }}>
+            <div className="text-[10px] font-medium mt-0.5" style={{ color: "var(--s0-accent-text)", letterSpacing: "0.06em" }}>
               AI Control Plane
             </div>
           </div>
@@ -123,15 +123,15 @@ export default function LoginPage() {
             <div
               className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold"
               style={{
-                background: "rgba(24,24,27,0.1)",
-                border: "1px solid rgba(24,24,27,0.2)",
-                color: "#52525B",
+                background: "var(--s0-accent-subtle)",
+                border: "1px solid var(--s0-accent-ring)",
+                color: "var(--s0-accent-text)",
                 letterSpacing: "0.04em",
               }}
             >
               <span
                 className="size-1.5 rounded-full"
-                style={{ background: "#18181B", boxShadow: "0 0 6px #18181B" }}
+                style={{ background: "var(--s0-accent)", boxShadow: "0 0 6px #18181B" }}
               />
               Enterprise AI permissions platform
             </div>

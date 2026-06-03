@@ -189,7 +189,7 @@ def handler(event, context):
 };
 
 const SEV_COLORS = {
-  info:     { bg: "rgba(24,24,27,0.12)",  text: "#52525B", border: "rgba(24,24,27,0.25)" },
+  info:     { bg: "var(--s0-accent-subtle)",  text: "var(--s0-accent-text)", border: "var(--s0-accent-ring)" },
   warn:     { bg: "rgba(245,158,11,0.12)",  text: "#FCD34D", border: "rgba(245,158,11,0.25)" },
   critical: { bg: "rgba(239,68,68,0.12)",   text: "#F87171", border: "rgba(239,68,68,0.25)" },
 };
@@ -233,13 +233,13 @@ function CreateModal({ onClose }: { onClose: () => void }) {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["guardrails"] }); onClose(); },
   });
   const inp = "w-full rounded-lg px-3 py-2 text-sm text-ink-50 border outline-none focus:border-indigo-500 transition-colors";
-  const bdr = { border: "1px solid rgba(148,163,184,0.15)", background: "#FFFFFF", color: "#18181B" };
+  const bdr = { border: "1px solid rgba(148,163,184,0.15)", background: "var(--s0-card)", color: "var(--s0-accent)" };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
       <div className="w-full max-w-lg rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto"
-        style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
+        style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)" }}>
         <h2 className="text-base font-bold text-ink-50">Add Integration</h2>
         <div className="space-y-3">
           <div>
@@ -252,9 +252,9 @@ function CreateModal({ onClose }: { onClose: () => void }) {
             <select className={inp} style={bdr} value={form.provider}
               onChange={e => setForm(f => ({ ...f, provider: e.target.value }))}>
               {PROVIDER_GROUPS.map(g => (
-                <optgroup key={g.label} label={g.label} style={{ background: "#FFFFFF", color: "#94A3B8" }}>
+                <optgroup key={g.label} label={g.label} style={{ background: "var(--s0-card)", color: "#94A3B8" }}>
                   {g.providers.map(p => (
-                    <option key={p} value={p} style={{ background: "#FFFFFF", color: "#18181B" }}>
+                    <option key={p} value={p} style={{ background: "var(--s0-card)", color: "var(--s0-accent)" }}>
                       {PROVIDER_LABELS[p as Provider]}
                     </option>
                   ))}
@@ -268,7 +268,7 @@ function CreateModal({ onClose }: { onClose: () => void }) {
               onChange={e => setForm(f => ({ ...f, default_action: e.target.value }))}>
               {Object.entries(ACTION_LABELS)
                 .filter(([v]) => v !== "suspend_agent")
-                .map(([v, l]) => <option key={v} value={v} style={{ background: "#FFFFFF", color: "#18181B" }}>{l}</option>)}
+                .map(([v, l]) => <option key={v} value={v} style={{ background: "var(--s0-card)", color: "var(--s0-accent)" }}>{l}</option>)}
             </select>
           </div>
           <div>
@@ -280,7 +280,7 @@ function CreateModal({ onClose }: { onClose: () => void }) {
 
           {/* Format reminder */}
           <div className="rounded-xl p-3 space-y-1"
-            style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.18)" }}>
+            style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}>
             <p className="text-xs font-semibold text-indigo-300">After creating, expand the integration card to get:</p>
             <ul className="text-xs text-ink-400 space-y-0.5 pl-3">
               <li>• The inbound URL to paste into {PROVIDER_TEMPLATES[form.provider as Provider]?.label ?? form.provider}</li>
@@ -318,7 +318,7 @@ function IntegrationCard({ item }: { item: GuardrailIntegration }) {
   });
   return (
     <div className="rounded-xl overflow-hidden"
-      style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.10)" }}>
+      style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.10)" }}>
       <div className="px-4 py-3 flex items-center gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -337,7 +337,7 @@ function IntegrationCard({ item }: { item: GuardrailIntegration }) {
         <div className="flex items-center gap-1 shrink-0">
           <button onClick={() => toggle.mutate()}
             className="p-1 rounded hover:bg-white/8 transition-colors"
-            style={{ color: item.is_enabled ? "#52525B" : "#475569" }}
+            style={{ color: item.is_enabled ? "var(--s0-accent-text)" : "#475569" }}
             title={item.is_enabled ? "Disable" : "Enable"}>
             {item.is_enabled ? <ToggleRight className="size-4" /> : <ToggleLeft className="size-4" />}
           </button>
@@ -396,9 +396,9 @@ function IntegrationCard({ item }: { item: GuardrailIntegration }) {
               <p className="text-[10px] font-semibold text-ink-400 uppercase tracking-wider mb-1.5">
                 Step 3 — Configure {PROVIDER_TEMPLATES[item.provider]!.label} to send in Kynara format
               </p>
-              <div className="rounded-lg overflow-hidden" style={{ border: "1px solid rgba(24,24,27,0.2)" }}>
+              <div className="rounded-lg overflow-hidden" style={{ border: "1px solid var(--s0-accent-ring)" }}>
                 <div className="flex items-center justify-between px-3 py-1.5"
-                  style={{ background: "rgba(24,24,27,0.06)", borderBottom: "1px solid rgba(24,24,27,0.12)" }}>
+                  style={{ background: "var(--s0-accent-subtle)", borderBottom: "1px solid var(--s0-accent-subtle)" }}>
                   <span className="text-[10px] font-medium text-indigo-300">
                     {PROVIDER_TEMPLATES[item.provider]!.templateLabel}
                   </span>
@@ -492,7 +492,7 @@ function RuleModal({ onClose }: { onClose: () => void }) {
   });
 
   const inp = "w-full rounded-lg px-3 py-2 text-sm text-ink-50 border outline-none focus:border-indigo-500 transition-colors";
-  const bdr = { border: "1px solid rgba(148,163,184,0.15)", background: "#FFFFFF", color: "#18181B" };
+  const bdr = { border: "1px solid rgba(148,163,184,0.15)", background: "var(--s0-card)", color: "var(--s0-accent)" };
 
   function toggleSev(s: string) {
     setForm(f => ({
@@ -514,7 +514,7 @@ function RuleModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
       <div className="w-full max-w-lg rounded-2xl p-6 space-y-5"
-        style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
+        style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)" }}>
         <div>
           <h2 className="text-base font-bold text-ink-50">New Rule</h2>
           <p className="text-xs text-ink-400 mt-0.5">
@@ -532,7 +532,7 @@ function RuleModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={() => setForm(f => ({ ...f, ...preset.patch, name: f.name || preset.label }))}
                 className="text-left rounded-xl px-3 py-2.5 transition-colors hover:bg-white/5"
-                style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.15)" }}
+                style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}
               >
                 <div className="text-sm mb-0.5">{preset.icon} <span className="text-xs font-semibold text-ink-100">{preset.label}</span></div>
                 <p className="text-[10px] text-ink-400 leading-snug">{preset.description}</p>
@@ -561,7 +561,7 @@ function RuleModal({ onClose }: { onClose: () => void }) {
           <div>
             <label className="block text-xs text-ink-400 mb-1">Trigger condition</label>
             <div className="rounded-xl p-4 space-y-3"
-              style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.18)" }}>
+              style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}>
               <p className="text-xs text-indigo-300 font-medium">
                 Fire when{" "}
                 <strong className="text-ink-50">{form.event_count_threshold}</strong>{" "}
@@ -592,9 +592,9 @@ function RuleModal({ onClose }: { onClose: () => void }) {
                     className="text-[10px] px-2 py-1 rounded-md transition-colors"
                     style={{
                       background: form.time_window_seconds === p.value
-                        ? "rgba(24,24,27,0.25)" : "rgba(148,163,184,0.06)",
-                      color: form.time_window_seconds === p.value ? "#52525B" : "#64748B",
-                      border: `1px solid ${form.time_window_seconds === p.value ? "rgba(24,24,27,0.4)" : "rgba(148,163,184,0.1)"}`,
+                        ? "var(--s0-accent-ring)" : "rgba(148,163,184,0.06)",
+                      color: form.time_window_seconds === p.value ? "var(--s0-accent-text)" : "#64748B",
+                      border: `1px solid ${form.time_window_seconds === p.value ? "var(--s0-accent-ring)" : "rgba(148,163,184,0.1)"}`,
                     }}>
                     {p.label}
                   </button>
@@ -610,7 +610,7 @@ function RuleModal({ onClose }: { onClose: () => void }) {
               onChange={e => setForm(f => ({ ...f, action: e.target.value as Action }))}>
               {Object.entries(ACTION_LABELS)
                 .filter(([v]) => v !== "suspend_agent")
-                .map(([v, l]) => <option key={v} value={v} style={{ background: "#FFFFFF", color: "#18181B" }}>{l}</option>)}
+                .map(([v, l]) => <option key={v} value={v} style={{ background: "var(--s0-card)", color: "var(--s0-accent)" }}>{l}</option>)}
             </select>
             {form.action === "disable_agent" && (
               <p className="text-[10px] text-orange-400 mt-1 flex items-center gap-1">
@@ -705,7 +705,7 @@ function RulesSection() {
         </div>
         <button onClick={() => setShowCreate(true)}
           className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors"
-          style={{ background: "rgba(24,24,27,0.12)", color: "#52525B", border: "1px solid rgba(24,24,27,0.25)" }}>
+          style={{ background: "var(--s0-accent-subtle)", color: "var(--s0-accent-text)", border: "1px solid var(--s0-accent-ring)" }}>
           <Plus className="size-3.5" /> Add Rule
         </button>
       </div>
@@ -714,7 +714,7 @@ function RulesSection() {
 
       {!isLoading && rules.length === 0 && (
         <div className="rounded-xl p-6 text-center"
-          style={{ background: "#FFFFFF", border: "1px dashed rgba(148,163,184,0.12)" }}>
+          style={{ background: "var(--s0-card)", border: "1px dashed rgba(148,163,184,0.12)" }}>
           <Zap className="size-6 mx-auto mb-2 text-slate-600" />
           <p className="text-sm text-ink-400">No threshold rules yet</p>
           <p className="text-xs text-slate-600 mt-1">
@@ -726,7 +726,7 @@ function RulesSection() {
       <div className="space-y-2">
         {rules.map(rule => (
           <div key={rule.id} className="rounded-xl px-4 py-3 flex items-start gap-3"
-            style={{ background: "#FFFFFF", border: `1px solid ${rule.is_enabled ? "rgba(148,163,184,0.10)" : "rgba(148,163,184,0.05)"}`, opacity: rule.is_enabled ? 1 : 0.55 }}>
+            style={{ background: "var(--s0-card)", border: `1px solid ${rule.is_enabled ? "rgba(148,163,184,0.10)" : "rgba(148,163,184,0.05)"}`, opacity: rule.is_enabled ? 1 : 0.55 }}>
             <div className="flex-1 min-w-0 space-y-1.5">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm font-semibold text-ink-50">{rule.name}</span>
@@ -738,7 +738,7 @@ function RulesSection() {
               {/* Threshold pill */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full"
-                  style={{ background: "rgba(24,24,27,0.10)", color: "#52525B", border: "1px solid rgba(24,24,27,0.2)" }}>
+                  style={{ background: "var(--s0-accent-subtle)", color: "var(--s0-accent-text)", border: "1px solid var(--s0-accent-ring)" }}>
                   <Clock className="size-3" />
                   {rule.event_count_threshold} events in {formatWindow(rule.time_window_seconds)}
                 </span>
@@ -759,7 +759,7 @@ function RulesSection() {
             <div className="flex items-center gap-1 shrink-0">
               <button onClick={() => toggle.mutate(rule)}
                 className="p-1 rounded hover:bg-white/8 transition-colors"
-                style={{ color: rule.is_enabled ? "#52525B" : "#475569" }}
+                style={{ color: rule.is_enabled ? "var(--s0-accent-text)" : "#475569" }}
                 title={rule.is_enabled ? "Disable" : "Enable"}>
                 {rule.is_enabled ? <ToggleRight className="size-4" /> : <ToggleLeft className="size-4" />}
               </button>
@@ -864,7 +864,7 @@ export default function GuardrailsPage() {
 
       {/* How it works callout */}
       <div className="rounded-xl p-4 flex gap-3"
-        style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.18)" }}>
+        style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}>
         <Zap className="size-4 text-yellow-400 mt-0.5 shrink-0" />
         <div className="space-y-1">
           <p className="text-xs font-semibold text-indigo-300">Threshold-based enforcement</p>
@@ -887,7 +887,7 @@ export default function GuardrailsPage() {
         {isLoading && <p className="text-xs text-ink-400">Loading…</p>}
         {!isLoading && integrations.length === 0 && (
           <div className="rounded-xl p-8 text-center"
-            style={{ background: "#FFFFFF", border: "1px dashed rgba(148,163,184,0.15)" }}>
+            style={{ background: "var(--s0-card)", border: "1px dashed rgba(148,163,184,0.15)" }}>
             <ShieldAlert className="size-8 mx-auto mb-2 text-slate-600" />
             <p className="text-sm text-ink-400">No integrations yet</p>
             <p className="text-xs text-slate-600 mt-1">Add your first guardrail integration above.</p>
@@ -900,7 +900,7 @@ export default function GuardrailsPage() {
       <div>
         <h2 className="text-sm font-semibold text-ink-100 mb-3">Recent Guardrail Events</h2>
         <div className="rounded-xl overflow-hidden"
-          style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.10)" }}>
+          style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.10)" }}>
           <EventsTable />
         </div>
       </div>

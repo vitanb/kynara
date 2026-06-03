@@ -127,7 +127,7 @@ export default function AgentsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-lg rounded-2xl shadow-2xl"
-            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)" }}>
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>

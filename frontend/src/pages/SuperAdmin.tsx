@@ -317,8 +317,8 @@ function OrgRow({ org, onRefresh }: { org: AdminOrg; onRefresh: () => void }) {
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 6,
                   padding: "6px 14px", borderRadius: 7, fontSize: 12, fontWeight: 500,
-                  background: "rgba(24,24,27,0.1)", color: "var(--s0-accent-text)",
-                  border: "1px solid rgba(24,24,27,0.3)", cursor: "pointer",
+                  background: "var(--s0-accent-subtle)", color: "var(--s0-accent-text)",
+                  border: "1px solid var(--s0-accent-ring)", cursor: "pointer",
                 }}
               >
                 <Mail size={13} /> Invite Member
@@ -373,7 +373,7 @@ function OrgRow({ org, onRefresh }: { org: AdminOrg; onRefresh: () => void }) {
                       style={{
                         padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 500,
                         background: inviteBusy ? "var(--s0-border)" : "var(--s0-accent)",
-                        color: "#18181B", border: "none",
+                        color: "var(--s0-accent)", border: "none",
                         cursor: inviteBusy ? "not-allowed" : "pointer",
                       }}
                     >
@@ -396,7 +396,7 @@ function OrgRow({ org, onRefresh }: { org: AdminOrg; onRefresh: () => void }) {
 
             {inviteLink && (
               <div style={{
-                background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.2)",
+                background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)",
                 borderRadius: 8, padding: "12px 14px",
               }}>
                 <div style={{ fontSize: 11, color: "var(--s0-accent-text)", fontWeight: 600, marginBottom: 6 }}>
@@ -417,7 +417,7 @@ function OrgRow({ org, onRefresh }: { org: AdminOrg; onRefresh: () => void }) {
                       display: "flex", alignItems: "center", gap: 5,
                       padding: "7px 12px", borderRadius: 6, fontSize: 12,
                       background: copied ? "#16a34a" : "var(--s0-accent)",
-                      color: "#18181B", border: "none", cursor: "pointer", whiteSpace: "nowrap",
+                      color: "var(--s0-accent)", border: "none", cursor: "pointer", whiteSpace: "nowrap",
                     }}
                   >
                     <Copy size={12} /> {copied ? "Copied!" : "Copy"}
@@ -444,7 +444,7 @@ function OrgRow({ org, onRefresh }: { org: AdminOrg; onRefresh: () => void }) {
                 <AlertTriangle size={14} style={{ color: "#ef4444" }} />
                 Delete "{org.name}"?
                 <button onClick={deleteOrg} disabled={deleting}
-                  style={{ background: "#ef4444", color: "#18181B", border: "none", borderRadius: 6, padding: "4px 12px", cursor: "pointer", fontSize: 13 }}>
+                  style={{ background: "#ef4444", color: "var(--s0-accent)", border: "none", borderRadius: 6, padding: "4px 12px", cursor: "pointer", fontSize: 13 }}>
                   {deleting ? "Deleting…" : "Confirm"}
                 </button>
                 <button onClick={() => setConfirmDelete(false)}
@@ -675,7 +675,7 @@ export default function SuperAdmin() {
             style={{
               display: "flex", alignItems: "center", gap: 6,
               padding: "7px 14px", borderRadius: 8, fontSize: 13, fontWeight: 500,
-              background: "var(--s0-accent)", color: "#18181B", border: "none", cursor: "pointer",
+              background: "var(--s0-accent)", color: "var(--s0-accent)", border: "none", cursor: "pointer",
             }}
           >
             <Plus size={14} /> New Org
@@ -750,7 +750,7 @@ export default function SuperAdmin() {
                 style={{
                   padding: "8px 18px", borderRadius: 7, fontSize: 13, fontWeight: 500,
                   background: createOrgBusy || !newOrgName.trim() ? "var(--s0-border)" : "var(--s0-accent)",
-                  color: "#18181B", border: "none",
+                  color: "var(--s0-accent)", border: "none",
                   cursor: createOrgBusy || !newOrgName.trim() ? "not-allowed" : "pointer",
                 }}
               >

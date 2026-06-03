@@ -52,7 +52,7 @@ function MiniChart({ daily }: { daily: Analytics["daily"] }) {
               style={{ height: `${h}px`, background: d.approved > 0 ? "rgba(16,185,129,.6)" : "rgba(148,163,184,.2)" }} />
             <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block z-10
               text-xs text-ink-50 rounded px-1.5 py-0.5 whitespace-nowrap"
-              style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,.15)" }}>
+              style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,.15)" }}>
               {d.date.slice(5)}: {total}
             </div>
           </div>
@@ -94,7 +94,7 @@ export default function ApprovalAnalyticsPage() {
         <div className="space-y-6">
           {/* KPI row */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <StatCard icon={TrendingUp} label="Total" value={data.total} color="#52525B" />
+            <StatCard icon={TrendingUp} label="Total" value={data.total} color="var(--s0-accent-text)" />
             <StatCard icon={CheckCircle2} label="Approved" value={data.approved} color="#34D399" />
             <StatCard icon={XCircle} label="Rejected" value={data.rejected} color="#F43F5E" />
             <StatCard icon={Timer} label="Expired" value={data.expired} color="#F59E0B" />
@@ -128,7 +128,7 @@ export default function ApprovalAnalyticsPage() {
             <div className={card} style={cardStyle}>
               <div className={sectionTag}>Top agents by approvals</div>
               {data.top_agents.length === 0 ? <p className="text-sm text-ink-400">No data</p> :
-                data.top_agents.map(a => <Bar key={a.agent} label={a.agent} value={a.count} max={data.top_agents[0]?.count || 1} color="#52525B" />)
+                data.top_agents.map(a => <Bar key={a.agent} label={a.agent} value={a.count} max={data.top_agents[0]?.count || 1} color="var(--s0-accent-text)" />)
               }
             </div>
             <div className={card} style={cardStyle}>

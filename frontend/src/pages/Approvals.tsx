@@ -100,7 +100,7 @@ function ReviewModal({
       />
       <div
         className="relative z-10 w-full max-w-md rounded-2xl p-6 flex flex-col gap-4"
-        style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}
+        style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)" }}
       >
         <div className="flex items-center gap-3">
           <div
@@ -200,7 +200,7 @@ function ApprovalRow({
     <div
       className="rounded-xl overflow-hidden transition-all"
       style={{
-        background: "#FFFFFF",
+        background: "var(--s0-card)",
         border: `1px solid ${isPending ? "rgba(245,158,11,0.2)" : "rgba(148,163,184,0.08)"}`,
       }}
     >
@@ -427,7 +427,7 @@ export default function ApprovalsPage() {
         ) : items.length === 0 ? (
           <div
             className="rounded-xl py-12 text-center"
-            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.08)" }}
+            style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.08)" }}
           >
             <CheckCircle2 className="size-8 mx-auto mb-3" style={{ color: "#10B981" }} />
             <div className="text-sm font-medium text-ink-50 mb-1">

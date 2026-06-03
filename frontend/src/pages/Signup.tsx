@@ -35,10 +35,10 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: "#FFFFFF" }}>
+    <div className="min-h-screen flex" style={{ background: "var(--s0-card)" }}>
       {/* Left panel */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12"
-        style={{ background: "#FAFAF9", borderRight: "1px solid rgba(148,163,184,0.06)" }}>
+        style={{ background: "var(--s0-card-elevated)", borderRight: "1px solid rgba(148,163,184,0.06)" }}>
         <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <img src="/logo.svg" className="w-9 h-9 rounded-lg" alt="Kynara" />
           <span className="font-semibold text-ink-50 text-lg tracking-tight">Kynara</span>
@@ -54,7 +54,7 @@ export default function SignupPage() {
           <div className="space-y-3">
             {["Free tier — up to 3 seats", "10,000 policy decisions / month", "Full audit log & role-based access", "Upgrade anytime — no credit card required"].map(f => (
               <div key={f} className="flex items-center gap-3 text-ink-300">
-                <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#18181B" }} />
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--s0-accent)" }} />
                 <span className="text-sm">{f}</span>
               </div>
             ))}

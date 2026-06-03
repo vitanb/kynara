@@ -12,8 +12,8 @@ const PLANS = [
     price: "$49",
     period: "per seat / month",
     icon: Shield,
-    iconColor: "#18181B",
-    iconBg: "rgba(24,24,27,0.15)",
+    iconColor: "var(--s0-accent)",
+    iconBg: "var(--s0-accent-ring)",
     features: [
       "Up to 10 seats",
       "50,000 policy decisions / month",
@@ -173,8 +173,8 @@ export default function BillingPage() {
             </div>
             <div className="flex items-center gap-3 mb-4">
               <div className="size-10 rounded-xl flex items-center justify-center"
-                style={{ background: "rgba(24,24,27,0.15)" }}>
-                <Zap className="size-5" style={{ color: "#18181B" }} />
+                style={{ background: "var(--s0-accent-ring)" }}>
+                <Zap className="size-5" style={{ color: "var(--s0-accent)" }} />
               </div>
               <div>
                 <div className="text-2xl font-bold text-ink-50 capitalize">{sub?.plan || "Free"}</div>
@@ -378,7 +378,7 @@ export default function BillingPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden"
-            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)" }}>
 
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5"
@@ -406,9 +406,9 @@ export default function BillingPage() {
                     onClick={() => setSelectedPlan(plan.id)}
                     className="rounded-xl p-5 text-left transition-all"
                     style={{
-                      background: isSelected ? "rgba(24,24,27,0.1)" : "rgba(148,163,184,0.04)",
+                      background: isSelected ? "var(--s0-accent-subtle)" : "rgba(148,163,184,0.04)",
                       border: isSelected
-                        ? "1px solid rgba(24,24,27,0.4)"
+                        ? "1px solid var(--s0-accent-ring)"
                         : "1px solid rgba(148,163,184,0.1)",
                     }}
                   >
@@ -419,7 +419,7 @@ export default function BillingPage() {
                       </div>
                       {isSelected && (
                         <div className="size-5 rounded-full flex items-center justify-center"
-                          style={{ background: "#18181B" }}>
+                          style={{ background: "var(--s0-accent)" }}>
                           <Check className="size-3 text-ink-50" />
                         </div>
                       )}

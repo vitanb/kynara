@@ -37,7 +37,7 @@ const RISK_COLORS: Record<string, { bg: string; text: string }> = {
   low:      { bg: "rgba(16,185,129,0.12)",  text: "#34D399" },
   medium:   { bg: "rgba(245,158,11,0.12)",  text: "#FBBF24" },
   high:     { bg: "rgba(244,63,94,0.12)",   text: "#F87171" },
-  critical: { bg: "rgba(24,24,27,0.12)",  text: "#71717A" },
+  critical: { bg: "var(--s0-accent-subtle)",  text: "var(--s0-text-muted)" },
 };
 
 export default function PolicyEditorPage() {
@@ -270,7 +270,7 @@ export default function PolicyEditorPage() {
                 title="Browse scope catalog"
                 onClick={() => { setCatalogDomain(null); setCatalogOpen(true); }}
                 className="shrink-0 flex items-center gap-1.5 text-xs font-medium px-2.5 py-2 rounded-lg transition-colors"
-                style={{ background: "rgba(24,24,27,0.1)", color: "#52525B", border: "1px solid rgba(24,24,27,0.2)" }}
+                style={{ background: "var(--s0-accent-subtle)", color: "var(--s0-accent-text)", border: "1px solid var(--s0-accent-ring)" }}
               >
                 <Layers className="size-3.5" /> Catalog
               </button>
@@ -291,7 +291,7 @@ export default function PolicyEditorPage() {
                 type="button"
                 onClick={() => setTemplateOpen(true)}
                 className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-md transition-colors"
-                style={{ background: "rgba(24,24,27,0.08)", color: "#52525B", border: "1px solid rgba(24,24,27,0.18)" }}
+                style={{ background: "var(--s0-accent-subtle)", color: "var(--s0-accent-text)", border: "1px solid var(--s0-accent-ring)" }}
               >
                 <BookOpen className="size-3" /> Load example
               </button>
@@ -562,7 +562,7 @@ export default function PolicyEditorPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[80vh]"
-            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)" }}>
             <div className="flex items-center justify-between px-6 py-4"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
               <div>
@@ -580,7 +580,7 @@ export default function PolicyEditorPage() {
                   type="button"
                   className="w-full text-left rounded-xl px-4 py-3 transition-colors group"
                   style={{ background: "rgba(148,163,184,0.04)", border: "1px solid rgba(148,163,184,0.08)" }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(24,24,27,0.3)")}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--s0-accent-ring)")}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(148,163,184,0.08)")}
                   onClick={() => {
                     updateForm({ condition: t.condition });
@@ -619,7 +619,7 @@ export default function PolicyEditorPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[85vh]"
-            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)" }}>
             <div className="flex items-center justify-between px-6 py-4"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
               <div>
@@ -656,7 +656,7 @@ export default function PolicyEditorPage() {
                       onClick={() => setCatalogDomain(d.domain)}
                       className="text-left rounded-xl px-4 py-3 transition-colors"
                       style={{ background: "rgba(148,163,184,0.04)", border: "1px solid rgba(148,163,184,0.08)" }}
-                      onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(24,24,27,0.3)")}
+                      onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--s0-accent-ring)")}
                       onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(148,163,184,0.08)")}
                     >
                       <div className="text-sm font-medium text-ink-50 mb-0.5">{d.label}</div>
@@ -700,7 +700,7 @@ export default function PolicyEditorPage() {
                                 className="text-[10px] font-semibold px-2 py-1 rounded transition-colors"
                                 style={alreadyAdded
                                   ? { background: "rgba(16,185,129,0.1)", color: "#34D399", cursor: "default" }
-                                  : { background: "rgba(24,24,27,0.12)", color: "#52525B" }}
+                                  : { background: "var(--s0-accent-subtle)", color: "var(--s0-accent-text)" }}
                               >
                                 {alreadyAdded ? "Added ✓" : "+ Add"}
                               </button>
@@ -722,7 +722,7 @@ export default function PolicyEditorPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-md rounded-2xl shadow-2xl"
-            style={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)" }}>
+            style={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)" }}>
             <div className="flex items-center justify-between px-6 py-4"
               style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
               <div className="text-base font-semibold text-ink-50">Add binding</div>
@@ -739,30 +739,4 @@ export default function PolicyEditorPage() {
                 placeholder="* or agent:<agent-id>"
               />
               <div className="text-xs text-ink-500 space-y-1">
-                <p><code className="font-mono">*</code> — applies to all agents in this org</p>
-                <p><code className="font-mono">agent:&lt;id&gt;</code> — applies to one specific agent</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-3 px-6 py-4"
-              style={{ borderTop: "1px solid rgba(148,163,184,0.08)" }}>
-              <button
-                onClick={() => setBindingOpen(false)}
-                className="btn-secondary"
-                disabled={addBinding.isPending}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => addBinding.mutate()}
-                className="btn-primary"
-                disabled={addBinding.isPending || !newSelector.trim()}
-              >
-                {addBinding.isPending ? "Adding…" : "Add binding"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+                <p><code className="font-mono">*</code> — applies to a

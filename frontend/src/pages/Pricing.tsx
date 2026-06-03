@@ -29,8 +29,8 @@ const plans = [
     period: "per seat / month",
     description: "For growing teams that need more agents, longer audit history, and SSO.",
     icon: Shield,
-    iconColor: "#18181B",
-    iconBg: "rgba(24,24,27,0.15)",
+    iconColor: "var(--s0-accent)",
+    iconBg: "var(--s0-accent-ring)",
     cta: "Start free trial",
     ctaTo: "/signup",
     highlighted: true,
@@ -73,7 +73,7 @@ const plans = [
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen" style={{ background: "#FFFFFF", color: "#CBD5E1" }}>
+    <div className="min-h-screen" style={{ background: "var(--s0-card)", color: "#CBD5E1" }}>
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto">
         <Link to="/" className="flex items-center gap-3">
@@ -89,7 +89,7 @@ export default function PricingPage() {
       {/* Hero */}
       <div className="text-center py-16 px-4">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-6"
-          style={{ background: "rgba(24,24,27,0.1)", border: "1px solid rgba(24,24,27,0.2)", color: "#71717A" }}>
+          style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)", color: "var(--s0-text-muted)" }}>
           Simple, transparent pricing
         </div>
         <h1 className="text-4xl lg:text-5xl font-bold text-ink-50 mb-4 tracking-tight">
@@ -109,9 +109,9 @@ export default function PricingPage() {
               key={plan.name}
               className="rounded-2xl p-8 flex flex-col"
               style={{
-                background: plan.highlighted ? "rgba(24,24,27,0.08)" : "#FAFAF9",
+                background: plan.highlighted ? "var(--s0-accent-subtle)" : "var(--s0-card-elevated)",
                 border: plan.highlighted
-                  ? "1px solid rgba(24,24,27,0.35)"
+                  ? "1px solid var(--s0-accent-ring)"
                   : "1px solid rgba(148,163,184,0.08)",
                 position: "relative",
               }}
@@ -119,7 +119,7 @@ export default function PricingPage() {
               {plan.highlighted && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span className="px-3 py-1 rounded-full text-xs font-medium text-ink-50"
-                    style={{ background: "#18181B" }}>
+                    style={{ background: "var(--s0-accent)" }}>
                     Most popular
                   </span>
                 </div>

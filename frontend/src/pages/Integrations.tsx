@@ -162,7 +162,7 @@ export default function IntegrationsPage() {
       <div>
         <div className="flex items-center gap-3 mb-2">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: "rgba(24,24,27,.15)", border: "1px solid rgba(24,24,27,.25)" }}>
+            style={{ background: "var(--s0-accent-ring)", border: "1px solid var(--s0-accent-ring)" }}>
             <MessageSquare className="w-4.5 h-4.5 text-indigo-400" />
           </div>
           <h1 className="text-2xl font-bold text-ink-50">Integrations</h1>
@@ -216,7 +216,7 @@ export default function IntegrationsPage() {
         </div>
 
         <div className="space-y-4">
-          <div className={`text-xs text-ink-400 p-3 rounded-lg mb-2`} style={{ background: "rgba(24,24,27,.06)", border: "1px solid rgba(24,24,27,.15)" }}>
+          <div className={`text-xs text-ink-400 p-3 rounded-lg mb-2`} style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}>
             <strong className="text-ink-400">Setup:</strong> Create a Slack app at{" "}
             <a href="https://api.slack.com/apps" target="_blank" rel="noopener" className="text-indigo-400 hover:underline">
               api.slack.com/apps <ExternalLink className="inline w-2.5 h-2.5" />
@@ -298,7 +298,7 @@ export default function IntegrationsPage() {
 
         <button onClick={handleSave} disabled={saveStatus === "saving"}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-ink-50 transition-all disabled:opacity-60"
-          style={{ background: "linear-gradient(135deg,#18181B,#27272A)", boxShadow: "0 4px 14px rgba(24,24,27,.3)" }}>
+          style={{ background: "linear-gradient(135deg,#18181B,#27272A)", boxShadow: "0 4px 14px var(--s0-accent-ring)" }}>
           {saveStatus === "saving" && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
           {saveStatus === "saved" ? "✓ Saved" : saveStatus === "error" ? "Error — retry" : "Save integration"}
         </button>
@@ -306,7 +306,7 @@ export default function IntegrationsPage() {
 
       {/* Test result */}
       {testResult && (
-        <div className="rounded-xl p-4 text-sm" style={{ background: "rgba(24,24,27,.06)", border: "1px solid rgba(24,24,27,.2)" }}>
+        <div className="rounded-xl p-4 text-sm" style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}>
           <div className="font-semibold text-ink-50 mb-2">Test result</div>
           {Object.entries(testResult).map(([k, v]) => (
             <div key={k} className="flex items-center gap-2">

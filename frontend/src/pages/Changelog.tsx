@@ -55,7 +55,7 @@ export default function ChangelogPage() {
   ];
 
   const tagStyle: Record<string, React.CSSProperties> = {
-    new:  { background: "rgba(24,24,27,.12)", color: "#52525B", border: "1px solid rgba(24,24,27,.25)" },
+    new:  { background: "var(--s0-accent-subtle)", color: "var(--s0-accent-text)", border: "1px solid var(--s0-accent-ring)" },
     fix:  { background: "rgba(16,185,129,.1)",  color: "#34D399", border: "1px solid rgba(16,185,129,.25)" },
     improved: { background: "rgba(245,158,11,.1)", color: "#FCD34D", border: "1px solid rgba(245,158,11,.25)" },
   };

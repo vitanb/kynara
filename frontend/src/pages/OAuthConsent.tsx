@@ -138,9 +138,9 @@ export default function OAuthConsentPage() {
               <div key={s} className="flex items-start gap-3">
                 <div
                   className="size-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                  style={{ background: "rgba(24,24,27,0.12)" }}
+                  style={{ background: "var(--s0-accent-subtle)" }}
                 >
-                  <Icon className="size-3.5" style={{ color: "#52525B" }} />
+                  <Icon className="size-3.5" style={{ color: "var(--s0-accent-text)" }} />
                 </div>
                 <p className="text-sm text-ink-300 leading-snug">{info.label}</p>
               </div>

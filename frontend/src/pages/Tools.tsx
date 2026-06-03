@@ -121,7 +121,7 @@ export default function ToolsPage() {
           <Link
             to="/app/catalog"
             className="flex items-center gap-1.5 text-sm font-medium transition-colors"
-            style={{ color: "#52525B" }}
+            style={{ color: "var(--s0-accent-text)" }}
           >
             <BookOpen className="size-4" /> Browse Library
           </Link>

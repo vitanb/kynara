@@ -59,7 +59,7 @@ export default function AcceptInvitePage() {
 
   if (notFound) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#FFFFFF" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--s0-card)" }}>
         <div className="text-center">
           <p className="text-ink-400 mb-4">This invite link is invalid or has expired.</p>
           <a href="/signup" className="btn-primary px-6 py-2">Create a new account</a>
@@ -70,7 +70,7 @@ export default function AcceptInvitePage() {
 
   if (!info) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#FFFFFF" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--s0-card)" }}>
         <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -78,7 +78,7 @@ export default function AcceptInvitePage() {
 
   if (!info.valid) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#FFFFFF" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--s0-card)" }}>
         <div className="text-center">
           <p className="text-ink-400 mb-4">This invite has already been used or revoked.</p>
           <a href="/login" className="btn-primary px-6 py-2">Sign in</a>
@@ -93,7 +93,7 @@ export default function AcceptInvitePage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#FFFFFF" }}>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--s0-card)" }}>
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center gap-3 mb-8 hover:opacity-80 transition-opacity">
           <img src="/logo.svg" className="w-9 h-9 rounded-lg" alt="Kynara" />

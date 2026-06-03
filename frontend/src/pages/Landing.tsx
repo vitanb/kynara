@@ -7,12 +7,12 @@ import {
 } from "lucide-react";
 
 const features = [
-  { icon: ShieldCheck, color: "#52525B", bg: "rgba(24,24,27,0.1)", title: "Real-time policy enforcement", desc: "Every tool call, every API action — evaluated against your policy tree in under 5 ms before the agent executes. Allow, deny, or escalate to a human reviewer." },
+  { icon: ShieldCheck, color: "var(--s0-accent-text)", bg: "var(--s0-accent-subtle)", title: "Real-time policy enforcement", desc: "Every tool call, every API action — evaluated against your policy tree in under 5 ms before the agent executes. Allow, deny, or escalate to a human reviewer." },
   { icon: GitBranch, color: "#34D399", bg: "rgba(16,185,129,0.1)", title: "Fine-grained RBAC", desc: "Grant agents the minimum privilege they need. Permissions scoped by org, role, environment, and time window — with JIT grants for elevated access." },
   { icon: Eye, color: "#FBBF24", bg: "rgba(245,158,11,0.1)", title: "Immutable audit trail", desc: "Cryptographically chained log of every decision, actor, context, and outcome. Replay events, investigate incidents, prove compliance to auditors." },
   { icon: Zap, color: "#F472B6", bg: "rgba(236,72,153,0.1)", title: "Guardrails & anomaly detection", desc: "Set spend limits, rate caps, and behavioral thresholds. Kynara auto-revokes agents that exceed them and fires webhook alerts to your SIEM." },
   { icon: Lock, color: "#3F3F46", bg: "rgba(59,130,246,0.1)", title: "SSO & enterprise identity", desc: "SAML 2.0 and OIDC out of the box. Plug into Okta, Azure AD, or any IdP. Role mappings flow automatically from your directory." },
-  { icon: LineChart, color: "#71717A", bg: "rgba(24,24,27,0.1)", title: "Live observability", desc: "Decision dashboards, risk scores, and cost attribution per agent. Know exactly which agent is doing what — and flag the risky ones before they cause damage." },
+  { icon: LineChart, color: "var(--s0-text-muted)", bg: "var(--s0-accent-subtle)", title: "Live observability", desc: "Decision dashboards, risk scores, and cost attribution per agent. Know exactly which agent is doing what — and flag the risky ones before they cause damage." },
 ];
 
 const steps = [
@@ -61,7 +61,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: "#FFFFFF", color: "#CBD5E1" }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ background: "var(--s0-card)", color: "#CBD5E1" }}>
 
       {/* Ambient glow removed for the light monochrome look */}
 
@@ -83,7 +83,7 @@ export default function LandingPage() {
               </button>
               {solutionsOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
-                  <div className="rounded-xl p-3 w-72" style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.12)", boxShadow: "0 16px 48px rgba(0,0,0,0.5)" }}>
+                  <div className="rounded-xl p-3 w-72" style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,0.12)", boxShadow: "0 16px 48px rgba(0,0,0,0.5)" }}>
                     <div className="text-xs font-semibold uppercase tracking-widest text-ink-400 px-2 pb-2 mb-1">By Industry</div>
                     {[
                       { href: "/solutions/financial-services.html", icon: "🏦", label: "Financial Services", desc: "SOC 2, HIPAA, regulated agents" },
@@ -111,7 +111,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link to="/login" className="text-sm text-ink-300 hover:text-ink-50 transition-colors hidden sm:block">Sign in</Link>
-            <button onClick={openContact} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-50 px-4 py-2 rounded-lg transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 0 0 1px rgba(24,24,27,0.4), 0 4px 16px rgba(24,24,27,0.3)" }}>
+            <button onClick={openContact} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-50 px-4 py-2 rounded-lg transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 0 0 1px var(--s0-accent-ring), 0 4px 16px var(--s0-accent-ring)" }}>
               Book a demo
             </button>
           </div>
@@ -119,7 +119,7 @@ export default function LandingPage() {
 
         {/* Hero */}
         <section className="text-center pt-20 pb-20 px-6 max-w-5xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs mb-8" style={{ background: "rgba(24,24,27,0.08)", border: "1px solid rgba(24,24,27,0.2)", color: "#71717A" }}>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs mb-8" style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)", color: "var(--s0-text-muted)" }}>
             <span className="w-1.5 h-1.5 rounded-full bg-ink-400 animate-pulse" />
             AI agent governance infrastructure
           </div>
@@ -127,7 +127,7 @@ export default function LandingPage() {
           <h1 className="text-5xl lg:text-7xl font-bold text-ink-50 mb-6 tracking-tight leading-[1.08]">
             The enterprise permission
             <br />
-            <span style={{ color: "#52525B" }}>
+            <span style={{ color: "var(--s0-accent-text)" }}>
               layer for AI agents
             </span>
           </h1>
@@ -138,7 +138,7 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-ink-50 transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 0 0 1px rgba(24,24,27,0.4), 0 8px 32px rgba(24,24,27,0.4)" }}>
+            <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-ink-50 transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 0 0 1px var(--s0-accent-ring), 0 8px 32px var(--s0-accent-ring)" }}>
               Book a demo <ArrowRight className="w-4 h-4" />
             </button>
             <Link to="/signup" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-medium text-ink-300 hover:text-ink-50 transition-all" style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}>
@@ -148,7 +148,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-3 gap-px rounded-2xl overflow-hidden max-w-2xl mx-auto" style={{ background: "rgba(148,163,184,0.08)", border: "1px solid rgba(148,163,184,0.08)" }}>
             {stats.map((s, i) => (
-              <div key={i} className="py-6 px-4 text-center" style={{ background: "#FFFFFF" }}>
+              <div key={i} className="py-6 px-4 text-center" style={{ background: "var(--s0-card)" }}>
                 <div className="text-3xl font-bold text-ink-50 mb-1">{s.value}</div>
                 <div className="text-xs text-ink-400">{s.label}</div>
               </div>
@@ -158,8 +158,8 @@ export default function LandingPage() {
 
         {/* Problem */}
         <section className="max-w-6xl mx-auto px-6 pb-24">
-          <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, rgba(24,24,27,0.2), rgba(24,24,27,0.05), rgba(24,24,27,0.1))" }}>
-            <div className="rounded-[22px] p-12 lg:p-16" style={{ background: "#FFFFFF" }}>
+          <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, var(--s0-accent-ring), var(--s0-accent-subtle), var(--s0-accent-subtle))" }}>
+            <div className="rounded-[22px] p-12 lg:p-16" style={{ background: "var(--s0-card)" }}>
               <div className="grid lg:grid-cols-2 gap-12 items-center">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-6" style={{ background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.15)", color: "#FCD34D" }}>
@@ -201,7 +201,7 @@ export default function LandingPage() {
         {/* How it works */}
         <section id="how-it-works" className="max-w-6xl mx-auto px-6 pb-24">
           <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-5" style={{ background: "rgba(24,24,27,0.08)", border: "1px solid rgba(24,24,27,0.15)", color: "#71717A" }}>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-5" style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)", color: "var(--s0-text-muted)" }}>
               How it works
             </div>
             <h2 className="text-3xl lg:text-4xl font-bold text-ink-50 mb-4">Up and running in under an hour</h2>
@@ -213,10 +213,10 @@ export default function LandingPage() {
             {steps.map((step) => {
               const Icon = step.icon;
               return (
-                <div key={step.num} className="rounded-2xl p-8" style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.07)" }}>
-                  <div className="text-xs font-mono font-bold mb-5" style={{ color: "rgba(24,24,27,0.5)" }}>{step.num}</div>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(24,24,27,0.1)", border: "1px solid rgba(24,24,27,0.15)" }}>
-                    <Icon className="w-5 h-5" style={{ color: "#52525B" }} />
+                <div key={step.num} className="rounded-2xl p-8" style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,0.07)" }}>
+                  <div className="text-xs font-mono font-bold mb-5" style={{ color: "var(--s0-accent-ring)" }}>{step.num}</div>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-5" style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}>
+                    <Icon className="w-5 h-5" style={{ color: "var(--s0-accent-text)" }} />
                   </div>
                   <h3 className="text-ink-50 font-semibold mb-3 text-base">{step.title}</h3>
                   <p className="text-ink-400 text-sm leading-relaxed">{step.desc}</p>
@@ -228,16 +228,16 @@ export default function LandingPage() {
 
         {/* Terminal mockup */}
         <section className="max-w-5xl mx-auto px-6 pb-24">
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(148,163,184,0.08)", boxShadow: "0 0 80px rgba(24,24,27,0.07)" }}>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(148,163,184,0.08)", boxShadow: "0 0 80px var(--s0-accent-subtle)" }}>
             <div className="flex items-center gap-2 px-4 py-3" style={{ background: "#0D1117", borderBottom: "1px solid rgba(148,163,184,0.06)" }}>
               <div className="w-3 h-3 rounded-full" style={{ background: "#FF5F57" }} />
               <div className="w-3 h-3 rounded-full" style={{ background: "#FEBC2E" }} />
               <div className="w-3 h-3 rounded-full" style={{ background: "#28C840" }} />
               <span className="ml-3 text-xs text-ink-400 font-mono">kynara · policy decision engine</span>
             </div>
-            <div className="p-7 font-mono text-sm" style={{ background: "#FAFAF9" }}>
+            <div className="p-7 font-mono text-sm" style={{ background: "var(--s0-card-elevated)" }}>
               <div className="space-y-3 text-ink-400">
-                <div><span className="text-ink-400">POST </span><span style={{ color: "#52525B" }}>/api/v1/decisions/check</span></div>
+                <div><span className="text-ink-400">POST </span><span style={{ color: "var(--s0-accent-text)" }}>/api/v1/decisions/check</span></div>
                 <div className="pl-4 space-y-1">
                   <div><span style={{ color: "#3F3F46" }}>"agent_id"</span>{': '}<span style={{ color: "#34D399" }}>"agent_billing_processor"</span></div>
                   <div><span style={{ color: "#3F3F46" }}>"tool"</span>{': '}<span style={{ color: "#34D399" }}>"stripe.charge_customer"</span></div>
@@ -257,7 +257,7 @@ export default function LandingPage() {
                   <div><span style={{ color: "#3F3F46" }}>"decision"</span>{': '}<span style={{ color: "#F87171" }}>"deny"</span></div>
                   <div><span style={{ color: "#3F3F46" }}>"reason"</span>{': '}<span style={{ color: "#34D399" }}>"charge_amount exceeds policy limit"</span></div>
                   <div><span style={{ color: "#3F3F46" }}>"escalate_to"</span>{': '}<span style={{ color: "#34D399" }}>"finance-approvals@company.com"</span></div>
-                  <div><span style={{ color: "#3F3F46" }}>"audit_id"</span>{': '}<span style={{ color: "#71717A" }}>"evt_01HXYZ..."</span></div>
+                  <div><span style={{ color: "#3F3F46" }}>"audit_id"</span>{': '}<span style={{ color: "var(--s0-text-muted)" }}>"evt_01HXYZ..."</span></div>
                 </div>
               </div>
             </div>
@@ -267,7 +267,7 @@ export default function LandingPage() {
         {/* Features */}
         <section id="features" className="max-w-6xl mx-auto px-6 pb-24">
           <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-5" style={{ background: "rgba(24,24,27,0.08)", border: "1px solid rgba(24,24,27,0.15)", color: "#71717A" }}>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-5" style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)", color: "var(--s0-text-muted)" }}>
               Full-stack governance
             </div>
             <h2 className="text-3xl lg:text-4xl font-bold text-ink-50 mb-4">Everything security teams need</h2>
@@ -279,7 +279,7 @@ export default function LandingPage() {
             {features.map((f) => {
               const Icon = f.icon;
               return (
-                <div key={f.title} className="rounded-2xl p-6" style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.07)" }}>
+                <div key={f.title} className="rounded-2xl p-6" style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,0.07)" }}>
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: f.bg }}>
                     <Icon className="w-5 h-5" style={{ color: f.color }} />
                   </div>
@@ -293,10 +293,10 @@ export default function LandingPage() {
 
         {/* Trust signals */}
         <section className="max-w-6xl mx-auto px-6 pb-24">
-          <div className="rounded-2xl p-10" style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.07)" }}>
+          <div className="rounded-2xl p-10" style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,0.07)" }}>
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(24,24,27,0.1)" }}>
-                <Building2 className="w-4 h-4" style={{ color: "#52525B" }} />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "var(--s0-accent-subtle)" }}>
+                <Building2 className="w-4 h-4" style={{ color: "var(--s0-accent-text)" }} />
               </div>
               <div>
                 <div className="text-ink-50 font-semibold text-sm">Built for enterprise compliance</div>
@@ -331,7 +331,7 @@ export default function LandingPage() {
                 name: "Head of Platform Security",
                 company: "Series B FinTech",
                 initial: "S",
-                color: "#52525B",
+                color: "var(--s0-accent-text)",
               },
               {
                 quote: "We evaluated OPA and Casbin. Kynara was the only option that had the human approval flow built in — not as an afterthought. That's what our compliance team actually wanted.",
@@ -377,7 +377,7 @@ export default function LandingPage() {
                 {
                   label: "Ask Perplexity",
                   href: "https://www.perplexity.ai/?q=Explain+what+Kynara+(kynaraai.com)+does+and+how+it+helps+enterprises+govern+AI+agents.+Use+https://kynaraai.com+as+the+source.",
-                  bg: "rgba(24,24,27,0.1)", border: "rgba(24,24,27,0.25)", color: "#52525B",
+                  bg: "var(--s0-accent-subtle)", border: "var(--s0-accent-ring)", color: "var(--s0-accent-text)",
                   icon: "⬡"
                 },
               ].map((ai) => (
@@ -393,9 +393,9 @@ export default function LandingPage() {
 
         {/* CTA */}
         <section className="max-w-4xl mx-auto px-6 pb-28">
-          <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, rgba(24,24,27,0.35), rgba(24,24,27,0.1), rgba(24,24,27,0.25))" }}>
-            <div className="rounded-[22px] py-16 px-12 text-center" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(24,24,27,0.15) 0%, #FFFFFF 60%)" }}>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-6" style={{ background: "rgba(24,24,27,0.1)", border: "1px solid rgba(24,24,27,0.2)", color: "#71717A" }}>
+          <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, var(--s0-accent-ring), var(--s0-accent-subtle), var(--s0-accent-ring))" }}>
+            <div className="rounded-[22px] py-16 px-12 text-center" style={{ background: "radial-gradient(ellipse at 50% 0%, var(--s0-accent-ring) 0%, #FFFFFF 60%)" }}>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-6" style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)", color: "var(--s0-text-muted)" }}>
                 <span className="w-1.5 h-1.5 rounded-full bg-ink-400 animate-pulse" />
                 Accepting design partners
               </div>
@@ -407,7 +407,7 @@ export default function LandingPage() {
                 Book a 30-minute call to see Kynara in action.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-                <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-ink-50 hover:opacity-90 transition-all" style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 8px 32px rgba(24,24,27,0.4)" }}>
+                <button onClick={openContact} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-ink-50 hover:opacity-90 transition-all" style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 8px 32px var(--s0-accent-ring)" }}>
                   Book a demo <ArrowRight className="w-4 h-4" />
                 </button>
                 <Link to="/signup" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-medium text-ink-300 hover:text-ink-50 transition-all" style={{ background: "rgba(148,163,184,0.05)", border: "1px solid rgba(148,163,184,0.1)" }}>
@@ -452,7 +452,7 @@ export default function LandingPage() {
       {contactOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
           onClick={(e) => { if (e.target === e.currentTarget) setContactOpen(false); }}>
-          <div className="w-full max-w-md rounded-2xl p-7 relative" style={{ background: "#FAFAF9", border: "1px solid rgba(148,163,184,0.1)", boxShadow: "0 0 80px rgba(24,24,27,0.15)" }}>
+          <div className="w-full max-w-md rounded-2xl p-7 relative" style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,0.1)", boxShadow: "0 0 80px var(--s0-accent-ring)" }}>
             <button onClick={() => setContactOpen(false)} className="absolute top-4 right-4 text-ink-400 hover:text-ink-300 transition-colors">
               <X className="w-4 h-4" />
             </button>
@@ -463,7 +463,7 @@ export default function LandingPage() {
                 </div>
                 <div className="text-xl font-bold text-ink-50 mb-2">We'll be in touch</div>
                 <p className="text-sm text-ink-300 mb-6">Expect a reply within one business day.</p>
-                <button onClick={() => setContactOpen(false)} className="text-sm font-medium px-5 py-2.5 rounded-lg text-ink-50" style={{ background: "#18181B" }}>Close</button>
+                <button onClick={() => setContactOpen(false)} className="text-sm font-medium px-5 py-2.5 rounded-lg text-ink-50" style={{ background: "var(--s0-accent)" }}>Close</button>
               </div>
             ) : (
               <>
@@ -502,7 +502,7 @@ export default function LandingPage() {
                   {contactState === "error" && <p className="text-xs text-red-400">Something went wrong. Please try again.</p>}
                   <button type="submit" disabled={contactState === "sending"}
                     className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-ink-50 transition-opacity disabled:opacity-60"
-                    style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 4px 16px rgba(24,24,27,0.3)" }}>
+                    style={{ background: "linear-gradient(135deg, #18181B, #27272A)", boxShadow: "0 4px 16px var(--s0-accent-ring)" }}>
                     <Send className="w-3.5 h-3.5" />
                     {contactState === "sending" ? "Sending…" : "Request demo"}
                   </button>
@@ -515,3 +515,4 @@ export default function LandingPage() {
     </div>
   );
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            

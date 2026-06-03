@@ -17,7 +17,7 @@ const C = {
   allow:   "#10B981",
   approve: "#F59E0B",
   deny:    "#F43F5E",
-  accent:  "#18181B",
+  accent:  "var(--s0-accent)",
   teal:    "#2DD4BF",
   quota:   "#2DD4BF",
 };
@@ -27,7 +27,7 @@ const TONE: Record<Tone, { text: string; iconColor: string; bg: string; border: 
   ok:     { text: "text-ok-400",     iconColor: C.allow,   bg: "rgba(16,185,129,0.09)",  border: "rgba(4,120,87,0.25)" },
   warn:   { text: "text-warn-400",   iconColor: C.approve, bg: "rgba(245,158,11,0.09)",  border: "rgba(180,83,9,0.25)" },
   danger: { text: "text-danger-400", iconColor: C.deny,    bg: "rgba(244,63,94,0.09)",   border: "rgba(190,18,60,0.25)" },
-  info:   { text: "text-accent-400", iconColor: C.accent,  bg: "rgba(24,24,27,0.09)",  border: "rgba(24,24,27,0.25)" },
+  info:   { text: "text-accent-400", iconColor: C.accent,  bg: "var(--s0-accent-subtle)",  border: "var(--s0-accent-ring)" },
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -89,10 +89,10 @@ const ChartGradients = () => (
 
 const tooltipStyle = {
   contentStyle: {
-    background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)",
+    background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)",
     borderRadius: "10px", fontSize: "12px", color: "#3F3F46",
   },
-  cursor: { stroke: "rgba(24,24,27,0.2)", strokeWidth: 1 },
+  cursor: { stroke: "var(--s0-accent-ring)", strokeWidth: 1 },
 };
 
 // ── Main ───────────────────────────────────────────────────────────────────
@@ -313,7 +313,7 @@ export default function DashboardPage() {
       {/* ── Getting started (empty state) ─────────────────────────────────── */}
       {isNew && (
         <div className="mx-6 mb-4 rounded-xl p-4"
-          style={{ background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.2)" }}>
+          style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}>
           <div className="text-sm font-semibold text-ink-50 mb-3">Get started with Kynara</div>
           <div className="grid md:grid-cols-3 gap-3">
             {[
@@ -331,17 +331,17 @@ export default function DashboardPage() {
               return (
                 <div key={item.step} className="flex gap-3">
                   <div className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mt-0.5"
-                    style={{ background: "rgba(24,24,27,0.2)", color: "#52525B" }}>
+                    style={{ background: "var(--s0-accent-ring)", color: "var(--s0-accent-text)" }}>
                     {item.step}
                   </div>
                   <div>
                     <div className="text-sm font-medium text-ink-50 flex items-center gap-2 mb-0.5">
-                      <Icon className="size-3.5" style={{ color: "#52525B" }} /> {item.title}
+                      <Icon className="size-3.5" style={{ color: "var(--s0-accent-text)" }} /> {item.title}
                     </div>
                     <p className="text-xs text-ink-400 mb-2">{item.desc}</p>
                     <Link to={item.to}
                       className="inline-flex items-center gap-1 text-xs font-medium"
-                      style={{ color: "#52525B" }}>
+                      style={{ color: "var(--s0-accent-text)" }}>
                       {item.cta} <ArrowRight className="size-3" />
                     </Link>
                   </div>
@@ -378,8 +378,8 @@ export default function DashboardPage() {
                     onClick={() => setChartWindow(w)}
                     className="px-2.5 py-1 transition-colors"
                     style={{
-                      background: chartWindow === w ? "rgba(24,24,27,0.2)" : "transparent",
-                      color: chartWindow === w ? "#52525B" : "#475569",
+                      background: chartWindow === w ? "var(--s0-accent-ring)" : "transparent",
+                      color: chartWindow === w ? "var(--s0-accent-text)" : "#475569",
                     }}
                   >
                     {w}
@@ -414,7 +414,7 @@ export default function DashboardPage() {
             <span className="text-sm font-semibold text-ink-50">Plan quota</span>
             {sub?.plan && (
               <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(24,24,27,0.15)", color: "#52525B" }}>
+                style={{ background: "var(--s0-accent-ring)", color: "var(--s0-accent-text)" }}>
                 {sub.plan.toUpperCase()}
               </span>
             )}
@@ -443,7 +443,7 @@ export default function DashboardPage() {
           <div className="mt-auto pt-3 border-t border-ink-700/60 text-xs text-ink-400 flex items-center justify-between">
             <span>Resets <span className="text-ink-200">{periodEnd}</span></span>
             <Link to="/app/billing" className="text-[10px] font-medium"
-              style={{ color: "#52525B" }}>
+              style={{ color: "var(--s0-accent-text)" }}>
               Billing →
             </Link>
           </div>
@@ -463,7 +463,7 @@ export default function DashboardPage() {
               <button
                 onClick={downloadReportCSV}
                 className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors"
-                style={{ background: "rgba(24,24,27,0.1)", color: "#52525B", border: "1px solid rgba(24,24,27,0.2)" }}
+                style={{ background: "var(--s0-accent-subtle)", color: "var(--s0-accent-text)", border: "1px solid var(--s0-accent-ring)" }}
               >
                 <Download className="size-3" /> Export CSV
               </button>
@@ -550,7 +550,7 @@ export default function DashboardPage() {
               <p className="text-xs text-ink-400 mb-3">No agent activity yet.</p>
               <Link to="/app/agents"
                 className="inline-flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5"
-                style={{ background: "rgba(24,24,27,0.12)", color: "#52525B" }}>
+                style={{ background: "var(--s0-accent-subtle)", color: "var(--s0-accent-text)" }}>
                 <Plus className="size-3" /> Create your first agent
               </Link>
             </div>
@@ -570,9 +570,9 @@ export default function DashboardPage() {
                       stroke="rgba(0,0,0,0)" tick={{ fill: "#94A3B8", fontSize: 10 }}
                       tickLine={false} axisLine={false} />
                     <Tooltip
-                      contentStyle={{ background: "#FFFFFF", border: "1px solid rgba(148,163,184,0.12)",
+                      contentStyle={{ background: "var(--s0-card)", border: "1px solid rgba(148,163,184,0.12)",
                         borderRadius: "10px", fontSize: "12px", color: "#3F3F46" }}
-                      cursor={{ fill: "rgba(24,24,27,0.06)" }}
+                      cursor={{ fill: "var(--s0-accent-subtle)" }}
                     />
                     <Bar dataKey="allow" stackId="a" fill={C.allow} />
                     <Bar dataKey="deny"  stackId="a" fill={C.deny}  radius={[0, 3, 3, 0]} />
@@ -650,7 +650,7 @@ export default function DashboardPage() {
                 <p className="text-xs text-ink-400 mb-3">No activity yet.</p>
                 <Link to="/app/agents"
                   className="inline-flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5"
-                  style={{ background: "rgba(24,24,27,0.12)", color: "#52525B" }}>
+                  style={{ background: "var(--s0-accent-subtle)", color: "var(--s0-accent-text)" }}>
                   <Plus className="size-3" /> Create your first agent
                 </Link>
               </div>
