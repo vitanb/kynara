@@ -10,25 +10,25 @@
   <meta property="og:image" content="https://kynaraai.com/logo-192.png" />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <style>
-    :root{--bg:#05080F;--surface:#080C14;--surface2:#0D1421;--border:rgba(148,163,184,0.1);--accent:#6366F1;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#10B981;--warn:#F59E0B;--danger:#F43F5E;--font:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",monospace;--ind:#818CF8;--ind-bg:rgba(99,102,241,0.1);--ind-border:rgba(99,102,241,0.25);}
+    :root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.1);--accent:#3B82F6;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#10B981;--warn:#F59E0B;--danger:#F43F5E;--font:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",monospace;--ind:#93C5FD;--ind-bg:rgba(59,130,246,0.1);--ind-border:rgba(59,130,246,0.25);}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.7;}
-    a{color:#818CF8;text-decoration:none;} a:hover{text-decoration:underline;}
-    nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(5,8,15,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+    a{color:#93C5FD;text-decoration:none;} a:hover{text-decoration:underline;}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
     .logo{display:flex;align-items:center;gap:10px;font-weight:700;color:white;font-size:15px;text-decoration:none;}
     .gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;}
     .gem svg{width:14px;height:14px;color:white;}
     .nav-links{display:flex;align-items:center;gap:24px;font-size:13px;color:var(--muted);}
     .nav-links a:hover{color:white;text-decoration:none;}
     .btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
-    .btn-primary{background:var(--accent);color:white;} .btn-primary:hover{background:#4F46E5;text-decoration:none;}
+    .btn-primary{background:var(--accent);color:white;} .btn-primary:hover{background:#2563EB;text-decoration:none;}
     .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);} .btn-ghost:hover{color:white;text-decoration:none;}
     .hero{max-width:1100px;margin:0 auto;padding:80px 40px 60px;}
     .bc{font-size:12px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:6px;}
     .bc a{color:var(--muted);} .bc a:hover{color:white;text-decoration:none;}
     .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--ind-bg);border:1px solid var(--ind-border);color:var(--ind);margin-bottom:20px;}
     h1{font-size:clamp(32px,4.5vw,52px);font-weight:900;color:white;letter-spacing:-.03em;line-height:1.1;margin-bottom:20px;}
-    h1 span{background:linear-gradient(135deg,#818CF8,#2DD4BF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    h1 span{background:linear-gradient(135deg,#93C5FD,#2DD4BF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
     .sub{font-size:18px;color:var(--muted);max-width:600px;margin-bottom:36px;line-height:1.65;}
     .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:48px;}
     .cbadges{display:flex;flex-wrap:wrap;gap:8px;}
@@ -51,8 +51,8 @@
     ul.cl{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;}
     ul.cl li{display:flex;gap:8px;font-size:13px;color:#94A3B8;}
     pre{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:12px;color:#94A3B8;line-height:1.8;margin-bottom:16px;}
-    code{font-family:var(--mono);font-size:12px;background:rgba(148,163,184,.08);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:#818CF8;}
-    .cta{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(45,212,191,.06));border:1px solid rgba(99,102,241,.2);border-radius:20px;padding:52px 48px;text-align:center;}
+    code{font-family:var(--mono);font-size:12px;background:rgba(148,163,184,.08);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:#93C5FD;}
+    .cta{background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(45,212,191,.06));border:1px solid rgba(59,130,246,.2);border-radius:20px;padding:52px 48px;text-align:center;}
     .cta p{color:var(--muted);font-size:16px;margin-bottom:28px;max-width:480px;margin-left:auto;margin-right:auto;}
     .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
     footer{border-top:1px solid var(--border);padding:24px 40px;max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);flex-wrap:wrap;gap:12px;}
@@ -178,7 +178,7 @@ app.post("/infra/deploy",
   }),
   deployController,
 );</pre>
-      <div style="background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:14px 16px;font-size:13px;color:#A5B4FC;margin-top:12px;">
+      <div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:14px 16px;font-size:13px;color:#A5B4FC;margin-top:12px;">
         <strong>Prompt injection safe:</strong> Kynara evaluates structured data from your code — not text from the LLM. No matter what a prompt injection attack writes, the policy engine evaluates the action, resource, and context your wrapper provides.
       </div>
     </div>

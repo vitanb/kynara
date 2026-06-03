@@ -13,9 +13,9 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Kynara Policy Sandbox","url":"https://kynaraai.com/sandbox","description":"Free MCP permission inspector and ABAC policy sandbox for AI agent developers. No signup required.","applicationCategory":"DeveloperApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
   <style>
     :root {
-      --bg: #05080F; --surface: #080C14; --surface2: #0D1421; --surface3: #111827;
+      --bg: #0B0E14; --surface: #0F131B; --surface2: #151A24; --surface3: #1B2230;
       --border: rgba(148,163,184,0.1); --border2: rgba(148,163,184,0.18);
-      --accent: #6366F1; --accent2: #8B5CF6; --teal: #2DD4BF;
+      --accent: #3B82F6; --accent2: #60A5FA; --teal: #2DD4BF;
       --text: #CBD5E1; --muted: #64748B; --strong: #F1F5F9;
       --ok: #10B981; --warn: #F59E0B; --danger: #F43F5E; --info: #38BDF8;
       --font: 'Inter', system-ui, sans-serif; --mono: 'JetBrains Mono','Fira Code',monospace;
@@ -40,7 +40,7 @@
     .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
     .btn-ghost:hover { color: white; border-color: var(--border2); }
     .btn-accent { background: var(--accent); color: white; }
-    .btn-accent:hover { background: #4F46E5; box-shadow: 0 3px 12px rgba(79,70,229,.4); }
+    .btn-accent:hover { background: #2563EB; box-shadow: 0 3px 12px rgba(59,130,246,.4); }
     .btn-sm { padding: 4px 10px; font-size: 11px; }
 
     /* ── TABS ── */
@@ -110,7 +110,7 @@
     .tool-desc { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
     .tool-params { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
     .param-tag { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 2px 7px; font-size: 11px; font-family: var(--mono); color: var(--text); }
-    .param-tag.required { border-color: rgba(99,102,241,.4); color: #A5B4FC; }
+    .param-tag.required { border-color: rgba(59,130,246,.4); color: #A5B4FC; }
     .policy-snippet { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; font-family: var(--mono); font-size: 11px; color: #94A3B8; line-height: 1.7; margin-top: 8px; }
     .copy-btn { font-size: 10px; color: var(--muted); cursor: pointer; background: none; border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; transition: all .15s; }
     .copy-btn:hover { color: white; border-color: var(--border2); }
@@ -159,7 +159,7 @@
     .empty-sub { font-size: 12px; line-height: 1.6; }
 
     /* ── BANNER ── */
-    .cta-banner { margin: 16px; padding: 14px 18px; background: linear-gradient(135deg, rgba(99,102,241,.1), rgba(45,212,191,.07)); border: 1px solid rgba(99,102,241,.25); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .cta-banner { margin: 16px; padding: 14px 18px; background: linear-gradient(135deg, rgba(59,130,246,.1), rgba(45,212,191,.07)); border: 1px solid rgba(59,130,246,.25); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .cta-banner-text { font-size: 12px; color: var(--text); line-height: 1.5; }
     .cta-banner-text strong { color: white; font-weight: 600; }
   </style>
@@ -202,7 +202,7 @@
   <!-- LEFT: Policies -->
   <div class="panel" style="max-width:380px; min-width:280px;">
     <div class="panel-header">
-      <span class="panel-title">📋 Policies <span id="policy-count" style="color:var(--accent);font-size:10px;background:rgba(99,102,241,.15);padding:1px 6px;border-radius:999px;margin-left:4px;">0</span></span>
+      <span class="panel-title">📋 Policies <span id="policy-count" style="color:var(--accent);font-size:10px;background:rgba(59,130,246,.15);padding:1px 6px;border-radius:999px;margin-left:4px;">0</span></span>
       <button class="btn btn-ghost btn-sm" onclick="addPolicy()">+ Add policy</button>
     </div>
     <div class="examples-bar">
