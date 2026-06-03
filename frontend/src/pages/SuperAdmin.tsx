@@ -675,7 +675,7 @@ export default function SuperAdmin() {
             style={{
               display: "flex", alignItems: "center", gap: 6,
               padding: "7px 14px", borderRadius: 8, fontSize: 13, fontWeight: 500,
-              background: "var(--s0-accent)", color: "var(--s0-accent)", border: "none", cursor: "pointer",
+              background: "var(--s0-accent)", color: "#fff", border: "none", cursor: "pointer",
             }}
           >
             <Plus size={14} /> New Org
