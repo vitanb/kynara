@@ -4,6 +4,7 @@ from app.models.agent import Agent, AgentAssignment
 from app.models.api_key import ApiKey
 from app.models.billing import Invoice, Subscription, UsageRecord
 from app.models.invite import OrgInvite
+from app.models.mcp_server import McpServer, McpTool
 from app.models.org import Organization, OrgMembership
 from app.models.password_reset import PasswordResetToken
 from app.models.policy import Policy, PolicyBinding, Role, RolePermission
@@ -23,6 +24,8 @@ __all__ = [
     "ApiKey",
     "Invoice",
     "OrgInvite",
+    "McpServer",
+    "McpTool",
     "PasswordResetToken",
     "Subscription",
     "UsageRecord",

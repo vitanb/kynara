@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation, Link } from "react-router-do
 import {
   LayoutDashboard, Bot, Wrench, ShieldCheck, ScrollText,
   CreditCard, Settings, LogOut, ChevronDown, Check, Building2,
-  Menu, X, CheckCircle2, Plug, ShieldAlert, KeyRound, BookOpen, UserCircle, Crown, Blocks, History, BarChart2, Code2,
+  Menu, X, CheckCircle2, Plug, ShieldAlert, KeyRound, BookOpen, UserCircle, Crown, Blocks, History, BarChart2, Code2, Network,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
@@ -29,6 +29,7 @@ const allNav: NavEntry[] = [
       { to: "roles",      label: "Roles",         icon: KeyRound,   roles: ["owner","admin","auditor","developer","member"] },
       { to: "tools",      label: "Scope Catalog", icon: Wrench,     roles: ["owner","admin","developer","auditor","member"] },
       { to: "guardrails", label: "Guardrails",    icon: ShieldAlert,roles: ["owner","admin"] },
+      { to: "mcp-gateway", label: "MCP Gateway",  icon: Network,    roles: ["owner","admin","developer"] },
       { to: "catalog",          label: "Library",          icon: BookOpen, roles: ["owner","admin","developer","auditor","member"] },
       { to: "policy-templates", label: "Policy Templates", icon: Blocks,   roles: ["owner","admin"] },
       { to: "how-it-works", label: "How it works",icon: BookOpen,   roles: ["owner","admin","developer","auditor","member"] },

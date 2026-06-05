@@ -28,3 +28,6 @@ test-results/
 kynara-restored/
 Kynara-Assets/
 docs/_ui_preview.png
+docs/_opt_*.png
+docs/_mercury_*.png
+docs/_verify_*.png

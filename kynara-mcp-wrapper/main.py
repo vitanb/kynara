@@ -50,6 +50,7 @@ from starlette.responses import JSONResponse
 from starlette.routing import Mount, Route
 
 import policy
+import gateway
 
 logging.basicConfig(
     level=logging.INFO,
@@ -150,7 +151,13 @@ async def handle_list_tools() -> list[types.Tool]:
     see if it connected directly, so no agent-side changes are needed.
     """
     try:
-        return await _get_upstream_tools()
+        tools = await _get_upstream_tools()
+        # Least-privilege discovery: only advertise tools this agent may invoke.
+        agent_id = _current_agent_id.get() or "anonymous"
+        allowed = await gateway.allowed_tool_names(agent_id)
+        if allowed is not None:
+            tools = [t for t in tools if t.name in allowed]
+        return tools
     except Exception as e:
         logger.error("list_tools.failed: %s", e)
         return []
@@ -171,11 +178,14 @@ async def handle_call_tool(
     logger.info("tool_call | agent=%s tool=%s", agent_id, name)
 
     # ── Policy check ──────────────────────────────────────────────────────
+    # Resolve the Kynara scope this tool maps to (if managed by the gateway).
+    scope = await gateway.scope_for_tool(name)
     dec = await policy.check(
         agent_id=agent_id,
         tool_name=name,
         arguments=args,
         context={"source": "mcp_wrapper", "upstream": UPSTREAM_MCP_URL},
+        scope=scope,
     )
 
     if dec.effect == "deny":
@@ -270,7 +280,11 @@ async def on_startup() -> None:
         UPSTREAM_MCP_URL, PORT, policy.FAIL_OPEN,
     )
     try:
-        await _get_upstream_tools()
+        tools = await _get_upstream_tools()
+        # Register discovered tools with the backend so admins can map scopes.
+        if gateway.ENABLED:
+            await gateway.sync_tools(tools)
+            logger.info("gateway.enabled | server_id=%s — tools synced for scope mapping", gateway.SERVER_ID)
     except Exception as e:
         logger.warning("startup.tool_cache.failed: %s — will retry on first request", e)
 

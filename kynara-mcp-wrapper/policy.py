@@ -35,11 +35,14 @@ async def check(
     tool_name: str,
     arguments: dict[str, Any],
     context: dict[str, Any] | None = None,
+    scope: str | None = None,
 ) -> Decision:
+    # When the gateway has mapped this tool to a Kynara scope, evaluate against
+    # that scope; otherwise fall back to the raw tool name as the action.
     payload = {
         "subject_type": "agent",
         "subject_id": agent_id,
-        "action": tool_name,
+        "action": scope or tool_name,
         "resource": {
             "type": "mcp_tool",
             "id": tool_name,
