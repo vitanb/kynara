@@ -35,6 +35,11 @@ class Agent(Base, UUIDPkMixin, TimestampMixin):
     model: Mapped[str | None] = mapped_column(String(128), nullable=True)  # e.g. "claude-sonnet-4-6"
     runtime_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
 
+    # Provenance — set when an agent is imported from an external IdP (e.g. Okta).
+    # external_source = "okta" | null (manual); external_id = the IdP's agent/user id.
+    external_source: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    external_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+
     # Kill-switch. Agents with `is_active=False` are denied all actions.
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 

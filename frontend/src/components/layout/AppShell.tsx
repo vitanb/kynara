@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation, Link } from "react-router-do
 import {
   LayoutDashboard, Bot, Wrench, ShieldCheck, ScrollText,
   CreditCard, Settings, LogOut, ChevronDown, Check, Building2,
-  Menu, X, CheckCircle2, Plug, ShieldAlert, KeyRound, BookOpen, UserCircle, Crown, Blocks, History, BarChart2, Code2, Network,
+  Menu, X, CheckCircle2, Plug, ShieldAlert, KeyRound, BookOpen, UserCircle, Crown, Blocks, History, BarChart2, Code2, Network, Fingerprint,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
@@ -42,6 +42,7 @@ const allNav: NavEntry[] = [
     items: [
       { to: "webhooks",     label: "Webhooks",     icon: Plug,      roles: ["owner","admin"] },
       { to: "integrations", label: "Integrations", icon: Blocks,    roles: ["owner","admin"] },
+      { to: "identity-providers", label: "Identity Providers", icon: Fingerprint, roles: ["owner","admin"] },
       { to: "billing",      label: "Billing",      icon: CreditCard,roles: ["owner","admin"] },
       { to: "settings",     label: "Settings",     icon: Settings,  roles: ["owner","admin"] },
     ],

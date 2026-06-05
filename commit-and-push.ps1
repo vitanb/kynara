@@ -6,7 +6,7 @@
 #>
 
 param(
-    [string]$Message = "feat: MCP authorization gateway (registry, tool-scope mapping, least-privilege, per-server fail-mode, deny override) + tests; Mercury UI; build/tsconfig fixes",
+    [string]$Message = "feat: Okta agent-identity sync (provider config, sync service, role mapping, UI) + MCP gateway + tests",
     [string]$Branch  = "main",
     [switch]$SkipBuild
 )

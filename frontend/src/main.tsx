@@ -35,6 +35,7 @@ import ProfilePage from "./pages/Profile";
 import SuperAdminPage from "./pages/SuperAdmin";
 import IntegrationsPage from "./pages/Integrations";
 import McpGatewayPage from "./pages/McpGateway";
+import IdentityProvidersPage from "./pages/IdentityProviders";
 import PolicyTemplatesPage from "./pages/PolicyTemplates";
 import ApprovalAnalyticsPage from "./pages/ApprovalAnalytics";
 import ChangelogPage from "./pages/Changelog";
@@ -95,6 +96,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <Route path="settings/sso/new" element={<SsoSetupPage />} />
               <Route path="integrations" element={<IntegrationsPage />} />
               <Route path="mcp-gateway" element={<McpGatewayPage />} />
+              <Route path="identity-providers" element={<IdentityProvidersPage />} />
               <Route path="approvals/analytics" element={<ApprovalAnalyticsPage />} />
               <Route path="changelog" element={<ChangelogPage />} />
               <Route path="api-explorer" element={<ApiExplorerPage />} />

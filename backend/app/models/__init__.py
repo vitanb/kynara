@@ -1,6 +1,7 @@
 from app.models.approval import ApprovalRequest
 from app.models.audit import AuditEvent
 from app.models.agent import Agent, AgentAssignment
+from app.models.agent_idp import AgentIdentityProvider
 from app.models.api_key import ApiKey
 from app.models.billing import Invoice, Subscription, UsageRecord
 from app.models.invite import OrgInvite
@@ -21,6 +22,7 @@ __all__ = [
     "AuditEvent",
     "Agent",
     "AgentAssignment",
+    "AgentIdentityProvider",
     "ApiKey",
     "Invoice",
     "OrgInvite",
