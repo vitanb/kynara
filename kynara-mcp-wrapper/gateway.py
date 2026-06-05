@@ -67,6 +67,31 @@ async def scope_for_tool(tool_name: str) -> str | None:
     return tool.get("scope") if tool else None
 
 
+async def effect_override_for_tool(tool_name: str) -> str | None:
+    """A hard effect set by an admin for this tool ("deny" | "require_approval"),
+    applied before the policy decision. None means the policy engine decides."""
+    cfg = await get_config()
+    tool = (cfg.get("tools") or {}).get(tool_name)
+    return tool.get("effect_override") if tool else None
+
+
+async def fail_open() -> bool | None:
+    """This server's fail behaviour when the policy engine is unreachable.
+
+    True  → fail-open (allow), False → fail-closed (deny),
+    None  → unmanaged: let the wrapper fall back to its KYNARA_FAIL_OPEN default.
+    """
+    if not ENABLED:
+        return None
+    cfg = await get_config()
+    fm = cfg.get("fail_mode")
+    if fm == "open":
+        return True
+    if fm == "closed":
+        return False
+    return None
+
+
 async def allowed_tool_names(agent_id: str) -> set[str] | None:
     """Tool names this agent may see.
 
@@ -108,7 +133,7 @@ async def sync_tools(tools: list) -> None:
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             r = await client.post(
-                f"{API_BASE_URL}/api/v1/mcp/servers/{SERVER_ID}/tools:sync",
+                f"{API_BASE_URL}/api/v1/mcp/servers/{SERVER_ID}/tools/sync",
                 json=payload, headers=_headers(),
             )
             r.raise_for_status()

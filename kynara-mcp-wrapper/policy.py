@@ -36,6 +36,7 @@ async def check(
     arguments: dict[str, Any],
     context: dict[str, Any] | None = None,
     scope: str | None = None,
+    fail_open: bool | None = None,
 ) -> Decision:
     # When the gateway has mapped this tool to a Kynara scope, evaluate against
     # that scope; otherwise fall back to the raw tool name as the action.
@@ -76,8 +77,10 @@ async def check(
         except Exception as e:
             logger.warning("central_api.miss: %s", e)
 
-    # Fallback
-    if FAIL_OPEN:
+    # Fallback — prefer the per-server fail mode (from gateway config) when
+    # provided; otherwise use the wrapper's global KYNARA_FAIL_OPEN default.
+    fo = FAIL_OPEN if fail_open is None else fail_open
+    if fo:
         return Decision(effect="allow", reason="kynara_unavailable_fail_open",
                         decision_id="fallback_open")
     return Decision(effect="deny", reason="kynara_unavailable_fail_closed",

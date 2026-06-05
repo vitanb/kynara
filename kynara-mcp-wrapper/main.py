@@ -177,6 +177,17 @@ async def handle_call_tool(
 
     logger.info("tool_call | agent=%s tool=%s", agent_id, name)
 
+    # ── Gateway hard override ─────────────────────────────────────────────
+    # An admin may pin a tool to always-deny regardless of policy. Enforce that
+    # here so a tool hidden from discovery also cannot be invoked by name.
+    override = await gateway.effect_override_for_tool(name)
+    if override == "deny":
+        logger.warning("blocked_by_override | agent=%s tool=%s", agent_id, name)
+        raise ValueError(
+            f"[Kynara] Permission denied for tool '{name}'. "
+            f"Reason: disabled by administrator policy."
+        )
+
     # ── Policy check ──────────────────────────────────────────────────────
     # Resolve the Kynara scope this tool maps to (if managed by the gateway).
     scope = await gateway.scope_for_tool(name)
@@ -186,6 +197,7 @@ async def handle_call_tool(
         arguments=args,
         context={"source": "mcp_wrapper", "upstream": UPSTREAM_MCP_URL},
         scope=scope,
+        fail_open=await gateway.fail_open(),
     )
 
     if dec.effect == "deny":

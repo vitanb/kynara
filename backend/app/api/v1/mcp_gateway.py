@@ -293,7 +293,7 @@ async def update_tool(
 
 # ── Wrapper: tool discovery sync ─────────────────────────────────────────────
 
-@router.post("/servers/{server_id}/tools:sync")
+@router.post("/servers/{server_id}/tools/sync")
 async def sync_tools(
     server_id: str, body: ToolSyncIn,
     principal: Principal = Depends(get_principal),
@@ -344,9 +344,13 @@ async def server_config(
     tools = (await session.scalars(
         select(McpTool).where(McpTool.server_id == srv.id, McpTool.is_enabled.is_(True))
     )).all()
+    # upstream_headers may carry the upstream's auth token — only expose to the
+    # wrapper (API key) or org admins, never to read-only/auditor sessions.
+    may_see_secrets = principal.auth_method == "api_key" or principal.seat_role in ("owner", "admin")
     return {
         "id": str(srv.id), "slug": srv.slug, "transport": srv.transport,
-        "url": srv.url, "stdio_cmd": srv.stdio_cmd, "upstream_headers": srv.upstream_headers,
+        "url": srv.url, "stdio_cmd": srv.stdio_cmd,
+        "upstream_headers": srv.upstream_headers if may_see_secrets else {},
         "fail_mode": srv.fail_mode, "is_enabled": srv.is_enabled,
         "tools": {
             t.name: {"scope": t.scope, "effect_override": t.effect_override,
