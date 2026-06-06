@@ -6,7 +6,7 @@
 #>
 
 param(
-    [string]$Message = "feat: Okta agent-identity sync (provider config, sync service, role mapping, UI) + MCP gateway + tests",
+    [string]$Message = "feat: simplified enterprise nav (grouped); docs update (MCP Gateway + Okta sections, fix truncation); Okta sync + MCP gateway",
     [string]$Branch  = "main",
     [switch]$SkipBuild
 )

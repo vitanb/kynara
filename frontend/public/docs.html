@@ -218,11 +218,13 @@
       <div class="nav-section-label">Features</div>
       <a href="#dashboard" class="nav-link">Dashboard</a>
       <a href="#agents" class="nav-link">Agents</a>
+      <a href="#identity-providers" class="nav-link">Identity Providers</a>
       <a href="#policies" class="nav-link">Policies &amp; Simulator</a>
       <a href="#policy-replay" class="nav-link">Policy Replay</a>
       <a href="#approvals" class="nav-link">Approvals</a>
       <a href="#jit-grants" class="nav-link">JIT Grants</a>
       <a href="#guardrails" class="nav-link">Guardrails</a>
+      <a href="#mcp-gateway" class="nav-link">MCP Gateway</a>
       <a href="#audit" class="nav-link">Audit log</a>
       <a href="#scope-catalog" class="nav-link">Scope Catalog</a>
       <a href="#webhooks" class="nav-link">Webhooks</a>
@@ -2081,4 +2083,56 @@ GET /api/v1/audit/events?limit=1000&amp;after_cursor=eyJ...
       <p>Kynara is fail-closed. If the API (or Go sidecar) cannot be reached, the SDK raises <code>KynaraUnavailable</code> — equivalent to <code>deny</code>. Never default to <code>allow</code> on timeout. Both SDKs enforce this automatically (<code>fail_closed=True</code> / <code>failClosed: true</code> by default).</p>
 
       <h3>Can I have policies that apply to all agents?</h3>
-      <p>Yes. Create a policy binding with <
+      <p>Yes. Create a policy binding with the <code>*</code> selector to apply a policy org-wide, or scope it to a single agent with <code>agent:&lt;id&gt;</code>.</p>
+
+      <h3>How does the MCP Gateway decide which tools an agent can see?</h3>
+      <p>Each MCP tool is mapped to a Kynara scope; the gateway evaluates that scope per agent and only advertises tools that resolve to <code>allow</code> or <code>require_approval</code>, hiding anything that would be denied. See <a href="#mcp-gateway">MCP Gateway</a>.</p>
+
+      <h3>Can I import agent identities from Okta?</h3>
+      <p>Yes — connect Okta under <a href="#identity-providers">Identity Providers</a> to sync agent identities into Kynara and optionally map Okta groups to Kynara roles.</p>
+    </section>
+
+    <!-- MCP GATEWAY -->
+    <section id="mcp-gateway">
+      <h2>MCP Gateway</h2>
+      <p>The MCP Gateway places Kynara in front of any Model Context Protocol (MCP) server so that <strong>every tool call is authorized per agent</strong> against your policies — and agents only ever see the tools they are allowed to use (least-privilege discovery).</p>
+
+      <h3>How it works</h3>
+      <ol>
+        <li>Register your upstream MCP server under <em>Enforcement &rarr; MCP Gateway</em> (URL or stdio command, a scope prefix, and a fail mode).</li>
+        <li>Point the Kynara MCP wrapper at it and set <code>KYNARA_MCP_SERVER_ID</code> and <code>KYNARA_API_KEY</code>. On start, the wrapper discovers the upstream tools and registers them with Kynara.</li>
+        <li>Each discovered tool is auto-mapped to a Kynara scope (e.g. <code>mcp.crm.contacts.read</code>). You can edit the scope, set a risk class, or pin an effect override per tool.</li>
+        <li>On every call the wrapper resolves the tool&rsquo;s scope and asks the decision engine for <code>allow</code>, <code>deny</code>, or <code>require_approval</code> — exactly like any other Kynara action.</li>
+      </ol>
+
+      <h3>Least-privilege discovery</h3>
+      <p>When an agent lists tools, the wrapper asks Kynara which tools that agent may call and hides the rest, so a denied capability is never even advertised. A tool pinned to <code>deny</code> can never be invoked, even by name.</p>
+
+      <h3>Fail mode</h3>
+      <p>Each server has a per-server fail mode: <code>closed</code> denies calls when the policy engine is unreachable (the secure default), <code>open</code> allows them. Mapped scopes flow through the same RBAC/ABAC, non-escalation, approval, and tamper-evident audit machinery as the rest of Kynara.</p>
+    </section>
+
+    <!-- IDENTITY PROVIDERS -->
+    <section id="identity-providers">
+      <h2>Identity Providers (Okta agent sync)</h2>
+      <p>Connect Okta to import your AI-agent identities into Kynara and keep them in sync. Imported agents become standard Kynara agents, so your policies, approvals, and audit apply to them automatically.</p>
+
+      <h3>Set up</h3>
+      <ol>
+        <li>Go to <em>Administration &rarr; Identity Providers &rarr; Connect Okta</em>.</li>
+        <li>Enter your Okta org URL and an SSWS API token (Okta &rarr; Security &rarr; API &rarr; Tokens). The token is stored encrypted.</li>
+        <li>Choose a sync mode: <strong>Agents</strong> (Okta&rsquo;s first-class agent identities, <code>/api/v1/agents</code>) or <strong>Group</strong> (members of a designated Okta group).</li>
+        <li>Click <em>Test</em> to verify connectivity, then <em>Sync now</em>.</li>
+      </ol>
+
+      <h3>Role mapping</h3>
+      <p>Optionally map Okta group names to Kynara role slugs. When an imported agent belongs to a mapped group, Kynara grants that role via a configured <em>on-behalf user</em>. Without an on-behalf user, sync imports identities only (no role grants).</p>
+
+      <h3>Lifecycle</h3>
+      <p>Sync is idempotent — agents are matched by their Okta id, so re-syncing updates rather than duplicates. Enable <em>Deactivate removed</em> to disable agents that no longer exist in Okta. Run sync on demand, or wire it to your scheduler.</p>
+    </section>
+
+  </main>
+  </div>
+</body>
+</html>

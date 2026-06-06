@@ -14,40 +14,77 @@ type NavItem = { to: string; label: string; icon: React.ElementType; roles: stri
 type NavGroup = { group: string; icon: React.ElementType; roles: string[]; items: NavItem[] };
 type NavEntry = NavItem | NavGroup;
 
+const ALL = ["owner", "admin", "developer", "auditor", "member"];
+
 const allNav: NavEntry[] = [
-  { to: "dashboard",  label: "Dashboard",  icon: LayoutDashboard, roles: ["owner","admin","developer","auditor","member"] },
-  { to: "agents",     label: "Agents",     icon: Bot,             roles: ["owner","admin","developer","auditor","member"] },
-  { to: "policies",   label: "Policies",   icon: ShieldCheck,     roles: ["owner","admin","auditor","developer","member"] },
-  { to: "approvals",            label: "Approvals",         icon: CheckCircle2, roles: ["owner","admin","auditor","developer","member"], badge: true },
-  { to: "approvals/analytics", label: "Approval Analytics", icon: BarChart2,    roles: ["owner","admin","auditor"] },
-  { to: "audit",      label: "Audit log",  icon: ScrollText,      roles: ["owner","admin","auditor","developer","member"] },
+  // ── Daily essentials (top level) ──────────────────────────────────────────
+  { to: "dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ALL },
+  { to: "agents",    label: "Agents",    icon: Bot,             roles: ALL },
+  { to: "policies",  label: "Policies",  icon: ShieldCheck,     roles: ALL },
+  { to: "approvals", label: "Approvals", icon: CheckCircle2,    roles: ALL, badge: true },
+
+  // ── Access Control — who/what can act, and with which permissions ─────────
   {
-    group: "Governance",
+    group: "Access Control",
     icon: KeyRound,
-    roles: ["owner","admin","auditor","developer","member"],
+    roles: ALL,
     items: [
-      { to: "roles",      label: "Roles",         icon: KeyRound,   roles: ["owner","admin","auditor","developer","member"] },
-      { to: "tools",      label: "Scope Catalog", icon: Wrench,     roles: ["owner","admin","developer","auditor","member"] },
-      { to: "guardrails", label: "Guardrails",    icon: ShieldAlert,roles: ["owner","admin"] },
-      { to: "mcp-gateway", label: "MCP Gateway",  icon: Network,    roles: ["owner","admin","developer"] },
-      { to: "catalog",          label: "Library",          icon: BookOpen, roles: ["owner","admin","developer","auditor","member"] },
-      { to: "policy-templates", label: "Policy Templates", icon: Blocks,   roles: ["owner","admin"] },
-      { to: "how-it-works", label: "How it works",icon: BookOpen,   roles: ["owner","admin","developer","auditor","member"] },
+      { to: "roles",              label: "Roles",            icon: KeyRound,     roles: ALL },
+      { to: "identity-providers", label: "Identity Providers", icon: Fingerprint, roles: ["owner","admin"] },
+      { to: "tools",              label: "Scope Catalog",    icon: Wrench,       roles: ALL },
+      { to: "policy-templates",   label: "Policy Templates", icon: Blocks,       roles: ["owner","admin"] },
     ],
   },
+
+  // ── Enforcement — runtime control points ─────────────────────────────────
   {
-    group: "Platform",
-    icon: Plug,
+    group: "Enforcement",
+    icon: ShieldAlert,
+    roles: ["owner","admin","developer"],
+    items: [
+      { to: "mcp-gateway", label: "MCP Gateway", icon: Network,     roles: ["owner","admin","developer"] },
+      { to: "guardrails",  label: "Guardrails",  icon: ShieldAlert, roles: ["owner","admin"] },
+    ],
+  },
+
+  // ── Monitoring — oversight & evidence ────────────────────────────────────
+  {
+    group: "Monitoring",
+    icon: BarChart2,
+    roles: ALL,
+    items: [
+      { to: "audit",               label: "Audit Log",          icon: ScrollText, roles: ALL },
+      { to: "approvals/analytics", label: "Approval Analytics", icon: BarChart2,  roles: ["owner","admin","auditor"] },
+    ],
+  },
+
+  // ── Administration — org & platform configuration ────────────────────────
+  {
+    group: "Administration",
+    icon: Building2,
     roles: ["owner","admin"],
     items: [
-      { to: "webhooks",     label: "Webhooks",     icon: Plug,      roles: ["owner","admin"] },
-      { to: "integrations", label: "Integrations", icon: Blocks,    roles: ["owner","admin"] },
-      { to: "identity-providers", label: "Identity Providers", icon: Fingerprint, roles: ["owner","admin"] },
-      { to: "billing",      label: "Billing",      icon: CreditCard,roles: ["owner","admin"] },
-      { to: "settings",     label: "Settings",     icon: Settings,  roles: ["owner","admin"] },
+      { to: "integrations", label: "Integrations", icon: Plug,       roles: ["owner","admin"] },
+      { to: "webhooks",     label: "Webhooks",     icon: Blocks,     roles: ["owner","admin"] },
+      { to: "billing",      label: "Billing",      icon: CreditCard, roles: ["owner","admin"] },
+      { to: "settings",     label: "Settings",     icon: Settings,   roles: ["owner","admin"] },
     ],
   },
-  { to: "superadmin", label: "Super Admin", icon: Crown, roles: ["owner","admin","developer","auditor","member"], superadminOnly: true },
+
+  // ── Resources — learn & build ────────────────────────────────────────────
+  {
+    group: "Resources",
+    icon: BookOpen,
+    roles: ALL,
+    items: [
+      { to: "how-it-works", label: "How it works", icon: BookOpen, roles: ALL },
+      { to: "catalog",      label: "Library",      icon: Blocks,   roles: ALL },
+      { to: "api-explorer", label: "API Explorer", icon: Code2,    roles: ["owner","admin","developer"] },
+      { to: "changelog",    label: "Changelog",    icon: History,  roles: ALL },
+    ],
+  },
+
+  { to: "superadmin", label: "Super Admin", icon: Crown, roles: ALL, superadminOnly: true },
 ];
 
 function isGroup(entry: NavEntry): entry is NavGroup { return "group" in entry; }
