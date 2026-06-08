@@ -107,6 +107,7 @@ export default function LandingPage() {
               )}
             </div>
             <Link to="/docs" className="hover:text-ink-50 transition-colors">Docs</Link>
+            <a href="/compare/" className="hover:text-ink-50 transition-colors">Compare</a>
             <button onClick={openContact} className="hover:text-ink-50 transition-colors">Contact</button>
           </div>
           <div className="flex items-center gap-3">

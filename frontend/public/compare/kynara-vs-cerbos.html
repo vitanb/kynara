@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kynara vs Cerbos — authorization for AI agents comparison</title>
+<meta name="description" content="Kynara vs Cerbos: Cerbos is a stateless authorization service (PDP) for application access; Kynara is an agent-native control plane adding identities, non-escalation, human approvals, MCP enforcement, and a tamper-evident audit log." />
+<link rel="canonical" href="https://kynaraai.com/compare/kynara-vs-cerbos" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Kynara vs Cerbos — authorization for AI agents comparison" />
+<meta property="og:description" content="Kynara vs Cerbos: Cerbos is a stateless authorization service (PDP) for application access; Kynara is an agent-native control plane adding identities, non-escalation, human approvals, MCP enforcement, and a tamper-evident audit log." />
+<meta property="og:url" content="https://kynaraai.com/compare/kynara-vs-cerbos" />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is Cerbos an AI-agent tool?", "acceptedAnswer": {"@type": "Answer", "text": "Cerbos is a general application authorization service. It can authorize many subjects, but it isn't purpose-built for the AI-agent trust model (delegation, approvals, MCP, agent identities) the way Kynara is."}}, {"@type": "Question", "name": "Does Kynara do ABAC like Cerbos?", "acceptedAnswer": {"@type": "Answer", "text": "Yes \u2014 Kynara evaluates RBAC + ABAC against runtime context, and adds agent-specific guarantees on top."}}, {"@type": "Question", "name": "Can I migrate policies from Cerbos to Kynara?", "acceptedAnswer": {"@type": "Answer", "text": "Concepts map closely (roles, attributes, conditions). Kynara additionally models agent/user delegation and approval outcomes; reach out and we can help map an existing policy set."}}]}</script>
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#34D399;--warn:#FBBF24;--no:#64748B;--font:'Inter',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.7;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;font-size:15px;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:24px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;border:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--accent);color:#fff;} .btn-primary:hover{background:#2563EB;text-decoration:none;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);} .btn-ghost:hover{color:#fff;text-decoration:none;}
+.hero{max-width:980px;margin:0 auto;padding:72px 40px 36px;}
+.bc{font-size:12px;color:var(--muted);margin-bottom:18px;}
+.bc a{color:var(--muted);}
+h1{font-size:clamp(30px,4.2vw,46px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.12;margin-bottom:18px;}
+h1 span{background:linear-gradient(135deg,#3B82F6,#93C5FD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sub{font-size:18px;color:var(--muted);max-width:680px;margin-bottom:18px;}
+.tldr{max-width:980px;margin:0 auto;padding:0 40px 8px;}
+.tldr-box{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:18px 22px;color:var(--text);font-size:15px;}
+section{max-width:980px;margin:0 auto;padding:28px 40px;}
+h2{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em;margin-bottom:14px;}
+h3{font-size:16px;font-weight:700;color:#fff;margin:18px 0 6px;}
+p{margin-bottom:12px;}
+table.cmp{width:100%;border-collapse:collapse;margin:8px 0 8px;font-size:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+table.cmp th,table.cmp td{padding:12px 16px;text-align:left;border-top:1px solid var(--border);vertical-align:top;}
+table.cmp thead th{background:var(--surface2);color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.06em;border-top:none;}
+table.cmp td:first-child{color:var(--strong);font-weight:600;width:30%;}
+.yes{color:var(--ok);font-weight:700;} .part{color:var(--warn);font-weight:700;} .no{color:var(--no);font-weight:700;}
+.note{color:var(--muted);font-size:12.5px;display:block;margin-top:2px;}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:760px){.cols{grid-template-columns:1fr;}}
+.col{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+.col h3{margin-top:0;}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;margin:8px 0 40px;}
+.cta h2{margin-bottom:8px;} .cta-btns{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+footer{max-width:980px;margin:0 auto;padding:24px 40px 48px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;color:var(--muted);flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+.related{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;}
+.related a{font-size:13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--accent2);}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+  <div class="nav-links">
+    <a href="/docs.html">Docs</a>
+    <a href="/compare/">Compare</a>
+    <a href="/sandbox.html">Sandbox</a>
+    <a href="https://kynaraai.com" class="btn btn-primary">Book a demo</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="bc"><a href="/">Home</a> / <a href="/compare/">Compare</a> / Cerbos</div>
+  <h1>Kynara vs <span>Cerbos</span></h1>
+  <p class="sub">Cerbos is a clean, stateless authorization service (a policy decision point) for application access control. Kynara targets the AI-agent problem specifically — adding the identity, delegation, approval, enforcement, and audit pieces agents require.</p>
+</div>
+<div class="tldr"><div class="tldr-box"><strong>TL;DR:</strong> Cerbos is great for decoupled application authorization with versioned policies. Choose Kynara when the subject is an AI agent and you need agent/user identity management, the non-escalation guarantee, human-in-the-loop approvals, MCP tool-call enforcement, and a tamper-evident audit chain as a single platform.</div></div>
+
+<section>
+  <h2>Cerbos vs Kynara at a glance</h2>
+  <table class="cmp">
+    <thead><tr><th>Capability</th><th>Kynara</th><th>Cerbos</th></tr></thead>
+    <tbody><tr><td>Primary category</td><td>AI-agent permission & governance control plane</td><td>Stateless authorization service (PDP) for apps</td></tr><tr><td>Purpose-built for AI agents</td><td><span class="yes">&#10003; Yes</span></td><td><span class="part">~ App authz; not agent-specific</span></td></tr><tr><td>Manages agent & user identities</td><td><span class="yes">&#10003; Yes</span></td><td><span class="no">&#10007; Bring your own identities</span></td></tr><tr><td>RBAC + ABAC policy engine</td><td><span class="yes">&#10003; Yes</span></td><td><span class="yes">&#10003; RBAC + ABAC</span></td></tr><tr><td>Non-escalation (agent &le; dispatching user)</td><td><span class="yes">&#10003; Yes</span></td><td><span class="no">&#10007; No agent-on-behalf model</span></td></tr><tr><td>Human-in-the-loop approvals</td><td><span class="yes">&#10003; Yes</span></td><td><span class="no">&#10007; Not built-in</span></td></tr><tr><td>MCP tool-call authorization</td><td><span class="yes">&#10003; Yes</span></td><td><span class="no">&#10007; Not built-in</span></td></tr><tr><td>Tamper-evident (hash-chained) audit log</td><td><span class="yes">&#10003; Yes</span></td><td><span class="part">~ Decision logs; not hash-chained by default</span></td></tr><tr><td>Policy replay / simulation</td><td><span class="yes">&#10003; Yes</span></td><td><span class="part">~ Policy testing; no historical replay</span></td></tr><tr><td>Deployment</td><td>Cloud or self-host (source-available)</td><td>Self-host / cloud</td></tr></tbody>
+  </table>
+  <p class="note" style="margin-top:6px;">Comparison reflects our reading of publicly documented capabilities and is provided in good faith; verify current specifics with each vendor.</p>
+</section>
+
+<section>
+  <div class="cols">
+    <div class="col"><h3>When Cerbos is the right choice</h3><p>You want a fast, language-light, stateless PDP for application authorization with policy-as-code and good testing. Cerbos is a strong choice for service/app access control.</p></div>
+    <div class="col"><h3>When Kynara is the right choice</h3><p>Your subjects are AI agents and you need an integrated, agent-native control plane: identities, non-escalation, approvals, MCP enforcement, policy replay, and tamper-evident audit — without stitching multiple tools together.</p></div>
+  </div>
+</section>
+
+<section><h2>How Kynara and Cerbos work together</h2><p>You can run Cerbos for application authorization and Kynara as the dedicated control plane for AI-agent actions; both follow a policy-as-code philosophy.</p></section>
+
+<section>
+  <h2>FAQ</h2>
+  <h3>Is Cerbos an AI-agent tool?</h3><p>Cerbos is a general application authorization service. It can authorize many subjects, but it isn't purpose-built for the AI-agent trust model (delegation, approvals, MCP, agent identities) the way Kynara is.</p><h3>Does Kynara do ABAC like Cerbos?</h3><p>Yes — Kynara evaluates RBAC + ABAC against runtime context, and adds agent-specific guarantees on top.</p><h3>Can I migrate policies from Cerbos to Kynara?</h3><p>Concepts map closely (roles, attributes, conditions). Kynara additionally models agent/user delegation and approval outcomes; reach out and we can help map an existing policy set.</p>
+  <div class="related">
+    <a href="/compare/kynara-vs-opa">Kynara vs OPA</a>
+    <a href="/compare/kynara-vs-okta">Kynara vs Okta</a>
+    <a href="/compare/kynara-vs-cerbos">Kynara vs Cerbos</a>
+  </div>
+</section>
+
+<section>
+  <div class="cta">
+    <h2>Govern your AI agents with Kynara</h2>
+    <p>RBAC + ABAC, human-in-the-loop approvals, MCP tool-call enforcement, and a tamper-evident audit log.</p>
+    <div class="cta-btns">
+      <a href="https://kynaraai.com" class="btn btn-primary" style="padding:11px 24px;font-size:14px;">Book a demo</a>
+      <a href="/sandbox.html" class="btn btn-ghost" style="padding:11px 24px;font-size:14px;">Try the sandbox</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Kynara &copy; 2026</span>
+  <div style="display:flex;gap:18px;"><a href="/">Home</a><a href="/docs.html">Docs</a><a href="/compare/">Compare</a><a href="/pricing">Pricing</a></div>
+</footer>
+</body>
+</html>

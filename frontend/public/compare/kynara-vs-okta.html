@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kynara vs Okta for AI agents — identity vs authorization comparison</title>
+<meta name="description" content="Kynara vs Okta for AI agents: Okta issues and verifies agent identities; Kynara provides the fine-grained, per-action authorization, containment, and tamper-evident audit on top. They are complementary, not competitors." />
+<link rel="canonical" href="https://kynaraai.com/compare/kynara-vs-okta" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Kynara vs Okta for AI agents — identity vs authorization comparison" />
+<meta property="og:description" content="Kynara vs Okta for AI agents: Okta issues and verifies agent identities; Kynara provides the fine-grained, per-action authorization, containment, and tamper-evident audit on top. They are complementary, not competitors." />
+<meta property="og:url" content="https://kynaraai.com/compare/kynara-vs-okta" />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does Kynara replace Okta?", "acceptedAnswer": {"@type": "Answer", "text": "No \u2014 they're complementary. Okta issues and verifies agent identity; Kynara enforces fine-grained authorization and keeps the audit trail. Kynara syncs agent identities from Okta."}}, {"@type": "Question", "name": "Can Kynara import agents from Okta?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Kynara's Okta integration imports agent identities (via Okta's agents API or a designated group) and keeps them in sync, optionally mapping Okta groups to Kynara roles."}}, {"@type": "Question", "name": "Why isn't identity enough to govern agents?", "acceptedAnswer": {"@type": "Answer", "text": "Verifying an agent's identity doesn't control what it can do. The unsolved 'authorization gap' is per-action, context-aware control \u2014 exactly what Kynara provides on top of identity."}}]}</script>
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#34D399;--warn:#FBBF24;--no:#64748B;--font:'Inter',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.7;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;font-size:15px;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:24px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;border:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--accent);color:#fff;} .btn-primary:hover{background:#2563EB;text-decoration:none;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);} .btn-ghost:hover{color:#fff;text-decoration:none;}
+.hero{max-width:980px;margin:0 auto;padding:72px 40px 36px;}
+.bc{font-size:12px;color:var(--muted);margin-bottom:18px;}
+.bc a{color:var(--muted);}
+h1{font-size:clamp(30px,4.2vw,46px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.12;margin-bottom:18px;}
+h1 span{background:linear-gradient(135deg,#3B82F6,#93C5FD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sub{font-size:18px;color:var(--muted);max-width:680px;margin-bottom:18px;}
+.tldr{max-width:980px;margin:0 auto;padding:0 40px 8px;}
+.tldr-box{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:18px 22px;color:var(--text);font-size:15px;}
+section{max-width:980px;margin:0 auto;padding:28px 40px;}
+h2{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em;margin-bottom:14px;}
+h3{font-size:16px;font-weight:700;color:#fff;margin:18px 0 6px;}
+p{margin-bottom:12px;}
+table.cmp{width:100%;border-collapse:collapse;margin:8px 0 8px;font-size:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+table.cmp th,table.cmp td{padding:12px 16px;text-align:left;border-top:1px solid var(--border);vertical-align:top;}
+table.cmp thead th{background:var(--surface2);color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.06em;border-top:none;}
+table.cmp td:first-child{color:var(--strong);font-weight:600;width:30%;}
+.yes{color:var(--ok);font-weight:700;} .part{color:var(--warn);font-weight:700;} .no{color:var(--no);font-weight:700;}
+.note{color:var(--muted);font-size:12.5px;display:block;margin-top:2px;}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:760px){.cols{grid-template-columns:1fr;}}
+.col{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+.col h3{margin-top:0;}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;margin:8px 0 40px;}
+.cta h2{margin-bottom:8px;} .cta-btns{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+footer{max-width:980px;margin:0 auto;padding:24px 40px 48px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;color:var(--muted);flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+.related{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;}
+.related a{font-size:13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--accent2);}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+  <div class="nav-links">
+    <a href="/docs.html">Docs</a>
+    <a href="/compare/">Compare</a>
+    <a href="/sandbox.html">Sandbox</a>
+    <a href="https://kynaraai.com" class="btn btn-primary">Book a demo</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="bc"><a href="/">Home</a> / <a href="/compare/">Compare</a> / Okta</div>
+  <h1>Kynara vs <span>Okta</span></h1>
+  <p class="sub">Okta is a leader in identity — including first-class AI-agent identities. Kynara is the authorization, containment, and compliance layer that runs on top of whatever issues those identities. In most stacks you'll use both.</p>
+</div>
+<div class="tldr"><div class="tldr-box"><strong>TL;DR:</strong> Okta answers <em>who is this agent</em>. Kynara answers <em>what is this agent allowed to do, on whose behalf, under what conditions — right now</em>. Kynara even syncs agent identities <em>from</em> Okta, so you keep Okta as the source of truth and add fine-grained runtime control with Kynara.</div></div>
+
+<section>
+  <h2>Okta vs Kynara at a glance</h2>
+  <table class="cmp">
+    <thead><tr><th>Capability</th><th>Kynara</th><th>Okta</th></tr></thead>
+    <tbody><tr><td>Primary category</td><td>AI-agent permission & governance control plane</td><td>Identity provider + lifecycle for humans, NHIs & agents</td></tr><tr><td>Purpose-built for AI agents</td><td><span class="yes">&#10003; Yes</span></td><td><span class="part">~ Agent identity, not fine-grained agent authz</span></td></tr><tr><td>Manages agent & user identities</td><td><span class="yes">&#10003; Yes</span></td><td><span class="yes">&#10003; Source of truth (Kynara syncs from Okta)</span></td></tr><tr><td>RBAC + ABAC policy engine</td><td><span class="yes">&#10003; Yes</span></td><td><span class="part">~ Coarse policies / group-based access</span></td></tr><tr><td>Non-escalation (agent &le; dispatching user)</td><td><span class="yes">&#10003; Yes</span></td><td><span class="no">&#10007; No agent-on-behalf intersection model</span></td></tr><tr><td>Human-in-the-loop approvals</td><td><span class="yes">&#10003; Yes</span></td><td><span class="no">&#10007; Not a built-in agent workflow</span></td></tr><tr><td>MCP tool-call authorization</td><td><span class="yes">&#10003; Yes</span></td><td><span class="no">&#10007; Not built-in</span></td></tr><tr><td>Tamper-evident (hash-chained) audit log</td><td><span class="yes">&#10003; Yes</span></td><td><span class="part">~ System log; not per-decision hash chain</span></td></tr><tr><td>Policy replay / simulation</td><td><span class="yes">&#10003; Yes</span></td><td><span class="no">&#10007; Not provided</span></td></tr><tr><td>Deployment</td><td>Cloud or self-host (source-available)</td><td>SaaS</td></tr></tbody>
+  </table>
+  <p class="note" style="margin-top:6px;">Comparison reflects our reading of publicly documented capabilities and is provided in good faith; verify current specifics with each vendor.</p>
+</section>
+
+<section>
+  <div class="cols">
+    <div class="col"><h3>When Okta is the right choice</h3><p>You need enterprise identity: SSO, lifecycle, directory, and a system of record for human, non-human, and agent identities. Okta is the right place to issue and govern those identities.</p></div>
+    <div class="col"><h3>When Kynara is the right choice</h3><p>You need fine-grained, per-tool-call authorization for agents, non-escalation across delegation, human approvals, MCP enforcement, and a tamper-evident decision log — the runtime control layer Okta isn't built to provide.</p></div>
+  </div>
+</section>
+
+<section><h2>How Kynara and Okta work together</h2><p>Connect Okta under Identity Providers and Kynara imports your agent identities (and can map Okta groups to Kynara roles). Okta owns identity; Kynara owns authorization, containment, and audit — a clean division of responsibility.</p></section>
+
+<section>
+  <h2>FAQ</h2>
+  <h3>Does Kynara replace Okta?</h3><p>No — they're complementary. Okta issues and verifies agent identity; Kynara enforces fine-grained authorization and keeps the audit trail. Kynara syncs agent identities from Okta.</p><h3>Can Kynara import agents from Okta?</h3><p>Yes. Kynara's Okta integration imports agent identities (via Okta's agents API or a designated group) and keeps them in sync, optionally mapping Okta groups to Kynara roles.</p><h3>Why isn't identity enough to govern agents?</h3><p>Verifying an agent's identity doesn't control what it can do. The unsolved 'authorization gap' is per-action, context-aware control — exactly what Kynara provides on top of identity.</p>
+  <div class="related">
+    <a href="/compare/kynara-vs-opa">Kynara vs OPA</a>
+    <a href="/compare/kynara-vs-okta">Kynara vs Okta</a>
+    <a href="/compare/kynara-vs-cerbos">Kynara vs Cerbos</a>
+  </div>
+</section>
+
+<section>
+  <div class="cta">
+    <h2>Govern your AI agents with Kynara</h2>
+    <p>RBAC + ABAC, human-in-the-loop approvals, MCP tool-call enforcement, and a tamper-evident audit log.</p>
+    <div class="cta-btns">
+      <a href="https://kynaraai.com" class="btn btn-primary" style="padding:11px 24px;font-size:14px;">Book a demo</a>
+      <a href="/sandbox.html" class="btn btn-ghost" style="padding:11px 24px;font-size:14px;">Try the sandbox</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Kynara &copy; 2026</span>
+  <div style="display:flex;gap:18px;"><a href="/">Home</a><a href="/docs.html">Docs</a><a href="/compare/">Compare</a><a href="/pricing">Pricing</a></div>
+</footer>
+</body>
+</html>

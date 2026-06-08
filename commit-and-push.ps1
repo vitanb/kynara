@@ -6,7 +6,7 @@
 #>
 
 param(
-    [string]$Message = "feat: simplified enterprise nav (grouped); docs update (MCP Gateway + Okta sections, fix truncation); Okta sync + MCP gateway",
+    [string]$Message = "seo: comparison pages (vs OPA/Okta/Cerbos) + hub, complete sitemap, Compare nav link",
     [string]$Branch  = "main",
     [switch]$SkipBuild
 )
