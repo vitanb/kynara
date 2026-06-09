@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kynara Blog — AI agent governance, authorization & security</title>
+<meta name="description" content="Insights on AI agent permissions, authorization, MCP security, non-human identity, and compliance from the Kynara team." />
+<link rel="canonical" href="https://kynaraai.com/blog/" />
+<meta property="og:title" content="Kynara Blog" />
+<meta property="og:description" content="AI agent governance, authorization, and security." />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--font:'Inter',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.75;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:22px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:#fff;}
+.btn:hover{background:#2563EB;text-decoration:none;}
+article,.wrap{max-width:740px;margin:0 auto;padding:48px 24px 64px;}
+.bc{font-size:13px;color:var(--muted);margin-bottom:22px;}
+h1{font-size:clamp(30px,4.5vw,44px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.15;margin-bottom:14px;}
+.dek{font-size:20px;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+.meta{font-size:13px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:22px;margin-bottom:30px;}
+article h2{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em;margin:36px 0 12px;}
+article h3{font-size:19px;font-weight:700;color:#fff;margin:26px 0 8px;}
+article p{margin-bottom:18px;} article ul,article ol{margin:0 0 18px 22px;} article li{margin-bottom:8px;}
+article strong{color:var(--strong);}
+hr{border:none;border-top:1px solid var(--border);margin:34px 0;}
+pre{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;font-size:13.5px;line-height:1.6;margin:0 0 22px;font-family:ui-monospace,Menlo,monospace;color:#E2E8F0;}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13.5px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent2);}
+pre code{background:none;padding:0;color:inherit;}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;text-align:center;margin-top:36px;}
+.cta-btns{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;}
+.btn-ghost:hover{color:#fff;text-decoration:none;}
+.post-card{display:block;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;}
+.post-card:hover{border-color:var(--accent);text-decoration:none;}
+.post-card h2{font-size:22px;color:#fff;margin-bottom:8px;}
+.post-card p{color:var(--muted);font-size:15px;margin:0;}
+footer{max-width:740px;margin:0 auto;padding:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+</style></head><body>
+<nav><a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+<div class="nav-links"><a href="/docs.html">Docs</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a><a href="https://kynaraai.com" class="btn">Book a demo</a></div></nav>
+<div class="wrap">
+  <div class="bc"><a href="/">Home</a> / Blog</div>
+  <h1 style="margin-bottom:8px;">Blog</h1>
+  <p class="dek" style="margin-bottom:30px;">AI agent governance, authorization, MCP security, and compliance.</p>
+  <a class="post-card" href="/blog/ai-agent-permission-problem">
+    <h2>The AI Agent Permission Problem — and How to Solve It</h2>
+    <p>AI agents can now call real APIs. The hard part is no longer capability — it's control. Why agent authorization is different from traditional IAM, why OPA/Okta/Cerbos only solve part of it, and what a real control plane for AI agents looks like.</p>
+  </a>
+</div>
+<footer><span>Kynara &copy; 2026</span><div style="display:flex;gap:18px;"><a href="/">Home</a><a href="/docs.html">Docs</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a></div></footer>
+</body></html>

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.kynara/mcp-gateway",
+  "description": "Authorization and policy enforcement gateway for MCP servers. Adds RBAC + ABAC checks, human-in-the-loop approvals, least-privilege tool discovery, and a tamper-evident audit log to any upstream MCP server — per agent, with zero agent-side changes.",
+  "version": "1.0.0",
+  "websiteUrl": "https://kynaraai.com",
+  "repository": {
+    "url": "https://github.com/vitanb/kynara",
+    "source": "github",
+    "subfolder": "kynara-mcp-wrapper"
+  },
+  "packages": [
+    {
+      "registryType": "oci",
+      "registryBaseUrl": "https://docker.io",
+      "identifier": "kynara/mcp-gateway",
+      "version": "1.0.0",
+      "transport": { "type": "sse" },
+      "environmentVariables": [
+        { "name": "KYNARA_UPSTREAM_MCP_URL", "description": "Upstream MCP server URL to front (SSE).", "isRequired": true },
+        { "name": "KYNARA_API_BASE_URL", "description": "Kynara API base URL.", "isRequired": true },
+        { "name": "KYNARA_API_KEY", "description": "Kynara API key (sk_live_...).", "isRequired": true, "isSecret": true },
+        { "name": "KYNARA_MCP_SERVER_ID", "description": "Server id from the Kynara MCP Gateway page; enables central tool->scope mapping and least-privilege filtering.", "isRequired": false },
+        { "name": "KYNARA_FAIL_OPEN", "description": "Fallback when Kynara is unreachable; false = fail-closed (default).", "isRequired": false },
+        { "name": "KYNARA_MCP_WRAPPER_PORT", "description": "Listen port (default 9090).", "isRequired": false }
+      ]
+    }
+  ]
+}
