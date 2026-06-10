@@ -27,7 +27,7 @@ the evaluation context as ``ctx.<path>``.
 ```
 
 Supported ops: ``and``, ``or``, ``not``, ``eq``, ``neq``, ``gt``, ``gte``, ``lt``,
-``lte``, ``in``, ``contains``, ``starts_with``, ``time_between``, ``has_scope``.
+``lte``, ``in``, ``contains``, ``starts_with``, ``ends_with``, ``time_between``, ``has_scope``.
 """
 from __future__ import annotations
 
@@ -128,6 +128,7 @@ def _evaluate(node: Any, ctx: DecisionContext) -> bool:
     if op == "in":  return resolved[0] in (resolved[1] or [])
     if op == "contains": return resolved[1] in (resolved[0] or [])
     if op == "starts_with": return (resolved[0] or "").startswith(resolved[1])
+    if op == "ends_with": return (resolved[0] or "").endswith(resolved[1])
     if op == "time_between":
         t, lo, hi = resolved
         if isinstance(t, str):

@@ -92,7 +92,7 @@ export default function PolicyEditorPage() {
     if (Object.keys(node).length === 0) return ""; // empty = match-all, valid
     if (!("op" in node))
       return `Missing "op" key. The condition must be a node like {"op":"and","args":[…]}, not a plain object like ${JSON.stringify(node).slice(0,60)}.`;
-    const validOps = ["and","or","not","eq","neq","gt","gte","lt","lte","in","contains","starts_with","time_between","has_scope"];
+    const validOps = ["and","or","not","eq","neq","gt","gte","lt","lte","in","contains","starts_with","ends_with","time_between","has_scope"];
     if (!validOps.includes(node.op))
       return `Unknown op "${node.op}". Valid ops: ${validOps.join(", ")}.`;
     return "";

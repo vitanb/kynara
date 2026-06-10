@@ -179,6 +179,38 @@ POLICY_TEMPLATES = [
         },
     },
     {
+        "id": "slack-channel-allowlist",
+        "label": "Slack: channel allowlist",
+        "description": "Allow sending a Slack message only when the destination channel is on an approved list. Map the tool's channel argument to resource.attrs.channel.",
+        "suggested_effect": "allow",
+        "condition": {
+            "op": "in",
+            "args": ["ctx.resource.attrs.channel", ["C0123ALLOWED", "C0456ALLOWED"]],
+        },
+    },
+    {
+        "id": "gmail-recipient-domain",
+        "label": "Gmail: internal recipients only",
+        "description": "Allow sending email only when the recipient address ends with your company domain. Map the recipient argument to resource.attrs.recipient.",
+        "suggested_effect": "allow",
+        "condition": {
+            "op": "ends_with",
+            "args": ["ctx.resource.attrs.recipient", "@yourcompany.com"],
+        },
+    },
+    {
+        "id": "external-recipient-approval",
+        "label": "Require approval for external recipients",
+        "description": "Route any email/message to an external recipient (not on your company domain) to human approval before it is sent.",
+        "suggested_effect": "require_approval",
+        "condition": {
+            "op": "not",
+            "args": [
+                {"op": "ends_with", "args": ["ctx.resource.attrs.recipient", "@yourcompany.com"]},
+            ],
+        },
+    },
+    {
         "id": "business-hours-and-region",
         "label": "Business hours + region",
         "description": "Allow only within business hours AND from an approved country",
