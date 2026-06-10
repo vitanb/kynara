@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Adding Permissions to LangChain Agents: A Practical Guide | Kynara</title>
+<meta name="description" content="LangChain makes tool-calling effortless, but adding permissions is on you. A practical guide to gating LangChain agent tools with allow/deny/require_approval checks, with code, plus LangGraph, AutoGen, and CrewAI." />
+<link rel="canonical" href="https://kynaraai.com/blog/langchain-agent-permissions" />
+<meta property="og:type" content="article" /><meta property="og:title" content="Adding Permissions to LangChain Agents: A Practical Guide" />
+<meta property="og:description" content="LangChain makes tool-calling effortless, but adding permissions is on you. A practical guide to gating LangChain agent tools with allow/deny/require_approval checks, with code, plus LangGraph, AutoGen, and CrewAI." /><meta property="og:url" content="https://kynaraai.com/blog/langchain-agent-permissions" />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" /><meta name="twitter:card" content="summary_large_image" />
+<meta name="author" content="Kynara" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Adding Permissions to LangChain Agents: A Practical Guide", "description": "LangChain makes tool-calling effortless, but adding permissions is on you. A practical guide to gating LangChain agent tools with allow/deny/require_approval checks, with code, plus LangGraph, AutoGen, and CrewAI.", "datePublished": "2026-06-05", "dateModified": "2026-06-05", "author": {"@type": "Organization", "name": "Kynara", "url": "https://kynaraai.com"}, "publisher": {"@type": "Organization", "name": "Kynara", "logo": {"@type": "ImageObject", "url": "https://kynaraai.com/logo-192.png"}}, "mainEntityOfPage": {"@type": "WebPage", "@id": "https://kynaraai.com/blog/langchain-agent-permissions"}, "image": "https://kynaraai.com/logo-192.png"}</script>
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--font:'Inter',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.75;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:22px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:#fff;}
+.btn:hover{background:#2563EB;text-decoration:none;}
+article,.wrap{max-width:740px;margin:0 auto;padding:48px 24px 64px;}
+.bc{font-size:13px;color:var(--muted);margin-bottom:22px;}
+h1{font-size:clamp(30px,4.5vw,44px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.15;margin-bottom:14px;}
+.dek{font-size:20px;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+.meta{font-size:13px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:22px;margin-bottom:30px;}
+article h2{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em;margin:36px 0 12px;}
+article h3{font-size:19px;font-weight:700;color:#fff;margin:26px 0 8px;}
+article p{margin-bottom:18px;} article ul,article ol{margin:0 0 18px 22px;} article li{margin-bottom:8px;}
+article strong{color:var(--strong);}
+hr{border:none;border-top:1px solid var(--border);margin:34px 0;}
+pre{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;font-size:13.5px;line-height:1.6;margin:0 0 22px;font-family:ui-monospace,Menlo,monospace;color:#E2E8F0;}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13.5px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent2);}
+pre code{background:none;padding:0;color:inherit;}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;text-align:center;margin-top:36px;}
+.cta-btns{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;}
+.btn-ghost:hover{color:#fff;text-decoration:none;}
+.post-card{display:block;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;}
+.post-card:hover{border-color:var(--accent);text-decoration:none;}
+.post-card h2{font-size:22px;color:#fff;margin-bottom:8px;}
+.post-card p{color:var(--muted);font-size:15px;margin:0;}
+footer{max-width:740px;margin:0 auto;padding:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+</style></head><body>
+<nav><a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+<div class="nav-links"><a href="/docs.html">Docs</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a><a href="https://kynaraai.com" class="btn">Book a demo</a></div></nav>
+<article>
+<div class="bc"><a href="/">Home</a> / <a href="/blog/">Blog</a></div>
+<h1>Adding Permissions to LangChain Agents: A Practical Guide</h1>
+<div class="meta">Kynara &middot; 2026-06-05 &middot; 6 min read</div>
+<p class="dek">LangChain makes tool-calling effortless. Deciding which tools an agent may actually use is still on you.</p>
+<p>LangChain (and LangGraph) turned "give an LLM some tools and let it act" into a few lines of code. That's the appeal — and the problem. By default, a LangChain agent will call whichever tool the model decides to call, with whatever arguments the model produces. There's no built-in notion of <em>permissions</em>: no concept of which agent may call which tool, on whose behalf, or under what conditions.</p>
+<p>For a demo, that's fine. For an agent that can send email, modify records, or move money, it's a liability. Here's how to add real permissions to LangChain agents — the pattern, the code, and the pitfalls.</p>
+<hr>
+<h2>The core idea: gate tools at the boundary</h2>
+<p>The right place to enforce permissions is <strong>at the tool boundary</strong> — between the model's decision to call a tool and the tool actually executing. You want a check that runs <em>before</em> any side effect and can:</p>
+<ul>
+<li><code>allow</code> the call to proceed,</li>
+<li><code>deny</code> it (raise an error the agent sees, so the side effect never happens),</li>
+<li>or <code>require_approval</code> (pause and surface an approval request to a human).</li>
+</ul>
+<p>There are two clean ways to do this in LangChain: a <strong>callback handler</strong> that intercepts every tool start, or a <strong>wrapper/decorator</strong> around each tool.</p>
+<hr>
+<h2>Pattern 1: a callback handler</h2>
+<p>A callback handler hooks <code>on_tool_start</code> for <em>every</em> tool the agent invokes — one place to enforce policy across all tools:</p>
+<pre><code>from langchain.agents import AgentExecutor
+from kynara_sdk.langchain import KynaraCallbackHandler
+
+executor = AgentExecutor(
+    agent=agent,
+    tools=tools,
+    callbacks=[KynaraCallbackHandler(agent_id=AGENT_ID)],
+)</code></pre>
+<p>Before any tool runs, the handler asks the decision engine whether this agent may perform this action with these arguments. A <code>deny</code> stops the call; a <code>require_approval</code> pauses it.</p>
+<h2>Pattern 2: wrap individual tools</h2>
+<p>When you want per-tool control, guard the tool function itself:</p>
+<pre><code>from langchain.tools import tool
+from kynara_sdk import permission_required
+
+@tool
+@permission_required(&quot;crm.contacts.read&quot;, resource_arg=&quot;contact_id&quot;)
+def get_contact(contact_id: str) -&gt; str:
+    &quot;&quot;&quot;Retrieve a CRM contact by id.&quot;&quot;&quot;
+    return crm.fetch(contact_id)</code></pre>
+<p>If the decision is <code>deny</code>, <code>permission_required</code> raises before the function body runs — the CRM is never queried. The agent receives a clear, structured error instead of a side effect.</p>
+<hr>
+<h2>The same pattern works beyond LangChain</h2>
+<p>This boundary-enforcement approach isn't LangChain-specific. The same decision check slots into <strong>LangGraph</strong> nodes, <strong>AutoGen</strong> tool execution, <strong>CrewAI</strong> tasks, and plain Python or TypeScript tool functions. Pick the integration point your framework gives you (callback, middleware, decorator) and put the check there.</p>
+<hr>
+<h2>Why this belongs outside the LLM</h2>
+<p>A critical detail: the permission check must live <em>outside</em> the model's reasoning. The decision engine evaluates structured data — the agent, the action, the arguments, the context — not the natural-language prompt. That means a prompt injection inside the LLM can't talk its way past the check. The model can decide to call <code>delete_all_records</code>; the policy layer still says no.</p>
+<hr>
+<h2>Best practices</h2>
+<ul>
+<li><strong>Least privilege.</strong> Only register the tools an agent actually needs, and scope each to a role.</li>
+<li><strong>Use context.</strong> Make decisions depend on runtime context (time, user, environment, amount), not just the tool name.</li>
+<li><strong>Approvals for high-risk tools.</strong> Route destructive or high-value calls through human approval.</li>
+<li><strong>Audit everything.</strong> Record every decision in a tamper-evident log so you can prove what happened.</li>
+<li><strong>Fail closed.</strong> If the policy engine is unreachable, deny by default.</li>
+</ul>
+<hr>
+<h2>How Kynara does it</h2>
+<p><a href="https://kynaraai.com">Kynara</a> ships a <code>KynaraCallbackHandler</code> for LangChain/LangGraph and a <code>permission_required</code> decorator for individual tools, plus integrations for AutoGen, CrewAI, OpenAI, and Anthropic — and Express middleware on the TypeScript side. Under the hood, every check runs against your RBAC + ABAC policies with the non-escalation guarantee, optional human approval, and a SHA-256 hash-chained audit log. You keep building agents in LangChain; Kynara decides what they're allowed to do.</p>
+<p><em>Try it in the <a href="https://kynaraai.com/sandbox">sandbox</a>, or read more on <a href="/blog/agent-least-privilege">agent least privilege</a>.</em></p>
+<div class="cta"><h2 style="margin:0 0 6px;border:none;padding:0;font-size:22px;">Govern your AI agents with Kynara</h2>
+<p style="margin:0;color:var(--muted);">RBAC + ABAC, approvals, MCP enforcement, tamper-evident audit.</p>
+<div class="cta-btns"><a href="https://kynaraai.com" class="btn">Book a demo</a><a href="/sandbox.html" class="btn-ghost">Try the sandbox</a></div></div>
+</article>
+<footer><span>Kynara &copy; 2026</span><div style="display:flex;gap:18px;"><a href="/">Home</a><a href="/docs.html">Docs</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a></div></footer>
+</body></html>

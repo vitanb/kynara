@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Non-Human Identity for AI Agents: What It Is and Why It&#x27;s Now a Security Priority | Kynara</title>
+<meta name="description" content="Machine identities outnumber human ones, and AI agents are the fastest-growing class. What non-human identity (NHI) means, why agents are a harder problem, and how to govern agent identity and authorization." />
+<link rel="canonical" href="https://kynaraai.com/blog/non-human-identity-ai-agents" />
+<meta property="og:type" content="article" /><meta property="og:title" content="Non-Human Identity for AI Agents: What It Is and Why It&#x27;s Now a Security Priority" />
+<meta property="og:description" content="Machine identities outnumber human ones, and AI agents are the fastest-growing class. What non-human identity (NHI) means, why agents are a harder problem, and how to govern agent identity and authorization." /><meta property="og:url" content="https://kynaraai.com/blog/non-human-identity-ai-agents" />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" /><meta name="twitter:card" content="summary_large_image" />
+<meta name="author" content="Kynara" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Non-Human Identity for AI Agents: What It Is and Why It's Now a Security Priority", "description": "Machine identities outnumber human ones, and AI agents are the fastest-growing class. What non-human identity (NHI) means, why agents are a harder problem, and how to govern agent identity and authorization.", "datePublished": "2026-06-05", "dateModified": "2026-06-05", "author": {"@type": "Organization", "name": "Kynara", "url": "https://kynaraai.com"}, "publisher": {"@type": "Organization", "name": "Kynara", "logo": {"@type": "ImageObject", "url": "https://kynaraai.com/logo-192.png"}}, "mainEntityOfPage": {"@type": "WebPage", "@id": "https://kynaraai.com/blog/non-human-identity-ai-agents"}, "image": "https://kynaraai.com/logo-192.png"}</script>
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--font:'Inter',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.75;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:22px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:#fff;}
+.btn:hover{background:#2563EB;text-decoration:none;}
+article,.wrap{max-width:740px;margin:0 auto;padding:48px 24px 64px;}
+.bc{font-size:13px;color:var(--muted);margin-bottom:22px;}
+h1{font-size:clamp(30px,4.5vw,44px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.15;margin-bottom:14px;}
+.dek{font-size:20px;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+.meta{font-size:13px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:22px;margin-bottom:30px;}
+article h2{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em;margin:36px 0 12px;}
+article h3{font-size:19px;font-weight:700;color:#fff;margin:26px 0 8px;}
+article p{margin-bottom:18px;} article ul,article ol{margin:0 0 18px 22px;} article li{margin-bottom:8px;}
+article strong{color:var(--strong);}
+hr{border:none;border-top:1px solid var(--border);margin:34px 0;}
+pre{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;font-size:13.5px;line-height:1.6;margin:0 0 22px;font-family:ui-monospace,Menlo,monospace;color:#E2E8F0;}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13.5px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent2);}
+pre code{background:none;padding:0;color:inherit;}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;text-align:center;margin-top:36px;}
+.cta-btns{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;}
+.btn-ghost:hover{color:#fff;text-decoration:none;}
+.post-card{display:block;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;}
+.post-card:hover{border-color:var(--accent);text-decoration:none;}
+.post-card h2{font-size:22px;color:#fff;margin-bottom:8px;}
+.post-card p{color:var(--muted);font-size:15px;margin:0;}
+footer{max-width:740px;margin:0 auto;padding:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+</style></head><body>
+<nav><a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+<div class="nav-links"><a href="/docs.html">Docs</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a><a href="https://kynaraai.com" class="btn">Book a demo</a></div></nav>
+<article>
+<div class="bc"><a href="/">Home</a> / <a href="/blog/">Blog</a></div>
+<h1>Non-Human Identity for AI Agents: What It Is and Why It&#x27;s Now a Security Priority</h1>
+<div class="meta">Kynara &middot; 2026-06-05 &middot; 6 min read</div>
+<p class="dek">Machine identities already outnumber human ones. AI agents are the fastest-growing — and least governed — class of them.</p>
+<p>For every human in your organization, there are now dozens of <em>non-human</em> identities: service accounts, API keys, OAuth tokens, CI/CD bots, and increasingly, <strong>AI agents.</strong> Security teams have spent the last few years waking up to "non-human identity" (NHI) as a category that's bigger, faster-growing, and riskier than the human identity estate they've governed for decades. AI agents are the newest entrant — and they break several assumptions NHI tooling was built on.</p>
+<p>Here's what non-human identity means, why AI agents are a distinct and harder problem, and what good governance looks like.</p>
+<hr>
+<h2>What is non-human identity?</h2>
+<p>Non-human identity covers any identity that isn't a person: service accounts, machine accounts, API keys, secrets, certificates, workload identities, and bots. They authenticate to systems and take actions, just like users — but there are far more of them, they're often created ad hoc, and they frequently outlive the project that spawned them. The result is <em>sprawl</em>: thousands of credentials, many over-permissioned, many with no clear owner, many that no one would notice if they were abused.</p>
+<p>AI agents are now a first-class member of this category — and identity providers like Okta and Microsoft Entra have started issuing first-class <strong>agent identities</strong> to track them.</p>
+<hr>
+<h2>Why AI agents are a harder NHI problem</h2>
+<p>A traditional NHI — say, a service account that syncs two databases — does one narrow, predictable thing. An AI agent is different in ways that matter for security:</p>
+<ul>
+<li><strong>It acts autonomously.</strong> It decides what to do next, in a loop, often thousands of times a day.</li>
+<li><strong>It acts on behalf of users.</strong> An agent frequently operates <em>as a delegate</em> — which means its effective authority should be bounded by the user who dispatched it, a concept classic NHI tooling has no model for.</li>
+<li><strong>It has broad reach.</strong> Through tools and MCP servers, a single agent can touch many systems — far more than a typical service account.</li>
+<li><strong>It's non-deterministic and manipulable.</strong> Its behavior is driven by an LLM that can be prompt-injected, so you can't assume it will only do what it was designed to do.</li>
+</ul>
+<p>So "give the agent an identity and rotate its key" — the NHI playbook — is necessary but nowhere near sufficient.</p>
+<hr>
+<h2>The risks when agents are ungoverned</h2>
+<ul>
+<li><strong>Over-permissioning.</strong> Agents are granted broad access "just in case," violating least privilege from day one.</li>
+<li><strong>No lifecycle.</strong> Agents get created for experiments and never deprovisioned; their credentials linger.</li>
+<li><strong>No ownership.</strong> When an agent misbehaves, no one is sure who owns it or what it's allowed to do.</li>
+<li><strong>No runtime control.</strong> Even with an identity, nothing decides <em>per action</em> whether a given call should be allowed.</li>
+<li><strong>Weak audit.</strong> Reconstructing what an agent did — and proving the record is intact — is hard without purpose-built logging.</li>
+</ul>
+<hr>
+<h2>What good NHI governance for AI agents looks like</h2>
+<ol>
+<li><strong>Identity and inventory.</strong> Every agent has a managed identity and shows up in an inventory you can see and own — ideally synced from your IdP.</li>
+<li><strong>Least privilege.</strong> Agents get the minimum scopes they need, not broad standing access.</li>
+<li><strong>Lifecycle.</strong> Agents are provisioned and <em>deprovisioned</em>; identities removed upstream are deactivated downstream.</li>
+<li><strong>Runtime authorization.</strong> Beyond identity, every consequential action is authorized in real time against policy and context.</li>
+<li><strong>Delegation bounds.</strong> An agent acting for a user can never exceed that user's permissions.</li>
+<li><strong>Tamper-evident audit.</strong> Every decision is recorded in an append-only, hash-chained log.</li>
+</ol>
+<hr>
+<h2>Identity is necessary, not sufficient</h2>
+<p>This is the crucial distinction. Issuing an agent identity answers <em>who is this?</em> It does not answer <em>what may this agent do, on whose behalf, right now?</em> That second question — authorization — is where the actual risk lives, and it's the gap most NHI and identity tools leave open. The right architecture pairs an identity provider (to issue and track agent identities) with an authorization control plane (to govern what those identities are allowed to do at runtime).</p>
+<h2>How Kynara fits</h2>
+<p><a href="https://kynaraai.com">Kynara</a> is the authorization side of that pairing. It <strong>syncs agent identities from your IdP</strong> (e.g. Okta), so the agents you govern stay in lockstep with your source of truth — and then it enforces what they can actually do: RBAC + ABAC policies evaluated per action, a non-escalation guarantee so an agent never exceeds its dispatching user, human approval for high-risk actions, MCP tool-call authorization, and a SHA-256 hash-chained audit log. Your IdP owns identity; Kynara owns authorization, containment, and the evidence trail.</p>
+<p>Non-human identity isn't just a bigger version of human IAM. For AI agents, it's a new problem — and the teams that get ahead of it will be the ones who treat <em>authorization</em>, not just identity, as the control point.</p>
+<p><em>See how Kynara governs agent identities and actions — <a href="https://kynaraai.com">book a demo</a> or read about <a href="/blog/ai-agent-permission-problem">the AI agent permission problem</a>.</em></p>
+<div class="cta"><h2 style="margin:0 0 6px;border:none;padding:0;font-size:22px;">Govern your AI agents with Kynara</h2>
+<p style="margin:0;color:var(--muted);">RBAC + ABAC, approvals, MCP enforcement, tamper-evident audit.</p>
+<div class="cta-btns"><a href="https://kynaraai.com" class="btn">Book a demo</a><a href="/sandbox.html" class="btn-ghost">Try the sandbox</a></div></div>
+</article>
+<footer><span>Kynara &copy; 2026</span><div style="display:flex;gap:18px;"><a href="/">Home</a><a href="/docs.html">Docs</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a></div></footer>
+</body></html>

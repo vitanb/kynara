@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Principle of Least Privilege for AI Agents | Kynara</title>
+<meta name="description" content="Least privilege is the oldest security principle and the one AI agents break by default. What least privilege means for agents and how to enforce it at runtime: scoped tools, non-escalation, JIT grants, fail-closed." />
+<link rel="canonical" href="https://kynaraai.com/blog/agent-least-privilege" />
+<meta property="og:type" content="article" /><meta property="og:title" content="The Principle of Least Privilege for AI Agents" />
+<meta property="og:description" content="Least privilege is the oldest security principle and the one AI agents break by default. What least privilege means for agents and how to enforce it at runtime: scoped tools, non-escalation, JIT grants, fail-closed." /><meta property="og:url" content="https://kynaraai.com/blog/agent-least-privilege" />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" /><meta name="twitter:card" content="summary_large_image" />
+<meta name="author" content="Kynara" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "The Principle of Least Privilege for AI Agents", "description": "Least privilege is the oldest security principle and the one AI agents break by default. What least privilege means for agents and how to enforce it at runtime: scoped tools, non-escalation, JIT grants, fail-closed.", "datePublished": "2026-06-05", "dateModified": "2026-06-05", "author": {"@type": "Organization", "name": "Kynara", "url": "https://kynaraai.com"}, "publisher": {"@type": "Organization", "name": "Kynara", "logo": {"@type": "ImageObject", "url": "https://kynaraai.com/logo-192.png"}}, "mainEntityOfPage": {"@type": "WebPage", "@id": "https://kynaraai.com/blog/agent-least-privilege"}, "image": "https://kynaraai.com/logo-192.png"}</script>
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--font:'Inter',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.75;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:22px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:#fff;}
+.btn:hover{background:#2563EB;text-decoration:none;}
+article,.wrap{max-width:740px;margin:0 auto;padding:48px 24px 64px;}
+.bc{font-size:13px;color:var(--muted);margin-bottom:22px;}
+h1{font-size:clamp(30px,4.5vw,44px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.15;margin-bottom:14px;}
+.dek{font-size:20px;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+.meta{font-size:13px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:22px;margin-bottom:30px;}
+article h2{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em;margin:36px 0 12px;}
+article h3{font-size:19px;font-weight:700;color:#fff;margin:26px 0 8px;}
+article p{margin-bottom:18px;} article ul,article ol{margin:0 0 18px 22px;} article li{margin-bottom:8px;}
+article strong{color:var(--strong);}
+hr{border:none;border-top:1px solid var(--border);margin:34px 0;}
+pre{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;font-size:13.5px;line-height:1.6;margin:0 0 22px;font-family:ui-monospace,Menlo,monospace;color:#E2E8F0;}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13.5px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent2);}
+pre code{background:none;padding:0;color:inherit;}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;text-align:center;margin-top:36px;}
+.cta-btns{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;}
+.btn-ghost:hover{color:#fff;text-decoration:none;}
+.post-card{display:block;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;}
+.post-card:hover{border-color:var(--accent);text-decoration:none;}
+.post-card h2{font-size:22px;color:#fff;margin-bottom:8px;}
+.post-card p{color:var(--muted);font-size:15px;margin:0;}
+footer{max-width:740px;margin:0 auto;padding:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+</style></head><body>
+<nav><a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+<div class="nav-links"><a href="/docs.html">Docs</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a><a href="https://kynaraai.com" class="btn">Book a demo</a></div></nav>
+<article>
+<div class="bc"><a href="/">Home</a> / <a href="/blog/">Blog</a></div>
+<h1>The Principle of Least Privilege for AI Agents</h1>
+<div class="meta">Kynara &middot; 2026-06-05 &middot; 6 min read</div>
+<p class="dek">The oldest rule in security is suddenly the hardest to follow — because agents are over-privileged by default.</p>
+<p>Least privilege — give every actor the minimum access it needs, and no more — has been a security cornerstone for fifty years. It's also the principle AI agents violate most casually. An agent gets handed broad credentials and a generous toolbelt "so it can handle whatever comes up," and just like that, a single prompt-injectable, autonomous system has standing access to far more than it will ever legitimately use.</p>
+<p>Applying least privilege to agents isn't optional anymore. Here's what it means in practice and how to actually enforce it.</p>
+<hr>
+<h2>What least privilege means for an AI agent</h2>
+<p>For agents, least privilege has four dimensions that go beyond "give it a narrow role":</p>
+<ul>
+<li><strong>Minimal scope.</strong> The agent can call only the specific tools and access only the specific resources its job requires.</li>
+<li><strong>Bounded by delegation.</strong> When acting for a user, the agent's effective permissions are the <em>intersection</em> of its own grants and that user's grants — never more.</li>
+<li><strong>Context-bound.</strong> Access is conditioned on runtime context: time, environment, region, amount, sensitivity of the specific record.</li>
+<li><strong>Time-boxed.</strong> Elevated access, when truly needed, is granted just-in-time and expires automatically.</li>
+</ul>
+<p>A static "this agent can read CRM" grant satisfies none of these well.</p>
+<hr>
+<h2>Why agents are over-privileged by default</h2>
+<ul>
+<li><strong>Broad credentials.</strong> Agents are wired to upstream systems with powerful service tokens, because that's the path of least resistance.</li>
+<li><strong>"Just in case" tools.</strong> Every tool the team might want is registered up front, expanding the blast radius.</li>
+<li><strong>Standing grants.</strong> Permissions are set once at deploy time and never revisited, so they only ever accumulate.</li>
+<li><strong>No per-action check.</strong> Even a well-scoped role does nothing if there's no enforcement deciding each individual action.</li>
+</ul>
+<p>The result: the gap between what an agent <em>can</em> do and what it <em>should</em> do is enormous — and that gap is exactly the attack surface.</p>
+<hr>
+<h2>How to enforce least privilege for agents</h2>
+<ol>
+<li><strong>Scope tools to roles.</strong> Map each tool to a capability scope and grant agents only the scopes they need. Deny by default.</li>
+<li><strong>Enforce non-escalation.</strong> Make the agent's authority the intersection of its roles and the dispatching user's roles, so it can never exceed the human behind it.</li>
+<li><strong>Authorize at runtime, per action.</strong> Check every consequential call against policy <em>and</em> context — not just at deploy time. Static configuration is not enforcement.</li>
+<li><strong>Least-privilege discovery.</strong> Don't even advertise tools an agent can't use. If you front MCP servers with a gateway, hide disallowed tools so the agent never sees them.</li>
+<li><strong>Just-in-time elevation.</strong> For genuine break-glass cases, grant a scoped, time-boxed elevation with a justification — recorded in the audit trail — that expires on its own.</li>
+<li><strong>Fail closed.</strong> If the policy engine is unreachable, deny. An agent should lose access on failure, not gain it.</li>
+</ol>
+<hr>
+<h2>Least privilege is a runtime property, not a config setting</h2>
+<p>The most common mistake is treating least privilege as something you set up once. For agents, it's a <em>runtime</em> property: the same agent might legitimately read a record at 10am from an allowed region and be denied the identical call at 2am from elsewhere. Real least privilege means evaluating each action against policy and live context at the moment it happens — and recording the decision.</p>
+<h2>How Kynara enforces it</h2>
+<p><a href="https://kynaraai.com">Kynara</a> is built around least privilege for agents. Tools map to scopes; agents get only the scopes they need; every action is evaluated per-call against RBAC + ABAC policies and runtime context, returning <code>allow</code>, <code>deny</code>, or <code>require_approval</code>. The <strong>non-escalation guarantee</strong> is enforced automatically, <strong>JIT grants</strong> cover time-boxed break-glass elevation, the <strong>MCP Gateway</strong> hides disallowed tools (least-privilege discovery), and everything is fail-closed by default and recorded in a tamper-evident audit log.</p>
+<p>Least privilege is the cheapest, highest-leverage control you can apply to an AI agent. For autonomous systems that can be manipulated, it's also the difference between a contained incident and an unbounded one.</p>
+<p><em>See how Kynara shrinks the gap between what your agents can do and what they should — <a href="https://kynaraai.com">book a demo</a>, or read about <a href="/blog/securing-mcp-servers">securing MCP servers</a>.</em></p>
+<div class="cta"><h2 style="margin:0 0 6px;border:none;padding:0;font-size:22px;">Govern your AI agents with Kynara</h2>
+<p style="margin:0;color:var(--muted);">RBAC + ABAC, approvals, MCP enforcement, tamper-evident audit.</p>
+<div class="cta-btns"><a href="https://kynaraai.com" class="btn">Book a demo</a><a href="/sandbox.html" class="btn-ghost">Try the sandbox</a></div></div>
+</article>
+<footer><span>Kynara &copy; 2026</span><div style="display:flex;gap:18px;"><a href="/">Home</a><a href="/docs.html">Docs</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a></div></footer>
+</body></html>
