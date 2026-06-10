@@ -17,6 +17,8 @@
   <!-- Blog -->
   <url><loc>https://kynaraai.com/blog/</loc><lastmod>2026-06-05</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://kynaraai.com/blog/ai-agent-permission-problem</loc><lastmod>2026-06-05</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://kynaraai.com/blog/securing-mcp-servers</loc><lastmod>2026-06-05</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://kynaraai.com/blog/eu-ai-act-agent-logging</loc><lastmod>2026-06-05</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
   <!-- Solutions / industry pages -->
   <url><loc>https://kynaraai.com/solutions/financial-services</loc><lastmod>2026-06-05</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
