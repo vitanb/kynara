@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Permissions & Governance for LangChain Agents | Kynara</title>
+<meta name="description" content="Add RBAC + ABAC permissions, human approval, and a tamper-evident audit log to your LangChain and LangGraph agents. Gate tool calls with allow/deny/require_approval before they execute." />
+<link rel="canonical" href="https://kynaraai.com/use-cases/langchain" />
+<meta property="og:type" content="website" /><meta property="og:title" content="Permissions & Governance for LangChain Agents | Kynara" />
+<meta property="og:description" content="Add RBAC + ABAC permissions, human approval, and a tamper-evident audit log to your LangChain and LangGraph agents. Gate tool calls with allow/deny/require_approval before they execute." /><meta property="og:url" content="https://kynaraai.com/use-cases/langchain" />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" /><meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#34D399;--font:'Inter',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:20px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:#fff;}
+.btn:hover{background:#2563EB;text-decoration:none;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;}
+.hero{max-width:880px;margin:0 auto;padding:64px 24px 24px;}
+.bc{font-size:13px;color:var(--muted);margin-bottom:18px;}
+h1{font-size:clamp(30px,4.5vw,46px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.12;margin-bottom:16px;}
+h1 span{background:linear-gradient(135deg,#3B82F6,#93C5FD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sub{font-size:19px;color:var(--muted);max-width:680px;}
+section{max-width:880px;margin:0 auto;padding:18px 24px;}
+h2{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em;margin:24px 0 12px;}
+p{margin-bottom:14px;} ul{margin:0 0 16px 20px;} li{margin-bottom:7px;} strong{color:var(--strong);}
+pre{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;font-size:13.5px;line-height:1.6;margin:0 0 18px;font-family:ui-monospace,Menlo,monospace;color:#E2E8F0;white-space:pre;}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13.5px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent2);}
+pre code{background:none;padding:0;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;} @media(max-width:760px){.grid{grid-template-columns:1fr;}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;} .card h3{font-size:15px;color:#fff;margin-bottom:6px;} .card p{color:var(--muted);font-size:14px;margin:0;}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:30px;text-align:center;margin:24px auto 40px;max-width:880px;}
+.cta-btns{display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap;}
+footer{max-width:880px;margin:0 auto;padding:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+</style></head><body>
+<nav><a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+<div class="nav-links"><a href="/quickstart">Quickstart</a><a href="/docs.html">Docs</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a><a href="/security">Security</a><a href="https://kynaraai.com" class="btn">Book a demo</a></div></nav>
+
+<div class="hero">
+  <div class="bc"><a href="/">Home</a> / Use cases / langchain</div>
+  <h1>Permissions for <span>LangChain</span> agents</h1>
+  <p class="sub">LangChain makes tool-calling effortless. Kynara decides which tools your agent may actually use — on whose behalf, under what conditions — before any side effect runs.</p>
+  <div style="margin-top:22px;display:flex;gap:12px;flex-wrap:wrap;"><a href="/quickstart" class="btn">Quickstart</a><a href="/sandbox.html" class="btn-ghost">Try the sandbox</a></div>
+</div>
+<section><h2>The problem</h2><p>A LangChain agent calls whichever tool the model chooses, with whatever arguments it produces. There's no built-in concept of permissions: no rule for which agent may call which tool, on whose behalf, or under what conditions. For demos that's fine; for agents that send email, modify records, or move money, it's a liability.</p></section>
+<section><h2>How Kynara fits</h2><pre><code>from langchain.agents import AgentExecutor
+from kynara_sdk.langchain import KynaraCallbackHandler
+
+# One callback governs every tool the agent invokes
+executor = AgentExecutor(
+    agent=agent, tools=tools,
+    callbacks=[KynaraCallbackHandler(kynara)],
+)
+
+# Or guard a single tool:
+from langchain.tools import tool
+from kynara_sdk import permission_required
+
+@tool
+@permission_required(&quot;crm.contacts.read&quot;, resource_arg=&quot;contact_id&quot;)
+def get_contact(contact_id: str) -&gt; str:
+    return crm.fetch(contact_id)</code></pre><p>On a <code>deny</code>, the call is blocked before the tool runs; on <code>require_approval</code>, the agent pauses for a human. Works the same for LangGraph nodes.</p></section>
+<section><h2>What you get</h2><div class="grid">
+  <div class="card"><h3>Allow / deny / require approval</h3><p>Every consequential call is evaluated against RBAC + ABAC policies and runtime context before it executes.</p></div>
+  <div class="card"><h3>Non-escalation guarantee</h3><p>An agent can never exceed the permissions of the user it acts on behalf of.</p></div>
+  <div class="card"><h3>Human-in-the-loop</h3><p>Route destructive or external-facing actions to a human for approval, with full context.</p></div>
+  <div class="card"><h3>Tamper-evident audit</h3><p>Every decision is appended to a SHA-256 hash-chained log for forensics and compliance.</p></div>
+</div></section>
+<section><p>Go deeper: <a href="/blog/langchain-agent-permissions">read the guide</a> &middot; <a href="/docs.html">docs</a> &middot; <a href="/compare/">compare Kynara</a>.</p></section>
+
+<section style="max-width:880px;margin:0 auto;padding:8px 24px;">
+  <div style="background:#0F131B;border:1px solid rgba(148,163,184,0.12);border-radius:14px;padding:26px 24px;text-align:center;">
+    <h2 style="font-size:22px;font-weight:800;color:#fff;margin:0 0 6px;">Stay in the loop</h2>
+    <p style="color:#64748B;margin:0 0 16px;font-size:15px;">New guides on AI agent governance, MCP security, and compliance &mdash; no spam.</p>
+    <form onsubmit="return kSub(event,'langchain')" style="display:flex;gap:8px;max-width:420px;margin:0 auto;flex-wrap:wrap;justify-content:center;">
+      <input type="email" required placeholder="you@company.com" style="flex:1;min-width:200px;background:#0B0E14;border:1px solid rgba(148,163,184,0.18);border-radius:8px;padding:11px 14px;color:#fff;font-size:14px;font-family:inherit;">
+      <button type="submit" style="background:#3B82F6;color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Subscribe</button>
+    </form>
+    <div class="kmsg" style="font-size:13px;margin-top:10px;min-height:18px;"></div>
+  </div>
+</section>
+<script>function kSub(e,src){e.preventDefault();var f=e.target;var inp=f.querySelector('input');var m=f.parentElement.querySelector('.kmsg');fetch('/api/v1/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:inp.value,source:src})}).then(function(r){if(r.ok){m.textContent="Thanks \u2014 you're subscribed.";m.style.color='#34D399';inp.value='';}else{m.textContent='Something went wrong, please try again.';m.style.color='#F87171';}}).catch(function(){m.textContent='Network error, please try again.';m.style.color='#F87171';});return false;}</script>
+
+<section><div class="cta">
+  <h2 style="margin:0 0 6px;">Govern your langchain agents</h2>
+  <p style="color:var(--muted);margin:0;">Free plan: 3 seats, 10k decisions/month.</p>
+  <div class="cta-btns"><a href="https://kynaraai.com" class="btn">Get started free</a><a href="https://kynaraai.com" class="btn-ghost">Book a demo</a></div>
+</div></section>
+
+<footer><span>Kynara &copy; 2026</span><div style="display:flex;gap:18px;"><a href="/">Home</a><a href="/quickstart">Quickstart</a><a href="/docs.html">Docs</a><a href="/security">Security</a><a href="/blog/">Blog</a></div></footer>
+</body></html>

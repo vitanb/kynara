@@ -11,6 +11,7 @@ from app.models.password_reset import PasswordResetToken
 from app.models.policy import Policy, PolicyBinding, Role, RolePermission
 from app.models.policy_version import PolicyVersion
 from app.models.session import RefreshSession
+from app.models.subscriber import NewsletterSubscriber
 from app.models.sso import SsoConnection, ScimSync
 from app.models.oauth import OAuthClient, OAuthCode
 from app.models.tool import Tool, ToolScope
@@ -39,6 +40,7 @@ __all__ = [
     "Role",
     "RolePermission",
     "RefreshSession",
+    "NewsletterSubscriber",
     "SsoConnection",
     "ScimSync",
     "OAuthClient",
