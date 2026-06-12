@@ -264,7 +264,7 @@
 
     <!-- HEADER -->
     <div class="doc-header">
-      <div class="badge"><span class="badge-dot"></span> v2.2 · May 2026</div>
+      <div class="badge"><span class="badge-dot"></span> v2.3 · June 2026</div>
       <h1>Kynara User Guide</h1>
       <p class="lead">
         Everything you need to register agents, define access policies, govern approvals,
@@ -1370,7 +1370,19 @@ condition:    {}    // catch-all for any salary read not matched above</code></p
   ]
 }</code></pre>
 
-      Common operators: <code>eq</code>, <code>neq</code>, <code>in</code>, <code>gt</code>, <code>lt</code>, <code>time_between</code>, <code>and</code>, <code>or</code>, <code>not</code>.
+      <p><strong>Operators:</strong> <code>and</code>, <code>or</code>, <code>not</code>, <code>eq</code>, <code>neq</code>, <code>gt</code>, <code>gte</code>, <code>lt</code>, <code>lte</code>, <code>in</code>, <code>contains</code>, <code>starts_with</code>, <code>ends_with</code>, <code>time_between</code>, <code>has_scope</code>.</p>
+
+      <h3>Argument-level policies (allowlists)</h3>
+      <p>Conditions can read the arguments of a tool call via <code>ctx.resource.attrs.&lt;key&gt;</code> — so you can enforce <em>intent</em>, not just the action. Map the relevant argument (a Slack channel, an email recipient, an amount) into the decision's resource attributes, then allowlist it. Ready-made templates for these ship in the policy editor (<em>Load example</em>).</p>
+      <p><strong>Slack — only post to approved channels:</strong></p>
+      <pre><code>{ "op": "in",
+  "args": ["ctx.resource.attrs.channel", ["C0123ALLOWED", "C0456ALLOWED"]] }</code></pre>
+      <p><strong>Gmail — only email internal recipients:</strong></p>
+      <pre><code>{ "op": "ends_with",
+  "args": ["ctx.resource.attrs.recipient", "@yourcompany.com"] }</code></pre>
+      <p><strong>Require approval for external recipients</strong> (set the policy effect to <code>require_approval</code>):</p>
+      <pre><code>{ "op": "not",
+  "args": [ { "op": "ends_with", "args": ["ctx.resource.attrs.recipient", "@yourcompany.com"] } ] }</code></pre>
 
       <h3>Evaluation order</h3>
       <p>Policies are evaluated in ascending priority order. The first match wins. If no policy matches, the outcome is <code>deny</code>. Place broad <code>deny</code> rules at low priority numbers and narrower <code>allow</code> rules higher to build an allow-list model.</p>
