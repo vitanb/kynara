@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quickstart: Add Permissions to Your AI Agent in 5 Minutes | Kynara</title>
+<meta name="description" content="Add RBAC + ABAC permissions, human approval, and a tamper-evident audit log to your AI agent in five minutes. Python and TypeScript SDKs, plus a no-code MCP gateway." />
+<link rel="canonical" href="https://kynaraai.com/quickstart" />
+<meta property="og:type" content="website" /><meta property="og:title" content="Quickstart: Add Permissions to Your AI Agent in 5 Minutes | Kynara" />
+<meta property="og:description" content="Add RBAC + ABAC permissions, human approval, and a tamper-evident audit log to your AI agent in five minutes. Python and TypeScript SDKs, plus a no-code MCP gateway." /><meta property="og:url" content="https://kynaraai.com/quickstart" />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" /><meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#34D399;--font:'Inter',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:22px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:#fff;}
+.btn:hover{background:#2563EB;text-decoration:none;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;}
+.btn-ghost:hover{color:#fff;text-decoration:none;}
+.hero{max-width:880px;margin:0 auto;padding:64px 24px 28px;}
+.bc{font-size:13px;color:var(--muted);margin-bottom:18px;}
+h1{font-size:clamp(30px,4.5vw,46px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.12;margin-bottom:16px;}
+h1 span{background:linear-gradient(135deg,#3B82F6,#93C5FD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sub{font-size:19px;color:var(--muted);max-width:660px;}
+section{max-width:880px;margin:0 auto;padding:18px 24px;}
+h2{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em;margin:26px 0 12px;}
+h3{font-size:17px;font-weight:700;color:#fff;margin:6px 0 6px;}
+p{margin-bottom:14px;} ul{margin:0 0 16px 20px;} li{margin-bottom:7px;}
+strong{color:var(--strong);}
+pre{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;font-size:13.5px;line-height:1.6;margin:0 0 18px;font-family:ui-monospace,Menlo,monospace;color:#E2E8F0;white-space:pre;}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13.5px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent2);}
+pre code{background:none;padding:0;}
+.step{display:flex;gap:16px;margin-bottom:24px;}
+.num{flex:0 0 34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.step-body{flex:1;min-width:0;} .step-body h3{margin-top:4px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;} @media(max-width:760px){.grid{grid-template-columns:1fr;}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+.card h3{margin-top:0;display:flex;align-items:center;gap:8px;}
+.card p{color:var(--muted);font-size:14px;margin:0;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:30px;text-align:center;margin:24px auto 48px;max-width:880px;}
+.cta-btns{display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap;}
+footer{max-width:880px;margin:0 auto;padding:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+</style></head><body>
+<nav><a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+<div class="nav-links"><a href="/quickstart">Quickstart</a><a href="/docs.html">Docs</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a><a href="/security">Security</a><a href="https://kynaraai.com" class="btn">Book a demo</a></div></nav>
+
+<div class="hero">
+  <div class="bc"><a href="/">Home</a> / Quickstart</div>
+  <h1>Add permissions to your AI agent in <span>5 minutes</span></h1>
+  <p class="sub">Wrap the tools that actually have consequences, and Kynara decides — allow, deny, or require human approval — before any side effect runs. No re-architecture required.</p>
+</div>
+
+<section>
+  <div class="step"><div class="num">1</div><div class="step-body">
+    <h3>Install the SDK</h3>
+    <pre><code># Python
+pip install kynara-sdk
+
+# TypeScript
+npm install @kynara/sdk</code></pre>
+  </div></div>
+
+  <div class="step"><div class="num">2</div><div class="step-body">
+    <h3>Create a free account &amp; get your keys</h3>
+    <p>Sign up at <a href="https://kynaraai.com">kynaraai.com</a>, register an agent, and create an API key (scope <code>decisions.check</code>). You'll use the API key and the agent ID below.</p>
+  </div></div>
+
+  <div class="step"><div class="num">3</div><div class="step-body">
+    <h3>Configure the client</h3>
+    <pre><code>from kynara_sdk import Kynara, permission_required
+from kynara_sdk.context import set_current_kynara
+
+set_current_kynara(Kynara(
+    api_key=os.environ["KYNARA_API_KEY"],
+    agent_id="crm-assistant",
+    user_id=current_user_id,   # the human the agent acts on behalf of
+    fail_closed=True,          # deny if the control plane is unreachable
+))</code></pre>
+  </div></div>
+
+  <div class="step"><div class="num">4</div><div class="step-body">
+    <h3>Guard a tool</h3>
+    <pre><code>@permission_required("crm.contacts.read",
+                     resource_arg="contact_id",
+                     resource_type="crm.contact")
+def read_contact(contact_id: str):
+    return crm.get(contact_id)</code></pre>
+    <p>If policy denies the call, <code>PermissionDenied</code> is raised <strong>before</strong> <code>crm.get</code> runs, and the attempt is recorded in the audit log. If policy returns <code>require_approval</code>, <code>ApprovalRequired</code> is raised so your agent can pause for a human.</p>
+  </div></div>
+
+  <div class="step"><div class="num">5</div><div class="step-body">
+    <h3>Write a policy</h3>
+    <p>In the Kynara console, create a policy (or load a template). For example, only allow refunds during business hours, or require approval for emails to external recipients:</p>
+    <pre><code>{ "op": "ends_with",
+  "args": ["ctx.resource.attrs.recipient", "@yourcompany.com"] }</code></pre>
+    <p>Browse ready-made policies in the <a href="/docs.html">docs</a> — Slack channel allowlists, Gmail recipient rules, business-hours, geo, and more.</p>
+  </div></div>
+
+  <div class="step"><div class="num">6</div><div class="step-body">
+    <h3>Watch the decisions</h3>
+    <p>Every check — allow, deny, or require_approval — lands in your tamper-evident audit log with the full context. That's it: your agent is governed.</p>
+  </div></div>
+</section>
+
+<section>
+  <h2>Prefer no code? Front your MCP server</h2>
+  <p>If your agent uses Model Context Protocol servers, point them at the <strong>Kynara MCP Gateway</strong> instead — every tool call is authorized per agent, and agents only see the tools they're allowed to use. No agent-side changes; swap one URL. See the <a href="/docs.html">MCP Gateway docs</a>.</p>
+</section>
+
+<section><div class="cta">
+  <h2 style="margin:0 0 6px;">Govern your first agent free</h2>
+  <p style="color:var(--muted);margin:0;">Free plan: 3 seats, 10k decisions/month.</p>
+  <div class="cta-btns"><a href="https://kynaraai.com" class="btn">Get started free</a><a href="/sandbox.html" class="btn-ghost">Try the sandbox</a></div>
+</div></section>
+
+<footer><span>Kynara &copy; 2026</span><div style="display:flex;gap:18px;"><a href="/">Home</a><a href="/quickstart">Quickstart</a><a href="/docs.html">Docs</a><a href="/security">Security</a><a href="/blog/">Blog</a></div></footer>
+</body></html>

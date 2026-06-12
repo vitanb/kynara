@@ -106,6 +106,7 @@ export default function LandingPage() {
                 </div>
               )}
             </div>
+            <a href="/quickstart" className="hover:text-ink-50 transition-colors">Quickstart</a>
             <Link to="/docs" className="hover:text-ink-50 transition-colors">Docs</Link>
             <a href="/compare/" className="hover:text-ink-50 transition-colors">Compare</a>
             <a href="/blog/" className="hover:text-ink-50 transition-colors">Blog</a>
