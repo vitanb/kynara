@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import {
   ShieldCheck, GitBranch, Eye, Zap, ArrowRight, Check, X, Send,
-  Lock, AlertTriangle, LineChart, KeyRound, ChevronRight, Building2, FileText, Bell,
+  Lock, AlertTriangle, LineChart, ChevronRight, Building2,
 } from "lucide-react";
 
 const features = [
@@ -13,12 +13,6 @@ const features = [
   { icon: Zap, color: "#F472B6", bg: "rgba(236,72,153,0.1)", title: "Guardrails & anomaly detection", desc: "Set spend limits, rate caps, and behavioral thresholds. Kynara auto-revokes agents that exceed them and fires webhook alerts to your SIEM." },
   { icon: Lock, color: "#3F3F46", bg: "rgba(59,130,246,0.1)", title: "SSO & enterprise identity", desc: "SAML 2.0 and OIDC out of the box. Plug into Okta, Azure AD, or any IdP. Role mappings flow automatically from your directory." },
   { icon: LineChart, color: "var(--s0-text-muted)", bg: "var(--s0-accent-subtle)", title: "Live observability", desc: "Decision dashboards, risk scores, and cost attribution per agent. Know exactly which agent is doing what — and flag the risky ones before they cause damage." },
-];
-
-const steps = [
-  { num: "01", title: "Register your agents", desc: "Call the Kynara API or use our MCP server to register every AI agent with a unique identity and capability scope.", icon: KeyRound },
-  { num: "02", title: "Define policies", desc: "Write allow/deny rules in our policy editor. Attach conditions — IP, time, user context, spend threshold — to any tool or API endpoint.", icon: FileText },
-  { num: "03", title: "Enforce & audit", desc: "Every agent action is checked in real time. Violations are blocked, logged, and surfaced in dashboards your security team already monitors.", icon: Bell },
 ];
 
 const trustSignals = [
@@ -74,8 +68,8 @@ export default function LandingPage() {
             <span className="font-bold text-ink-50 text-base tracking-tight">Kynara</span>
           </div>
           <div className="hidden md:flex items-center gap-7 text-sm text-ink-300">
-            <a href="#how-it-works" className="hover:text-ink-50 transition-colors">How it works</a>
             <a href="#features" className="hover:text-ink-50 transition-colors">Features</a>
+            <a href="/design-partners" className="hover:text-ink-50 transition-colors">Design partners</a>
             {/* Solutions dropdown */}
             <div className="relative" onMouseEnter={() => setSolutionsOpen(true)} onMouseLeave={() => setSolutionsOpen(false)}>
               <button className="flex items-center gap-1 hover:text-ink-50 transition-colors">
@@ -198,34 +192,6 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* How it works */}
-        <section id="how-it-works" className="max-w-6xl mx-auto px-6 pb-24">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-5" style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)", color: "var(--s0-text-muted)" }}>
-              How it works
-            </div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-ink-50 mb-4">Up and running in under an hour</h2>
-            <p className="text-ink-300 max-w-lg mx-auto text-sm leading-relaxed">
-              Kynara sits between your AI agents and the systems they access. No changes to your existing infrastructure required.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-5">
-            {steps.map((step) => {
-              const Icon = step.icon;
-              return (
-                <div key={step.num} className="rounded-2xl p-8" style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,0.07)" }}>
-                  <div className="text-xs font-mono font-bold mb-5" style={{ color: "var(--s0-accent-ring)" }}>{step.num}</div>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-5" style={{ background: "var(--s0-accent-subtle)", border: "1px solid var(--s0-accent-ring)" }}>
-                    <Icon className="w-5 h-5" style={{ color: "var(--s0-accent-text)" }} />
-                  </div>
-                  <h3 className="text-ink-50 font-semibold mb-3 text-base">{step.title}</h3>
-                  <p className="text-ink-400 text-sm leading-relaxed">{step.desc}</p>
-                </div>
-              );
-            })}
           </div>
         </section>
 
@@ -439,7 +405,7 @@ export default function LandingPage() {
             </div>
             <div className="flex items-center gap-6">
               <a href="#features" className="hover:text-ink-300 transition-colors">Features</a>
-              <a href="#how-it-works" className="hover:text-ink-300 transition-colors">How it works</a>
+              <a href="/design-partners" className="hover:text-ink-300 transition-colors">Design partners</a>
               <Link to="/docs" className="hover:text-ink-300 transition-colors">Docs</Link>
               <a href="/sandbox.html" className="hover:text-ink-300 transition-colors">Policy Sandbox</a>
               <a href="/solutions/financial-services.html" className="hover:text-ink-300 transition-colors">FinServ</a>
