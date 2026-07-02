@@ -27,7 +27,31 @@ the evaluation context as ``ctx.<path>``.
 ```
 
 Supported ops: ``and``, ``or``, ``not``, ``eq``, ``neq``, ``gt``, ``gte``, ``lt``,
-``lte``, ``in``, ``contains``, ``starts_with``, ``ends_with``, ``time_between``, ``has_scope``.
+``lte``, ``in``, ``contains``, ``starts_with``, ``ends_with``, ``time_between``,
+``has_scope``, ``is_tainted``.
+
+## Dynamic downgrade on untrusted input
+
+``is_tainted`` inspects the request context for untrusted-input markers so a policy
+can automatically tighten permissions the moment an agent ingests untrusted data
+(a public web page, an inbound email, another agent's output). This is *risk-elevation
+based hardening* / blast-radius control per the OWASP AI Exchange (#LEAST MODEL
+PRIVILEGE, #OVERSIGHT) and MITRE ATLAS AML.M0030.
+
+Callers flag taint on the decision context::
+
+    context = {"taint": True}                       # generic: untrusted input present
+    context = {"taint": ["untrusted_web"]}          # named source categories
+    context = {"trust_level": "untrusted"}           # or a coarse trust level
+
+Then a high-precedence (low priority number) policy on egress-capable actions denies
+or requires approval::
+
+    {"op": "is_tainted"}                # true if any untrusted input is present
+    {"op": "is_tainted", "args": ["untrusted_web"]}   # true for a specific category
+
+A generically tainted request (``taint == True``) matches any category query — the
+fail-safe direction is to over-restrict.
 """
 from __future__ import annotations
 
@@ -137,8 +161,43 @@ def _evaluate(node: Any, ctx: DecisionContext) -> bool:
     if op == "has_scope":
         scopes = ctx.subject.get("attrs", {}).get("scopes", [])
         return _scope_matches(scopes, resolved[0])
+    if op == "is_tainted":
+        markers, generic = _taint_state(ctx)
+        if not args:
+            return generic or bool(markers)
+        if generic:
+            return True  # fail-safe: generic taint matches any category query
+        wanted = resolved[0]
+        wanted_set = set(wanted) if isinstance(wanted, (list, tuple, set)) else {wanted}
+        return bool(markers & {str(w) for w in wanted_set})
 
     raise ValueError(f"unsupported op: {op}")
+
+
+def _taint_state(ctx: DecisionContext) -> tuple[set[str], bool]:
+    """Inspect the request context for untrusted-input markers.
+
+    Returns ``(markers, generic)``. ``generic`` is True when the request is flagged
+    tainted without a specific category (``context.taint == True`` or a low
+    ``trust_level``). ``markers`` holds named taint categories, e.g.
+    ``{"untrusted_web", "external_email"}``.
+    """
+    context = ctx.context or {}
+    raw = context.get("taint")
+    markers: set[str] = set()
+    generic = False
+    if raw is True:
+        generic = True
+    elif isinstance(raw, str):
+        markers.add(raw)
+    elif isinstance(raw, (list, tuple, set)):
+        markers.update(str(x) for x in raw)
+    elif raw:
+        generic = True
+    trust = context.get("trust_level")
+    if isinstance(trust, str) and trust.lower() in ("untrusted", "low", "tainted"):
+        generic = True
+    return markers, generic
 
 
 def _in_time_window(t: dt.datetime, lo: str, hi: str) -> bool:

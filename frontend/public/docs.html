@@ -1370,7 +1370,7 @@ condition:    {}    // catch-all for any salary read not matched above</code></p
   ]
 }</code></pre>
 
-      <p><strong>Operators:</strong> <code>and</code>, <code>or</code>, <code>not</code>, <code>eq</code>, <code>neq</code>, <code>gt</code>, <code>gte</code>, <code>lt</code>, <code>lte</code>, <code>in</code>, <code>contains</code>, <code>starts_with</code>, <code>ends_with</code>, <code>time_between</code>, <code>has_scope</code>.</p>
+      <p><strong>Operators:</strong> <code>and</code>, <code>or</code>, <code>not</code>, <code>eq</code>, <code>neq</code>, <code>gt</code>, <code>gte</code>, <code>lt</code>, <code>lte</code>, <code>in</code>, <code>contains</code>, <code>starts_with</code>, <code>ends_with</code>, <code>time_between</code>, <code>has_scope</code>, <code>is_tainted</code>.</p>
 
       <h3>Argument-level policies (allowlists)</h3>
       <p>Conditions can read the arguments of a tool call via <code>ctx.resource.attrs.&lt;key&gt;</code> — so you can enforce <em>intent</em>, not just the action. Map the relevant argument (a Slack channel, an email recipient, an amount) into the decision's resource attributes, then allowlist it. Ready-made templates for these ship in the policy editor (<em>Load example</em>).</p>
@@ -1383,6 +1383,17 @@ condition:    {}    // catch-all for any salary read not matched above</code></p
       <p><strong>Require approval for external recipients</strong> (set the policy effect to <code>require_approval</code>):</p>
       <pre><code>{ "op": "not",
   "args": [ { "op": "ends_with", "args": ["ctx.resource.attrs.recipient", "@yourcompany.com"] } ] }</code></pre>
+
+      <h3 id="dynamic-downgrade">Dynamic downgrade on untrusted input</h3>
+      <p>The <code>is_tainted</code> operator lets a policy automatically tighten permissions the moment an agent ingests untrusted content — a public web page, an inbound email, another agent's output. This is <em>risk-elevation based hardening</em> (blast-radius control) per the <a href="/compliance/owasp-ai-exchange">OWASP AI Exchange</a> (#LEAST MODEL PRIVILEGE, #OVERSIGHT) and MITRE ATLAS AML.M0030. Because the decision is made outside the LLM, a prompt injection in the untrusted content cannot lift the restriction.</p>
+      <p>Flag taint on the decision context (the <a href="#mcp-gateway">MCP Gateway</a> does this automatically — reading an untrusted source taints the session for subsequent egress calls):</p>
+      <pre><code>context = { "taint": true }                 // generic: untrusted input present
+context = { "taint": ["untrusted_web"] }    // named source categories
+context = { "trust_level": "untrusted" }     // or a coarse trust level</code></pre>
+      <p>Then a high-precedence policy on egress-capable actions (<code>email.send</code>, <code>slack.message.send</code>, <code>http.post</code>, <code>*.write</code>) denies or requires approval:</p>
+      <pre><code>{ "op": "is_tainted" }                        // true if any untrusted input is present
+{ "op": "is_tainted", "args": ["untrusted_web"] }   // true for a specific category</code></pre>
+      <p>A generically tainted request (<code>taint: true</code>) matches any category query — the fail-safe direction is to over-restrict. Ready-made templates ship in the policy editor: <em>Block data egress after untrusted input</em> and <em>Require approval for egress after untrusted input</em>.</p>
 
       <h3>Evaluation order</h3>
       <p>Policies are evaluated in ascending priority order. The first match wins. If no policy matches, the outcome is <code>deny</code>. Place broad <code>deny</code> rules at low priority numbers and narrower <code>allow</code> rules higher to build an allow-list model.</p>

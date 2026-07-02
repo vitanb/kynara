@@ -76,6 +76,31 @@ TOOL_CACHE_TTL: float = float(os.getenv("KYNARA_TOOL_CACHE_TTL", "60"))
 AGENT_ID_HEADER: str = os.getenv("KYNARA_AGENT_ID_HEADER", "x-kynara-agent")
 PORT: int = int(os.getenv("KYNARA_MCP_WRAPPER_PORT", "9090"))
 
+# ── Taint tracking (OWASP AI Exchange: harden based on risk elevation) ──────
+# When an agent calls a tool that returns untrusted content (a web fetch, an
+# inbound email, a public dataset), we mark the session tainted. Subsequent
+# egress-capable calls then carry context.taint, so a Kynara `is_tainted` policy
+# can deny/approve them — dynamic blast-radius control done OUTSIDE the LLM.
+# Configure which upstream tools taint output via a comma-separated substring list.
+TAINT_ENABLED: bool = os.getenv("KYNARA_TAINT_TRACKING", "true").lower() == "true"
+_WEB_HINTS = ("web", "fetch", "browse", "http", "url", "scrape", "crawl", "search")
+_TAINT_HINTS = _WEB_HINTS + ("read", "get", "list", "email", "inbox", "message", "load", "download")
+TAINT_SOURCE_TOOLS: list[str] = [
+    s.strip().lower()
+    for s in os.getenv("KYNARA_TAINT_SOURCE_TOOLS", ",".join(_TAINT_HINTS)).split(",")
+    if s.strip()
+]
+
+
+def _taints_output(tool_name: str) -> str | None:
+    """If this tool returns untrusted content, the taint category to apply (else None)."""
+    if not TAINT_ENABLED:
+        return None
+    n = (tool_name or "").lower()
+    if not any(h in n for h in TAINT_SOURCE_TOOLS):
+        return None
+    return "untrusted_web" if any(h in n for h in _WEB_HINTS) else "untrusted_input"
+
 # ── Tool cache ────────────────────────────────────────────────────────────
 
 _tool_cache: list[types.Tool] = []
@@ -191,11 +216,17 @@ async def handle_call_tool(
     # ── Policy check ──────────────────────────────────────────────────────
     # Resolve the Kynara scope this tool maps to (if managed by the gateway).
     scope = await gateway.scope_for_tool(name)
+    ctx: dict[str, Any] = {"source": "mcp_wrapper", "upstream": UPSTREAM_MCP_URL}
+    # Carry any untrusted-input markers accumulated earlier this session so a
+    # Kynara `is_tainted` policy can downgrade this action's permissions.
+    taint = _session_taint.get()
+    if taint:
+        ctx["taint"] = sorted(taint)
     dec = await policy.check(
         agent_id=agent_id,
         tool_name=name,
         arguments=args,
-        context={"source": "mcp_wrapper", "upstream": UPSTREAM_MCP_URL},
+        context=ctx,
         scope=scope,
         fail_open=await gateway.fail_open(),
     )
@@ -224,6 +255,14 @@ async def handle_call_tool(
     try:
         content = await _call_upstream_tool(name, args)
         logger.info("success | agent=%s tool=%s", agent_id, name)
+        # Risk elevation: if this tool returns untrusted content, taint the
+        # session so later egress calls are downgraded by `is_tainted` policies.
+        marker = _taints_output(name)
+        if marker is not None:
+            session_taint = _session_taint.get()
+            if session_taint is not None and marker not in session_taint:
+                session_taint.add(marker)
+                logger.info("session.tainted | agent=%s via=%s marker=%s", agent_id, name, marker)
         return content
     except ValueError:
         raise
@@ -238,6 +277,10 @@ async def handle_call_tool(
 import contextvars
 _current_agent_id: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "_current_agent_id", default=None
+)
+# Per-session accumulated taint markers (mutated in place across tool calls).
+_session_taint: contextvars.ContextVar[set | None] = contextvars.ContextVar(
+    "_session_taint", default=None
 )
 
 
@@ -256,6 +299,7 @@ async def handle_sse(request: Request):
         or "anonymous"
     )
     token = _current_agent_id.set(agent_id)
+    taint_token = _session_taint.set(set())
     logger.info("session.open agent=%s", agent_id)
 
     try:
@@ -269,6 +313,7 @@ async def handle_sse(request: Request):
             )
     finally:
         _current_agent_id.reset(token)
+        _session_taint.reset(taint_token)
         logger.info("session.close agent=%s", agent_id)
 
 

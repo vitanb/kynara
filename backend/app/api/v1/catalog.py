@@ -211,6 +211,41 @@ POLICY_TEMPLATES = [
         },
     },
     {
+        "id": "block-egress-on-untrusted-input",
+        "label": "Block data egress after untrusted input",
+        "description": (
+            "Deny data-sending actions once the agent has ingested untrusted input this turn. "
+            "Set context.taint (e.g. true, or [\"untrusted_web\"]) when the agent reads an "
+            "external/public source. Attach to egress-capable actions (email.send, "
+            "slack.message.send, http.post, *.write) with a low priority number so it wins. "
+            "Implements OWASP AI Exchange 'harden based on risk elevation' + MITRE ATLAS AML.M0030."
+        ),
+        "suggested_effect": "deny",
+        "condition": {"op": "is_tainted"},
+    },
+    {
+        "id": "approve-egress-on-untrusted-input",
+        "label": "Require approval for egress after untrusted input",
+        "description": (
+            "Softer variant: route data-sending actions to a human when untrusted input has "
+            "entered the flow, instead of denying outright. Set context.taint when the agent "
+            "reads an external source. Pair with egress-capable actions at a low priority number."
+        ),
+        "suggested_effect": "require_approval",
+        "condition": {"op": "is_tainted"},
+    },
+    {
+        "id": "block-egress-on-untrusted-web",
+        "label": "Block egress after reading untrusted web content",
+        "description": (
+            "Category-scoped variant: deny egress only when the specific taint marker "
+            "'untrusted_web' is present. Set context.taint = [\"untrusted_web\"] when a tool "
+            "fetches public web content."
+        ),
+        "suggested_effect": "deny",
+        "condition": {"op": "is_tainted", "args": ["untrusted_web"]},
+    },
+    {
         "id": "business-hours-and-region",
         "label": "Business hours + region",
         "description": "Allow only within business hours AND from an approved country",

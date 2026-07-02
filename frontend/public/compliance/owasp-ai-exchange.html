@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kynara &amp; the OWASP AI Exchange — Controls Coverage | MITRE ATLAS</title>
+<meta name="description" content="How Kynara maps to the OWASP AI Exchange controls for AI agents (Least Model Privilege, Oversight, Monitor Use) and MITRE ATLAS mitigations (AML.M0026–M0030) — including dynamic downgrade on untrusted input." />
+<meta name="keywords" content="OWASP AI Exchange, MITRE ATLAS, AI agent security controls, least model privilege, AI oversight, AML.M0030, agent authorization, blast radius control" />
+<link rel="canonical" href="https://kynaraai.com/compliance/owasp-ai-exchange" />
+<meta property="og:type" content="website" /><meta property="og:title" content="Kynara &amp; the OWASP AI Exchange — Controls Coverage" />
+<meta property="og:description" content="Kynara mapped to OWASP AI Exchange controls and MITRE ATLAS mitigations for AI agents." />
+<meta property="og:url" content="https://kynaraai.com/compliance/owasp-ai-exchange" />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" /><meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#34D399;--warn:#FBBF24;--font:'Inter',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:22px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:#fff;}
+.btn:hover{background:#2563EB;text-decoration:none;}
+.hero{max-width:960px;margin:0 auto;padding:60px 24px 20px;}
+.bc{font-size:13px;color:var(--muted);margin-bottom:18px;}
+h1{font-size:clamp(28px,4.2vw,42px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.14;margin-bottom:16px;}
+h1 span{background:linear-gradient(135deg,#3B82F6,#93C5FD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sub{font-size:18px;color:var(--muted);max-width:760px;}
+section{max-width:960px;margin:0 auto;padding:18px 24px;}
+h2{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.02em;margin:28px 0 12px;}
+h3{font-size:16px;font-weight:700;color:#fff;margin:14px 0 6px;}
+p{margin-bottom:14px;} ul{margin:0 0 16px 20px;} li{margin-bottom:7px;}
+strong{color:var(--strong);}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent2);}
+.note{font-size:14px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 18px;margin:6px 0 18px;}
+table{width:100%;border-collapse:collapse;margin:8px 0 20px;font-size:14px;}
+th{background:var(--surface2);color:#fff;text-align:left;padding:10px 12px;font-size:12.5px;font-weight:700;border:1px solid var(--border);}
+td{border:1px solid var(--border);padding:10px 12px;color:var(--text);vertical-align:top;}
+td.c{white-space:nowrap;font-weight:700;}
+.full{color:var(--ok);} .part{color:var(--warn);} .road{color:var(--muted);}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}
+.pill.full{background:rgba(52,211,153,0.12);color:var(--ok);}
+.pill.part{background:rgba(251,191,36,0.12);color:var(--warn);}
+.pill.road{background:rgba(148,163,184,0.12);color:var(--muted);}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center;margin:24px auto 40px;max-width:960px;}
+.cta-btns{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;}
+.btn-ghost:hover{color:#fff;text-decoration:none;}
+footer{max-width:960px;margin:0 auto;padding:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+</style></head><body>
+<nav><a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+<div class="nav-links"><a href="/quickstart">Quickstart</a><a href="/docs.html">Docs</a><a href="/security">Security</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a><a href="https://kynaraai.com" class="btn">Book a demo</a></div></nav>
+
+<div class="hero">
+  <div class="bc"><a href="/">Home</a> / <a href="/security">Security</a> / OWASP AI Exchange coverage</div>
+  <h1>Kynara &amp; the <span>OWASP AI Exchange</span></h1>
+  <p class="sub">The OWASP AI Exchange is the closest thing to a global consensus on AI security, feeding directly into the EU AI Act and ISO standards. This page maps Kynara to its runtime controls for AI agents — and to the corresponding MITRE ATLAS mitigations.</p>
+</div>
+
+<section>
+  <div class="note">
+    Legend: <span class="pill full">Implemented</span> Kynara enforces this today &nbsp;·&nbsp;
+    <span class="pill part">Partial</span> partially covered &nbsp;·&nbsp;
+    <span class="pill road">Roadmap</span> planned. This is Kynara's own assessment against the public OWASP AI Exchange (§1.3, "controls to limit the effects of unwanted behaviour" — blast-radius control), not a certification.
+  </div>
+</section>
+
+<section>
+  <h2>OWASP AI Exchange — runtime controls</h2>
+  <table>
+    <thead><tr><th>OWASP control</th><th style="width:96px">Coverage</th><th>How Kynara implements it</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="c">#LEAST MODEL PRIVILEGE<br><span style="font-weight:400;color:var(--muted)">Minimize what an agent can do</span></td>
+        <td><span class="pill full">Implemented</span></td>
+        <td>RBAC scopes gate every action; ABAC conditions constrain arguments. MCP Gateway does least-privilege tool discovery (agents only see tools they may call). <strong>"Avoid implementing authorization in GenAI instructions"</strong> — Kynara decides on structured requests <em>outside</em> the LLM, immune to prompt injection.</td>
+      </tr>
+      <tr>
+        <td class="c">↳ Honor limitations of the served</td>
+        <td><span class="pill full">Implemented</span></td>
+        <td>Non-escalation guarantee: an agent's effective permissions are the intersection of the agent's roles and the dispatching user's roles.</td>
+      </tr>
+      <tr>
+        <td class="c">↳ Ephemeral permissions<br><span style="font-weight:400;color:var(--muted)">temporal blast-radius control</span></td>
+        <td><span class="pill full">Implemented</span></td>
+        <td>JIT grants: time-boxed, scoped elevation that auto-expires, recorded in the audit chain.</td>
+      </tr>
+      <tr>
+        <td class="c">↳ Harden based on risk elevation<br><span style="font-weight:400;color:var(--muted)">downgrade on untrusted input</span></td>
+        <td><span class="pill full">Implemented</span></td>
+        <td>The <code>is_tainted</code> policy operator + automatic session taint tracking in the MCP Gateway: the moment an agent reads untrusted content (web fetch, inbound email), egress actions are denied or routed to approval — done outside the LLM.</td>
+      </tr>
+      <tr>
+        <td class="c">↳ Harden based on role assignment</td>
+        <td><span class="pill full">Implemented</span></td>
+        <td>Roles map to task-scoped permission sets; agents are assigned the role for their task.</td>
+      </tr>
+      <tr>
+        <td class="c">↳ Downgrading subagents<br><span style="font-weight:400;color:var(--muted)">delegated scoped credentials</span></td>
+        <td><span class="pill part">Partial</span></td>
+        <td>Non-escalation already bounds agent authority to the user. Fine-grained runtime permission handoff to subagents (scoped, short-lived delegation) is on the roadmap.</td>
+      </tr>
+      <tr>
+        <td class="c">#OVERSIGHT<br><span style="font-weight:400;color:var(--muted)">Detect &amp; respond to unwanted behaviour</span></td>
+        <td><span class="pill full">Implemented</span></td>
+        <td>Human-in-the-loop approvals via the <code>require_approval</code> effect and approval queue; a deny on an unpermitted action is recorded and alertable. Risk-scored requests help avoid approval fatigue.</td>
+      </tr>
+      <tr>
+        <td class="c">↳ Rollback / undo actions</td>
+        <td><span class="pill road">Roadmap</span></td>
+        <td>Every decision is logged with full context; compensating-action / revert-from-timeline support is planned.</td>
+      </tr>
+      <tr>
+        <td class="c">#MONITOR USE</td>
+        <td><span class="pill full">Implemented</span></td>
+        <td>Tamper-evident, SHA-256 hash-chained audit log of every decision; queryable dashboards, filters, and CSV export.</td>
+      </tr>
+      <tr>
+        <td class="c">#CONTINUOUS VALIDATION</td>
+        <td><span class="pill part">Partial</span></td>
+        <td>Guardrails auto-revoke agents that breach behavioral thresholds; per-agent baseline anomaly detection is on the roadmap.</td>
+      </tr>
+      <tr>
+        <td class="c">#AI TRANSPARENCY</td>
+        <td><span class="pill part">Partial</span></td>
+        <td>Decision traces explain <em>why</em> an action was allowed or denied. In-product nudges warning admins about risky permissions are planned.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>MITRE ATLAS mitigations</h2>
+  <p>The OWASP controls above reference these MITRE ATLAS mitigations for AI agents. Kynara maps to them directly:</p>
+  <table>
+    <thead><tr><th style="width:130px">ATLAS ID</th><th>Mitigation</th><th style="width:96px">Kynara</th></tr></thead>
+    <tbody>
+      <tr><td class="c">AML.M0029</td><td>Human-in-the-Loop for AI Agent Actions</td><td><span class="pill full">Implemented</span></td></tr>
+      <tr><td class="c">AML.M0030</td><td>Restrict AI Agent Tool Invocation on Untrusted Data</td><td><span class="pill full">Implemented</span></td></tr>
+      <tr><td class="c">AML.M0028</td><td>AI Agent Tools Permissions Configuration</td><td><span class="pill full">Implemented</span></td></tr>
+      <tr><td class="c">AML.M0026</td><td>Privileged AI Agent Permissions Configuration</td><td><span class="pill full">Implemented</span></td></tr>
+      <tr><td class="c">AML.M0027</td><td>Single-User AI Agent Permissions Configuration</td><td><span class="pill full">Implemented</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Spotlight: dynamic downgrade on untrusted input</h2>
+  <p>OWASP's "harden based on risk elevation" and MITRE ATLAS <strong>AML.M0030</strong> both call for tightening an agent's permissions the moment it ingests untrusted data — the primary vector for prompt injection. Kynara implements this as a first-class control:</p>
+  <ul>
+    <li>The MCP Gateway tracks <strong>session taint</strong>: when an agent calls a tool that returns untrusted content (a web fetch, an inbound email), the session is marked tainted.</li>
+    <li>Subsequent tool calls carry <code>context.taint</code>, and a policy using the <code>is_tainted</code> operator denies or requires approval for egress-capable actions.</li>
+    <li>Because the decision is made outside the model, a prompt injection in the untrusted content cannot lift the restriction.</li>
+  </ul>
+  <p>Ready-made templates ship in the policy editor: <em>Block data egress after untrusted input</em> and <em>Require approval for egress after untrusted input</em>. See the <a href="/docs.html#dynamic-downgrade">docs</a>.</p>
+</section>
+
+<section><div class="cta">
+  <h2 style="margin:0 0 6px;">Governing AI agents against a framework?</h2>
+  <p style="color:var(--muted);margin:0;">We're happy to walk security and compliance teams through Kynara's control coverage.</p>
+  <div class="cta-btns"><a href="https://kynaraai.com" class="btn">Talk to us</a><a href="/security" class="btn-ghost">Security &amp; trust</a><a href="/docs.html" class="btn-ghost">Read the docs</a></div>
+</div></section>
+
+<footer><span>Kynara &copy; 2026</span><div style="display:flex;gap:18px;"><a href="/">Home</a><a href="/security">Security</a><a href="/docs.html">Docs</a><a href="/blog/">Blog</a></div></footer>
+</body></html>
