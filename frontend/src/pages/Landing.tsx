@@ -102,6 +102,7 @@ export default function LandingPage() {
             </div>
             <a href="/quickstart" className="hover:text-ink-50 transition-colors">Quickstart</a>
             <Link to="/docs" className="hover:text-ink-50 transition-colors">Docs</Link>
+            <a href="/security" className="hover:text-ink-50 transition-colors">Security</a>
             <a href="/compare/" className="hover:text-ink-50 transition-colors">Compare</a>
             <a href="/blog/" className="hover:text-ink-50 transition-colors">Blog</a>
             <button onClick={openContact} className="hover:text-ink-50 transition-colors">Contact</button>
@@ -407,6 +408,7 @@ export default function LandingPage() {
               <a href="#features" className="hover:text-ink-300 transition-colors">Features</a>
               <a href="/design-partners" className="hover:text-ink-300 transition-colors">Design partners</a>
               <Link to="/docs" className="hover:text-ink-300 transition-colors">Docs</Link>
+              <a href="/security" className="hover:text-ink-300 transition-colors">Security</a>
               <a href="/sandbox.html" className="hover:text-ink-300 transition-colors">Policy Sandbox</a>
               <a href="/solutions/financial-services.html" className="hover:text-ink-300 transition-colors">FinServ</a>
               <Link to="/login" className="hover:text-ink-300 transition-colors">Sign in</Link>
