@@ -15,7 +15,7 @@ class Settings:
     sidecar_url: str = os.getenv("KYNARA_SIDECAR_URL", "http://localhost:7070")
 
     # Fall back to central API if sidecar is unreachable
-    api_base_url: str = os.getenv("KYNARA_API_BASE_URL", "https://app.kynara.io")
+    api_base_url: str = os.getenv("KYNARA_API_BASE_URL", "https://kynaraai.com")
     api_key: str = os.getenv("KYNARA_API_KEY", "")
 
     # fail_open=True: if Kynara is unreachable, allow the request (risky but available)

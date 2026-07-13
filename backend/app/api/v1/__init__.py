@@ -8,6 +8,7 @@ from app.api.v1 import (
     # New feature routers
     activity_stream, agent_credentials, delegation, git_sync,
     policy_simulation, policy_templates, mcp_gateway, agent_idp, subscribe,
+    jit_grants,
 )
 
 v1 = APIRouter(prefix="/api/v1", redirect_slashes=False)
@@ -44,4 +45,5 @@ v1.include_router(mcp_gateway.router)
 v1.include_router(agent_idp.router)
 v1.include_router(subscribe.router)
 v1.include_router(approval_analytics.router)
+v1.include_router(jit_grants.router)
 # OAuth 2.0

@@ -48,9 +48,9 @@ def create_app() -> FastAPI:
         version="0.1.0",
         description="AI Agent permission system — control plane.",
         lifespan=lifespan,
-        openapi_url="/api/v1/openapi.json",
-        docs_url="/api/v1/docs",
-        redoc_url="/api/v1/redoc",
+        openapi_url="/api/openapi.json",
+        docs_url="/api/docs",
+        redoc_url="/api/redoc",
         redirect_slashes=False,
     )
 

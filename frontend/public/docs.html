@@ -174,6 +174,7 @@
     .method-post { background: rgba(59,130,246,0.15); color: #A5B4FC; }
     .method-del  { background: rgba(244,63,94,0.15);  color: #FB7185; }
     .method-put  { background: rgba(245,158,11,0.15); color: #FCD34D; }
+    .method-patch{ background: rgba(168,85,247,0.15); color: #C4B5FD; }
     .api-path { font-family: var(--mono); font-size: 12.5px; color: var(--text); }
 
     section { scroll-margin-top: 24px; }
@@ -337,7 +338,7 @@ kynara.check(subject, action, resource, context)
       <p>Get from zero to your first policy decision in under five minutes.</p>
 
       <ol class="steps">
-        <li><p><strong>Create your account</strong> at <a href="https://kynara.ai">kynara.ai</a>. The free plan includes 3 seats and 10,000 policy decisions per month.</p></li>
+        <li><p><strong>Create your account</strong> at <a href="https://kynaraai.com">kynaraai.com</a>. The free plan includes 3 seats and 10,000 policy decisions per month.</p></li>
         <li><p><strong>Register your first agent.</strong> Navigate to <em>Agents → New agent</em>. Give it a display name, choose a supervision mode, and set a daily action budget. Copy the <strong>Agent ID</strong> — you'll need it in your code.</p></li>
         <li><p><strong>Create an API key.</strong> Go to <em>Settings → API Keys → New API Key</em>. Copy it immediately — it is shown only once.</p></li>
         <li><p><strong>Create a policy.</strong> Navigate to <em>Policies → New policy</em>. For example: effect <code>allow</code>, actions <code>file.read</code>, resources <code>file</code>. Test it in the integrated <strong>Simulator</strong> panel.</p></li>
@@ -358,7 +359,7 @@ def read_file(file_id: str):
     return open(file_id).read()</code></pre>
 
       <pre><code># Or call the REST API directly
-curl -X POST https://kynara.ai/api/v1/decisions/check \
+curl -X POST https://kynaraai.com/api/v1/decisions/check \
   -H "Authorization: Bearer &lt;your-api-key&gt;" \
   -H "Content-Type: application/json" \
   -d '{
@@ -1703,7 +1704,7 @@ def verify_webhook(secret: str, body: bytes, sig_header: str) -> bool:
     <!-- REST API -->
     <section id="api">
       <h2>REST API</h2>
-      <p>The Kynara REST API is at <code>https://kynara.ai/api/v1</code>. All endpoints require a JWT in <code>Authorization: Bearer &lt;token&gt;</code> or an API key in <code>X-Kynara-Key: sk_live_...</code>. Full OpenAPI 3.1 spec is available at <code>/api/docs</code>.</p>
+      <p>The Kynara REST API is at <code>https://kynaraai.com/api/v1</code>. All endpoints require a JWT in <code>Authorization: Bearer &lt;token&gt;</code> or an API key in <code>X-Kynara-Key: sk_live_...</code>. The interactive OpenAPI 3.1 docs (Swagger UI) are at <a href="https://kynaraai.com/api/docs"><code>/api/docs</code></a>, and the raw machine-readable spec is at <a href="https://kynaraai.com/api/openapi.json"><code>/api/openapi.json</code></a> (ReDoc at <code>/api/redoc</code>). That spec is generated from the live API and is the authoritative endpoint reference — the summary below lists the most common routes.</p>
 
       <h3>Auth</h3>
       <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/auth/login</span></div>
@@ -1757,7 +1758,9 @@ def verify_webhook(secret: str, body: bytes, sig_header: str) -> bool:
       <h3>JIT Grants</h3>
       <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/jit-grants</span></div>
       <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/jit-grants</span></div>
-      <div class="api-block"><span class="api-method method-del">DEL</span><span class="api-path">/api/v1/jit-grants/{grant_id}</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/jit-grants/{grant_id}/revoke</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/jit-grants/request</span></div>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/jit-grants/my-requests</span></div>
 
       <h3>Approvals</h3>
       <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/approvals</span></div>
@@ -1780,9 +1783,38 @@ def verify_webhook(secret: str, body: bytes, sig_header: str) -> bool:
       <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/guardrails/rules</span></div>
 
       <h3>Billing</h3>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/billing/subscription</span></div>
       <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/billing/usage</span></div>
       <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/billing/invoices</span></div>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/billing/attribution</span></div>
       <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/billing/checkout</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/billing/portal</span></div>
+
+      <h3>Team &amp; org</h3>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/org</span></div>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/org/members</span></div>
+      <div class="api-block"><span class="api-method method-patch">PATCH</span><span class="api-path">/api/v1/org/members/{user_id}</span></div>
+      <div class="api-block"><span class="api-method method-del">DEL</span><span class="api-path">/api/v1/org/members/{user_id}</span></div>
+
+      <h3>Identity Providers (Okta agent sync)</h3>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/idp/providers</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/idp/providers</span></div>
+      <div class="api-block"><span class="api-method method-patch">PATCH</span><span class="api-path">/api/v1/idp/providers/{pid}</span></div>
+      <div class="api-block"><span class="api-method method-del">DEL</span><span class="api-path">/api/v1/idp/providers/{pid}</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/idp/providers/{pid}/test</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/idp/providers/{pid}/sync</span></div>
+
+      <h3>Scope Catalog</h3>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/catalog/scope-domains</span></div>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/catalog/scope-domains/{domain}</span></div>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/catalog/policy-templates</span></div>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/catalog/tool-templates</span></div>
+
+      <h3>MCP Gateway</h3>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/mcp/servers</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/mcp/servers</span></div>
+      <div class="api-block"><span class="api-method method-post">POST</span><span class="api-path">/api/v1/mcp/servers/{server_id}/tools/sync</span></div>
+      <div class="api-block"><span class="api-method method-get">GET</span><span class="api-path">/api/v1/mcp/servers/{server_id}/allowed-tools</span></div>
     </section>
 
     <!-- PYTHON SDK -->
@@ -1913,7 +1945,7 @@ const executor = new AgentExecutor({
 
       <pre><code>docker run --rm -p 7070:7070 \
   -e KYNARA_API_KEY=$KEY \
-  -e KYNARA_BASE_URL=https://api.kynara.ai \
+  -e KYNARA_BASE_URL=https://kynaraai.com \
   ghcr.io/kynara/decision-cache:latest</code></pre>
 
       <p>Point your SDK at the sidecar:</p>
@@ -1943,7 +1975,7 @@ const client = new Kynara({ apiKey: KEY, baseUrl: "http://localhost:7070", agent
       <h2>Policy-as-code CLI <span class="new-tag">NEW</span></h2>
       <p>Manage Kynara policies through git using <code>scripts/kynara-cli.py</code> — no pip install required (stdlib only).</p>
 
-      <pre><code>export KYNARA_BASE_URL=https://api.kynara.ai
+      <pre><code>export KYNARA_BASE_URL=https://kynaraai.com
 export KYNARA_API_KEY=sk_live_...
 
 # Pull the live bundle to a JSON file
@@ -1975,7 +2007,7 @@ python scripts/kynara-cli.py verify --bundle policies.json</code></pre>
 
       <h3>Configuring Okta OIDC</h3>
       <ol class="steps">
-        <li><p>In Okta admin, create a new <strong>OIDC – Web Application</strong>. Set the sign-in redirect URI to <code>https://kynara.ai/api/v1/auth/sso/okta/callback</code>.</p></li>
+        <li><p>In Okta admin, create a new <strong>OIDC – Web Application</strong>. Set the sign-in redirect URI to <code>https://kynaraai.com/api/v1/auth/sso/okta/callback</code>.</p></li>
         <li><p>Copy the <strong>Client ID</strong>, <strong>Client Secret</strong>, and <strong>Okta domain</strong>.</p></li>
         <li><p>In Kynara, navigate to <strong>Settings → SSO → + New SSO Connection</strong>.</p></li>
         <li><p>Choose <strong>Okta OIDC</strong>, enter the Okta domain, Client ID, and Client Secret.</p></li>

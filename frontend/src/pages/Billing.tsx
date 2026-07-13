@@ -90,7 +90,7 @@ export default function BillingPage() {
       window.location.href = redirect_url;
     },
     onError: () => {
-      window.open("mailto:support@kynara.ai?subject=Manage subscription", "_blank");
+      window.open("mailto:support@kynaraai.com?subject=Manage subscription", "_blank");
     },
   });
 
@@ -106,7 +106,7 @@ export default function BillingPage() {
     },
     onError: () => {
       // Stripe not configured — open contact sales
-      window.open("mailto:sales@kynara.ai?subject=Upgrade inquiry", "_blank");
+      window.open("mailto:sales@kynaraai.com?subject=Upgrade inquiry", "_blank");
     },
   });
 
@@ -214,7 +214,7 @@ export default function BillingPage() {
             ) : (
               <button
                 className="w-full justify-center py-2 text-sm text-ink-400 hover:text-ink-50 transition-colors"
-                onClick={() => window.open("mailto:sales@kynara.ai", "_blank")}
+                onClick={() => window.open("mailto:sales@kynaraai.com", "_blank")}
               >
                 Contact sales
               </button>

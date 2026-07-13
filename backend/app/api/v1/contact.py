@@ -57,7 +57,7 @@ async def submit_contact(form: ContactForm):
         </tr>
         <tr>
           <td style="padding:16px 36px 24px;border-top:1px solid rgba(148,163,184,0.08)">
-            <p style="margin:0;color:#475569;font-size:12px">Sent via kynara.ai contact form.</p>
+            <p style="margin:0;color:#475569;font-size:12px">Sent via kynaraai.com contact form.</p>
           </td>
         </tr>
       </table>

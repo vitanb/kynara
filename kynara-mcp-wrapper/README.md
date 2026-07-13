@@ -33,7 +33,7 @@ pip install -r requirements.txt
 
 # Front an upstream MCP server, centrally governed by Kynara:
 KYNARA_UPSTREAM_MCP_URL=https://your-mcp-server.example.com/sse \
-KYNARA_API_BASE_URL=https://app.kynara.io \
+KYNARA_API_BASE_URL=https://kynaraai.com \
 KYNARA_API_KEY=sk_live_xxx \
 KYNARA_MCP_SERVER_ID=<server id from the Kynara MCP Gateway page> \
 KYNARA_MCP_WRAPPER_PORT=9090 \

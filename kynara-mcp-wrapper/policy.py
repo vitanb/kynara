@@ -16,7 +16,7 @@ import httpx
 logger = logging.getLogger("kynara.mcp_wrapper.policy")
 
 SIDECAR_URL = os.getenv("KYNARA_SIDECAR_URL", "http://localhost:7070")
-API_BASE_URL = os.getenv("KYNARA_API_BASE_URL", "https://app.kynara.io")
+API_BASE_URL = os.getenv("KYNARA_API_BASE_URL", "https://kynaraai.com")
 API_KEY = os.getenv("KYNARA_API_KEY", "")
 FAIL_OPEN = os.getenv("KYNARA_FAIL_OPEN", "false").lower() == "true"
 

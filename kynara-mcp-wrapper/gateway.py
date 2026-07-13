@@ -23,7 +23,7 @@ import httpx
 
 logger = logging.getLogger("kynara.mcp_wrapper.gateway")
 
-API_BASE_URL = os.getenv("KYNARA_API_BASE_URL", "https://app.kynara.io")
+API_BASE_URL = os.getenv("KYNARA_API_BASE_URL", "https://kynaraai.com")
 API_KEY = os.getenv("KYNARA_API_KEY", "")
 SERVER_ID = os.getenv("KYNARA_MCP_SERVER_ID", "")
 CONFIG_TTL = float(os.getenv("KYNARA_GATEWAY_CONFIG_TTL", "60"))

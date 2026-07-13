@@ -438,7 +438,7 @@ function ApiKeysTab() {
               <div className="text-xs font-semibold text-ink-300 uppercase tracking-wider mb-2">Polling endpoint</div>
               <div className="rounded-lg p-3 font-mono text-xs text-ink-300"
                 style={{ background: "#0A0F1A", border: "1px solid rgba(148,163,184,0.1)" }}>
-                GET https://kynara.ai/api/v1/audit/events<br />
+                GET https://kynaraai.com/api/v1/audit/events<br />
                 &nbsp;&nbsp;?since_sequence=&#123;last_sequence&#125;<br />
                 &nbsp;&nbsp;&amp;limit=500<br />
                 Authorization: Bearer sk_live_…
@@ -467,7 +467,7 @@ function ApiKeysTab() {
                   tool: "Splunk",
                   steps: [
                     'Install "Splunk Add-on for REST API" or use the Modular Input SDK',
-                    "Create an input with URL: https://kynara.ai/api/v1/audit/events",
+                    "Create an input with URL: https://kynaraai.com/api/v1/audit/events",
                     "Add header Authorization: Bearer <your-api-key>",
                     "Set interval to 300 s (5 min) and sourcetype kynara:audit",
                     "Use a KV store checkpoint to track since_sequence between runs",
