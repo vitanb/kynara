@@ -1,0 +1,12 @@
+{
+  "name": "Refunds over $50 need manager approval",
+  "description": "Any refund of more than $50 routes to a human manager before it executes. Smaller refunds the support agent can issue on its own.",
+  "effect": "require_approval",
+  "priority": 100,
+  "actions": ["payments.refund.issue"],
+  "resource_types": ["payment"],
+  "condition": {
+    "op": "gt",
+    "args": ["ctx.resource.attrs.amount_cents", 5000]
+  }
+}

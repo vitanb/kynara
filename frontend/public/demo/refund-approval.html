@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Live Demo: Slack Support Agent Refund → Manager Approval | Kynara</title>
+<meta name="description" content="Watch a Slack AI support agent try to refund a customer, Kynara require manager approval before the money moves, and every decision land in a tamper-evident audit log. Interactive demo." />
+<link rel="canonical" href="https://kynaraai.com/demo/refund-approval" />
+<meta property="og:type" content="website" /><meta property="og:title" content="Live Demo: AI support agent refund → manager approval" />
+<meta property="og:description" content="A Slack AI agent tries to refund a customer; Kynara requires manager approval before it runs. Interactive." />
+<meta property="og:url" content="https://kynaraai.com/demo/refund-approval" />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" /><meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#34D399;--warn:#FBBF24;--danger:#F87171;--font:'Inter',system-ui,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.6;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:22px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:#fff;border:none;cursor:pointer;font-family:inherit;}
+.btn:hover{background:#2563EB;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;}
+.btn-ghost:hover{color:#fff;border-color:var(--accent);}
+.wrap{max-width:1080px;margin:0 auto;padding:40px 24px 60px;}
+.bc{font-size:13px;color:var(--muted);margin-bottom:16px;}
+h1{font-size:clamp(26px,4vw,38px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.15;margin-bottom:12px;}
+h1 span{background:linear-gradient(135deg,#3B82F6,#93C5FD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sub{font-size:17px;color:var(--muted);max-width:720px;margin-bottom:20px;}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px;}
+.controls .status{font-size:13px;color:var(--muted);margin-left:6px;}
+.stage{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;}
+@media(max-width:840px){.stage{grid-template-columns:1fr;}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-height:420px;}
+.panel-head{display:flex;align-items:center;gap:9px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2);font-size:13px;font-weight:600;color:var(--strong);}
+.panel-head .dot{width:9px;height:9px;border-radius:50%;}
+.slack .panel-head .hash{color:var(--muted);font-weight:500;}
+.msgs{padding:14px 16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;flex:1;}
+.msg{display:flex;gap:10px;opacity:0;transform:translateY(6px);animation:rise .35s forwards;}
+@keyframes rise{to{opacity:1;transform:none;}}
+.ava{width:34px;height:34px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;}
+.ava.cust{background:#8B5CF6;} .ava.agent{background:var(--accent);} .ava.mgr{background:#0EA5E9;} .ava.sys{background:#334155;}
+.msg .body{min-width:0;}
+.msg .name{font-size:13px;font-weight:700;color:var(--strong);margin-bottom:1px;}
+.msg .name .tag{font-size:10px;font-weight:700;color:var(--accent2);background:rgba(59,130,246,.14);padding:1px 6px;border-radius:4px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;}
+.msg .name .time{font-size:11px;color:var(--muted);font-weight:500;margin-left:6px;}
+.msg .text{font-size:14px;color:var(--text);}
+.msg .text code{font-family:var(--mono);font-size:12.5px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent2);}
+.toolcall{border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:8px;padding:9px 12px;background:var(--surface2);font-family:var(--mono);font-size:12px;color:var(--text);}
+.toolcall .lbl{color:var(--warn);font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+.typing{display:flex;gap:4px;padding:6px 0;}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;} .typing span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,60%,100%{opacity:.25;}30%{opacity:1;}}
+/* Kynara panel */
+.kynara .panel-head .dot{background:var(--accent);}
+.kbody{padding:16px;flex:1;display:flex;flex-direction:column;gap:14px;}
+.krow{font-size:13px;display:flex;justify-content:space-between;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.krow .k{color:var(--muted);} .krow .v{color:var(--strong);font-weight:600;font-family:var(--mono);font-size:12.5px;text-align:right;word-break:break-word;}
+.verdict{border-radius:10px;padding:14px;text-align:center;font-weight:800;font-size:15px;letter-spacing:.02em;opacity:0;transform:scale(.96);transition:.3s;}
+.verdict.show{opacity:1;transform:none;}
+.verdict.approve{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:var(--ok);}
+.verdict.wait{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);color:var(--warn);}
+.verdict.deny{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--danger);}
+.verdict small{display:block;font-weight:500;font-size:12px;color:var(--muted);margin-top:4px;}
+/* approval card */
+.approval{margin-top:2px;border:1px solid rgba(251,191,36,.35);border-radius:12px;padding:14px;background:linear-gradient(180deg,rgba(251,191,36,.06),transparent);opacity:0;max-height:0;overflow:hidden;transition:.35s;}
+.approval.show{opacity:1;max-height:340px;}
+.approval h4{font-size:13px;color:var(--warn);margin-bottom:8px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.05em;}
+.approval .det{font-size:13.5px;color:var(--text);margin-bottom:4px;} .approval .det b{color:var(--strong);}
+.approval .risk{display:inline-block;font-size:11px;font-weight:700;color:var(--warn);background:rgba(251,191,36,.14);padding:2px 8px;border-radius:999px;margin:6px 0 12px;}
+.approval .acts{display:flex;gap:10px;}
+.approve-btn{flex:1;background:var(--ok);color:#052e1a;border:none;border-radius:8px;padding:10px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13.5px;}
+.reject-btn{flex:1;background:transparent;color:var(--danger);border:1px solid rgba(248,113,113,.4);border-radius:8px;padding:10px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13.5px;}
+.approve-btn:hover{filter:brightness(1.08);} .reject-btn:hover{background:rgba(248,113,113,.1);}
+/* audit */
+.audit{margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.audit .panel-head .dot{background:#94A3B8;}
+.alog{padding:6px 16px 14px;font-family:var(--mono);font-size:12.5px;}
+.aentry{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--border);opacity:0;transform:translateY(4px);animation:rise .3s forwards;}
+.aentry:last-child{border-bottom:none;}
+.aentry .ic{flex-shrink:0;width:18px;text-align:center;}
+.aentry .ad{min-width:0;} .aentry .ev{color:var(--strong);font-weight:600;} .aentry .meta{color:var(--muted);font-size:11.5px;} .aentry .hash{color:var(--accent2);font-size:11px;}
+.empty{color:var(--muted);font-family:var(--mono);font-size:12.5px;padding:14px 0;}
+/* explainer + code */
+.section{max-width:1080px;margin:0 auto;padding:8px 24px 20px;}
+h2{font-size:22px;font-weight:800;color:#fff;margin:26px 0 10px;letter-spacing:-.02em;}
+p{margin-bottom:12px;} .section ul{margin:0 0 14px 20px;} .section li{margin-bottom:6px;}
+pre{background:#070A10;border:1px solid var(--border);border-radius:10px;padding:15px 17px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;color:#E2E8F0;margin-bottom:14px;}
+.tab{display:flex;gap:6px;margin-bottom:10px;}
+.tab button{background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:7px 14px;font-size:13px;cursor:pointer;font-family:inherit;}
+.tab button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+footer{max-width:1080px;margin:0 auto;padding:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+</style></head><body>
+<nav><a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+<div class="nav-links"><a href="/quickstart">Quickstart</a><a href="/docs.html">Docs</a><a href="/security">Security</a><a href="/blog/">Blog</a><a href="https://kynaraai.com" class="btn">Book a demo</a></div></nav>
+
+<div class="wrap">
+  <div class="bc"><a href="/">Home</a> / Demo / Refund approval</div>
+  <h1>A Slack support agent tries to refund a customer.<br><span>Kynara requires a manager to approve it.</span></h1>
+  <p class="sub">Press play. Watch an AI support agent handle a refund in Slack, hit Kynara's policy check, pause for human approval on the money-moving step — and land every decision in a tamper-evident audit log. You are the manager: approve or reject when prompted.</p>
+
+  <div class="controls">
+    <button class="btn" id="play">▶ Play demo</button>
+    <button class="btn-ghost" id="replay" disabled>↻ Replay</button>
+    <span class="status" id="status">Ready.</span>
+  </div>
+
+  <div class="stage">
+    <!-- Slack -->
+    <div class="panel slack">
+      <div class="panel-head"><span class="dot" style="background:#8B5CF6"></span> Slack &nbsp;<span class="hash">· #support</span></div>
+      <div class="msgs" id="slack"><div class="empty">Press <b>Play</b> to start the scenario…</div></div>
+    </div>
+    <!-- Kynara -->
+    <div class="panel kynara">
+      <div class="panel-head"><span class="dot"></span> Kynara · Decision engine</div>
+      <div class="kbody" id="kynara">
+        <div class="empty">Waiting for a tool call to authorize…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audit -->
+  <div class="audit">
+    <div class="panel-head"><span class="dot"></span> Tamper-evident audit log &nbsp;<span style="color:var(--muted);font-weight:500">· SHA-256 hash-chained</span></div>
+    <div class="alog" id="audit"><div class="empty">No decisions recorded yet.</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>What just happened</h2>
+  <p>The agent had permission to <em>read</em> the account and <em>draft</em> a reply, but the refund is a money-moving action. A Kynara policy says any refund over $50 returns <code>require_approval</code>, so the agent paused instead of paying out. A human manager approved, the refund executed, and the whole chain — request, decision, approver, execution — is recorded and verifiable. A prompt injection in the customer message can't change that, because the decision is made outside the model.</p>
+
+  <h2>The policy &amp; the code</h2>
+  <div class="tab">
+    <button class="on" data-tab="policy">Policy</button>
+    <button data-tab="py">Python</button>
+    <button data-tab="curl">API call</button>
+  </div>
+  <div id="tab-policy">
+<pre><code>// Refunds over $50 need a manager. Effect: require_approval.
+{
+  "name": "Refunds over $50 need manager approval",
+  "effect": "require_approval",
+  "priority": 100,
+  "actions": ["payments.refund.issue"],
+  "condition": {
+    "op": "gt",
+    "args": ["ctx.resource.attrs.amount_cents", 5000]
+  }
+}</code></pre>
+  </div>
+  <div id="tab-py" style="display:none">
+<pre><code>from kynara_sdk import Kynara, ApprovalRequired
+
+k = Kynara(api_key=KEY, agent_id="slack-support-agent",
+           user_id="dana_r", fail_closed=True)
+
+decision = k.check(
+    action="payments.refund.issue",
+    resource={"type": "payment", "id": "pay_8842",
+              "attrs": {"amount_cents": 8900, "customer": "cus_dana"}},
+    context={"channel": "support", "reason": "duplicate charge"},
+)
+
+if decision.effect == "require_approval":
+    raise ApprovalRequired(decision.approval_id)   # agent pauses here
+# ...on approval, the refund actually runs
+stripe.Refund.create(payment_intent="pay_8842", amount=8900)</code></pre>
+  <p style="font-size:13.5px;color:var(--muted)">Runnable version (with approval polling) is in the repo at <code>examples/refund-approval-demo/</code>.</p>
+  </div>
+  <div id="tab-curl" style="display:none">
+<pre><code>curl -X POST https://kynaraai.com/api/v1/decisions/check \
+  -H "X-Kynara-Key: sk_live_..." -H "Content-Type: application/json" \
+  -d '{
+    "subject_type": "agent",
+    "subject_id": "slack-support-agent",
+    "action": "payments.refund.issue",
+    "resource": {"type":"payment","id":"pay_8842",
+                 "attrs":{"amount_cents":8900,"customer":"cus_dana"}},
+    "context": {"channel":"support","reason":"duplicate charge"}
+  }'
+
+# → { "effect": "require_approval", "approval_id": "apr_…", "reason": "..." }</code></pre>
+  </div>
+
+  <p style="margin-top:8px">Want this on your own agents? <a href="/quickstart">Start with the quickstart</a>, see the <a href="/docs.html#dynamic-downgrade">policy docs</a>, or <a href="/design-partners">become a design partner</a>.</p>
+</div>
+
+<footer><span>Kynara &copy; 2026</span><div style="display:flex;gap:18px;"><a href="/">Home</a><a href="/docs.html">Docs</a><a href="/security">Security</a><a href="/design-partners">Design partners</a></div></footer>
+
+<script>
+(function(){
+  var slack=document.getElementById('slack'), kynara=document.getElementById('kynara'), audit=document.getElementById('audit');
+  var playBtn=document.getElementById('play'), replayBtn=document.getElementById('replay'), status=document.getElementById('status');
+  var timers=[], running=false;
+  function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
+  function wait(ms){ return new Promise(function(res){ timers.push(setTimeout(res,ms)); }); }
+  function h(html){ var d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
+
+  function msg(kind, name, tag, time, text){
+    var tagHtml = tag ? '<span class="tag">'+tag+'</span>' : '';
+    return h('<div class="msg"><div class="ava '+kind+'">'+name.charAt(0)+'</div><div class="body">'+
+      '<div class="name">'+name+tagHtml+'<span class="time">'+time+'</span></div>'+
+      '<div class="text">'+text+'</div></div></div>');
+  }
+  function typing(kind,name){
+    return h('<div class="msg" data-typing="1"><div class="ava '+kind+'">'+name.charAt(0)+'</div>'+
+      '<div class="body"><div class="typing"><span></span><span></span><span></span></div></div></div>');
+  }
+  function scroll(el){ el.scrollTop=el.scrollHeight; }
+
+  function krow(k,v){ return '<div class="krow"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>'; }
+  function auditEntry(icon,ev,meta,hash){
+    if(audit.querySelector('.empty')) audit.innerHTML='';
+    audit.appendChild(h('<div class="aentry"><div class="ic">'+icon+'</div><div class="ad">'+
+      '<div class="ev">'+ev+'</div><div class="meta">'+meta+'</div>'+
+      (hash?'<div class="hash">chain: '+hash+'</div>':'')+'</div></div>'));
+    scroll(audit);
+  }
+  function rndHash(){ var c='0123456789abcdef',s=''; for(var i=0;i<10;i++) s+=c[Math.floor(Math.random()*16)]; return s; }
+
+  async function run(){
+    if(running) return; running=true;
+    playBtn.disabled=true; replayBtn.disabled=true;
+    slack.innerHTML=''; kynara.innerHTML='<div class="empty">Waiting for a tool call to authorize…</div>'; audit.innerHTML='<div class="empty">No decisions recorded yet.</div>';
+
+    status.textContent='Customer opens a ticket…';
+    slack.appendChild(msg('cust','Dana R.','customer','9:41','Hi — I was double-charged <b>$89.00</b> for my subscription this month. Can you refund the duplicate?')); scroll(slack);
+    await wait(1500);
+
+    var t=typing('agent','Support Agent'); slack.appendChild(t); scroll(slack);
+    status.textContent='AI support agent is drafting a response…';
+    await wait(1400); t.remove();
+    slack.appendChild(msg('agent','Support Agent','AI agent','9:41','Sorry about that, Dana! I can see the duplicate charge on order <code>#4471</code>. Issuing your <b>$89.00</b> refund now…')); scroll(slack);
+    await wait(1300);
+
+    // tool call
+    slack.appendChild(h('<div class="msg"><div class="ava agent">S</div><div class="body"><div class="toolcall"><div class="lbl">Agent → tool call</div>stripe.refund.issue({ amount_cents: 8900, customer: "cus_dana", order: "#4471" })</div></div></div>')); scroll(slack);
+    status.textContent='Kynara is authorizing the refund…';
+    await wait(700);
+
+    // Kynara evaluates
+    kynara.innerHTML='';
+    kynara.appendChild(h('<div>'+
+      krow('subject','agent:slack-support-agent')+
+      krow('action','payments.refund.issue')+
+      krow('resource.amount','$89.00 (8900¢)')+
+      krow('rbac gate','✓ scope granted')+
+      '</div>'));
+    var verdict=h('<div class="verdict wait">EVALUATING…<small>matching policies by priority</small></div>');
+    kynara.appendChild(verdict);
+    await wait(1300);
+    verdict.classList.add('show');
+    await wait(300);
+    verdict.className='verdict wait show';
+    verdict.innerHTML='⏸ REQUIRE_APPROVAL<small>policy: “Refunds over $50 need manager approval” · amount &gt; $50</small>';
+    auditEntry('📝','decision.recorded — <b>require_approval</b>','payments.refund.issue · $89.00 · agent slack-support-agent','0x'+rndHash());
+    status.textContent='Refund paused — waiting for a manager.';
+
+    // agent tells customer it is pending
+    await wait(900);
+    slack.appendChild(msg('agent','Support Agent','AI agent','9:42','This refund needs a quick manager sign-off — one moment while I get that approved. ⏳')); scroll(slack);
+
+    // approval card in Kynara panel
+    var card=h('<div class="approval"><h4>⚠ Approval required</h4>'+
+      '<div class="det"><b>Support Agent</b> requests approval to issue a refund.</div>'+
+      '<div class="det">Amount: <b>$89.00</b> → Dana R. · order <b>#4471</b></div>'+
+      '<div class="det">Reason: duplicate charge</div>'+
+      '<span class="risk">Risk: medium · money movement</span>'+
+      '<div class="acts"><button class="approve-btn">✓ Approve</button><button class="reject-btn">✕ Reject</button></div></div>');
+    kynara.appendChild(card);
+    await wait(60); card.classList.add('show');
+    status.textContent='You are the manager — approve or reject.';
+
+    card.querySelector('.approve-btn').onclick=function(){ resolve(true, verdict, card); };
+    card.querySelector('.reject-btn').onclick=function(){ resolve(false, verdict, card); };
+    running=false; // allow interaction; buttons drive the rest
+  }
+
+  async function resolve(approved, verdict, card){
+    if(card._done) return; card._done=true;
+    card.querySelector('.approve-btn').disabled=true; card.querySelector('.reject-btn').disabled=true;
+    card.classList.remove('show');
+    await wait(350);
+    card.remove();
+
+    if(approved){
+      verdict.className='verdict approve show';
+      verdict.innerHTML='✓ APPROVED → ALLOW<small>approved by You (Manager) · refund executed</small>';
+      auditEntry('✅','approval.approved','by You (Manager) · 9:42','0x'+rndHash());
+      auditEntry('💸','payments.refund.issue — <b>executed</b>','$89.00 refunded to Dana R. · order #4471','0x'+rndHash());
+      status.textContent='Approved. Refund executed and recorded.';
+      var t=typing('agent','Support Agent'); slack.appendChild(t); scroll(slack); await wait(1100); t.remove();
+      slack.appendChild(msg('agent','Support Agent','AI agent','9:43','✅ All set, Dana — your <b>$89.00</b> refund is approved and processed. You\'ll see it back on your card in 3–5 business days. Sorry again for the mix-up!')); scroll(slack);
+    } else {
+      verdict.className='verdict deny show';
+      verdict.innerHTML='✕ REJECTED → DENY<small>rejected by You (Manager) · refund blocked</small>';
+      auditEntry('🛑','approval.rejected','by You (Manager) · 9:42','0x'+rndHash());
+      auditEntry('⛔','payments.refund.issue — <b>blocked</b>','refund not executed · escalated to human','0x'+rndHash());
+      status.textContent='Rejected. Refund blocked and recorded.';
+      var t=typing('agent','Support Agent'); slack.appendChild(t); scroll(slack); await wait(1100); t.remove();
+      slack.appendChild(msg('agent','Support Agent','AI agent','9:43','Thanks for your patience, Dana. I\'ve escalated your refund to a human teammate who\'ll review order <code>#4471</code> and follow up shortly.')); scroll(slack);
+    }
+    await wait(400);
+    replayBtn.disabled=false; playBtn.disabled=false; playBtn.textContent='▶ Play again';
+  }
+
+  playBtn.onclick=function(){ clearTimers(); run(); };
+  replayBtn.onclick=function(){ clearTimers(); run(); };
+
+  // tabs
+  document.querySelectorAll('.tab button').forEach(function(b){
+    b.onclick=function(){
+      document.querySelectorAll('.tab button').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on');
+      ['policy','py','curl'].forEach(function(id){ document.getElementById('tab-'+id).style.display = (id===b.dataset.tab?'block':'none'); });
+    };
+  });
+})();
+</script>
+</body></html>
