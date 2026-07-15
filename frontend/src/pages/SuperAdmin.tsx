@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Shield, Building2, Users, ChevronDown, ChevronRight,
   Edit2, Trash2, Check, X, RefreshCw, UserCheck, UserX,
-  Crown, AlertTriangle, Plus, Mail, Copy, Link2,
+  Crown, AlertTriangle, Plus, Mail, Copy, Link2, LifeBuoy,
 } from "lucide-react";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -33,6 +33,23 @@ interface AdminUser {
   last_login_at: string | null; orgs: { org_id: string; org_name: string; seat_role: string }[];
   created_at: string | null;
 }
+
+interface AdminAgent {
+  id: string; slug: string; display_name: string; description: string | null;
+  mode: string; model: string | null; is_active: boolean;
+  daily_action_budget: number; last_action_at: string | null; created_at: string | null;
+}
+
+interface AdminApproval {
+  id: string; subject_type: string; subject_id: string; action: string;
+  resource_type: string | null; resource_id: string | null; status: string;
+  matched_policy_id: string | null; reviewed_by_user_id: string | null;
+  reviewed_at: string | null; expires_at: string; created_at: string;
+}
+
+const APPROVAL_COLORS: Record<string, string> = {
+  pending: "#ca8a04", approved: "#16a34a", rejected: "#ef4444", expired: "var(--s0-muted-text)",
+};
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -119,6 +136,32 @@ function OrgRow({ org, onRefresh }: { org: AdminOrg; onRefresh: () => void }) {
   const [inviteBusy, setInviteBusy] = useState(false);
   const [inviteErr, setInviteErr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Support view — agents & approvals (read-only, cross-tenant, audited)
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [supportLoaded, setSupportLoaded] = useState(false);
+  const [supportLoading, setSupportLoading] = useState(false);
+  const [supportErr, setSupportErr] = useState<string | null>(null);
+  const [agents, setAgents] = useState<AdminAgent[]>([]);
+  const [approvals, setApprovals] = useState<AdminApproval[]>([]);
+
+  async function loadSupport() {
+    setSupportLoading(true); setSupportErr(null);
+    try {
+      const [a, ap] = await Promise.all([
+        api.get<AdminAgent[]>(`/api/v1/admin/orgs/${org.org_id}/agents`),
+        api.get<AdminApproval[]>(`/api/v1/admin/orgs/${org.org_id}/approvals?limit=50`),
+      ]);
+      setAgents(a); setApprovals(ap); setSupportLoaded(true);
+    } catch (e: any) { setSupportErr(e.message || "Failed to load support data"); }
+    finally { setSupportLoading(false); }
+  }
+
+  function toggleSupport() {
+    const next = !supportOpen;
+    setSupportOpen(next);
+    if (next && !supportLoaded) loadSupport();
+  }
 
   async function createInvite() {
     setInviteBusy(true);
@@ -433,6 +476,82 @@ function OrgRow({ org, onRefresh }: { org: AdminOrg; onRefresh: () => void }) {
                     Done
                   </button>
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* Support view — agents & approvals (read-only, audited) */}
+          <div style={{ marginTop: 18, borderTop: "1px solid var(--s0-border)", paddingTop: 14 }}>
+            <button onClick={toggleSupport}
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 14px", borderRadius: 7, fontSize: 12, fontWeight: 500, background: "var(--s0-bg)", color: "var(--s0-text)", border: "1px solid var(--s0-border)", cursor: "pointer" }}>
+              {supportOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+              <LifeBuoy size={13} style={{ color: "var(--s0-accent-text)" }} /> Support view — Agents &amp; Approvals
+            </button>
+
+            {supportOpen && (
+              <div style={{ marginTop: 12 }}>
+                <div style={{ fontSize: 11, color: "var(--s0-muted-text)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                  <AlertTriangle size={12} style={{ color: "#ca8a04" }} />
+                  Read-only cross-org view for support. Every access is recorded in <em>{org.name}</em>'s audit log.
+                </div>
+                {supportErr && <div style={{ color: "#ef4444", fontSize: 12, marginBottom: 8 }}>{supportErr}</div>}
+                {supportLoading ? (
+                  <div style={{ color: "var(--s0-muted-text)", fontSize: 13, padding: "10px 0" }}>Loading…</div>
+                ) : (
+                  <>
+                    {/* Agents */}
+                    <strong style={{ fontSize: 12, color: "var(--s0-muted-text)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Agents ({agents.length})</strong>
+                    {agents.length === 0 ? (
+                      <div style={{ color: "var(--s0-muted-text)", fontSize: 12, padding: "6px 0 12px" }}>No agents in this org.</div>
+                    ) : (
+                      <table style={{ width: "100%", borderCollapse: "collapse", margin: "8px 0 16px", fontSize: 13 }}>
+                        <thead><tr style={{ color: "var(--s0-muted-text)", textAlign: "left" }}>
+                          {["Agent","Mode","Status","Last action","Created"].map(h => (
+                            <th key={h} style={{ padding: "4px 8px", fontWeight: 500, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                          ))}
+                        </tr></thead>
+                        <tbody>
+                          {agents.map(a => (
+                            <tr key={a.id} style={{ borderTop: "1px solid var(--s0-border)" }}>
+                              <td style={{ padding: "8px" }}>
+                                <div style={{ fontWeight: 500 }}>{a.display_name}</div>
+                                <div style={{ fontSize: 11, color: "var(--s0-muted-text)" }}>{a.slug}</div>
+                              </td>
+                              <td style={{ padding: "8px", color: "var(--s0-muted-text)", fontSize: 12 }}>{a.mode}</td>
+                              <td style={{ padding: "8px" }}><Badge label={a.is_active ? "active" : "disabled"} color={a.is_active ? "#16a34a" : "#ef4444"} /></td>
+                              <td style={{ padding: "8px", color: "var(--s0-muted-text)", fontSize: 12 }}>{fmtDate(a.last_action_at)}</td>
+                              <td style={{ padding: "8px", color: "var(--s0-muted-text)", fontSize: 12 }}>{fmtDate(a.created_at)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+
+                    {/* Approvals */}
+                    <strong style={{ fontSize: 12, color: "var(--s0-muted-text)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Approvals ({approvals.length})</strong>
+                    {approvals.length === 0 ? (
+                      <div style={{ color: "var(--s0-muted-text)", fontSize: 12, padding: "6px 0" }}>No approval requests in this org.</div>
+                    ) : (
+                      <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 8, fontSize: 13 }}>
+                        <thead><tr style={{ color: "var(--s0-muted-text)", textAlign: "left" }}>
+                          {["Action","Subject","Status","Created"].map(h => (
+                            <th key={h} style={{ padding: "4px 8px", fontWeight: 500, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                          ))}
+                        </tr></thead>
+                        <tbody>
+                          {approvals.map(ap => (
+                            <tr key={ap.id} style={{ borderTop: "1px solid var(--s0-border)" }}>
+                              <td style={{ padding: "8px", fontFamily: "monospace", fontSize: 12 }}>{ap.action}</td>
+                              <td style={{ padding: "8px", color: "var(--s0-muted-text)", fontSize: 12 }}>{ap.subject_type}:{ap.subject_id}</td>
+                              <td style={{ padding: "8px" }}><Badge label={ap.status} color={APPROVAL_COLORS[ap.status] || "var(--s0-muted-text)"} /></td>
+                              <td style={{ padding: "8px", color: "var(--s0-muted-text)", fontSize: 12 }}>{fmtDate(ap.created_at)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </>
+                )}
               </div>
             )}
           </div>

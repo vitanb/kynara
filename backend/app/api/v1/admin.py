@@ -12,12 +12,16 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.audit.service import record_admin
 from app.auth.dependencies import Principal, require_superadmin
 from app.core.logging import get_logger
 
 logger = get_logger("kynara.admin")
 from app.db.session import SessionLocal
-from app.models import OrgInvite, OrgMembership, Organization, RefreshSession, Subscription, User
+from app.models import (
+    Agent, ApprovalRequest, OrgInvite, OrgMembership, Organization,
+    RefreshSession, Subscription, User,
+)
 
 
 router = APIRouter(prefix="/admin", tags=["superadmin"])
@@ -510,3 +514,115 @@ async def admin_list_invites(
         }
         for i in rows
     ]
+
+
+# ─── superadmin: view a customer org's agents & approvals (support) ───────────
+# Read-only, cross-tenant visibility for support. Every access is recorded in the
+# TARGET org's tamper-evident audit log so customers can see when Kynara staff
+# looked at their data. No cross-org mutation is exposed here.
+
+class AdminAgentOut(BaseModel):
+    id: str
+    slug: str
+    display_name: str
+    description: str | None
+    mode: str
+    model: str | None
+    is_active: bool
+    daily_action_budget: int
+    last_action_at: str | None
+    created_at: str | None
+
+
+class AdminApprovalOut(BaseModel):
+    id: str
+    subject_type: str
+    subject_id: str
+    on_behalf_of_user_id: str | None
+    action: str
+    resource_type: str | None
+    resource_id: str | None
+    status: str
+    matched_policy_id: str | None
+    reviewed_by_user_id: str | None
+    reviewed_at: str | None
+    expires_at: str
+    created_at: str
+
+
+async def _superadmin_support_audit(
+    session: AsyncSession, principal: Principal, org_id: str, event: str, count: int
+) -> None:
+    """Best-effort: record cross-tenant support access in the target org's audit log.
+    Never fails the read — support visibility must not depend on the audit write."""
+    try:
+        await record_admin(
+            session,
+            org_id=org_id,
+            actor=f"superadmin:{principal.user_id}",
+            event_type=event,
+            resource_type="organization",
+            resource_id=org_id,
+            payload={"superadmin_user_id": principal.user_id, "count": count},
+            outcome="allow",
+        )
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        logger.warning("superadmin.support_audit_failed event=%s org=%s", event, org_id, exc_info=True)
+
+
+@router.get("/orgs/{org_id}/agents", response_model=list[AdminAgentOut])
+async def list_org_agents(
+    org_id: str,
+    principal: Principal = Depends(require_superadmin),
+    session: AsyncSession = Depends(_session),
+):
+    """Read-only: view a customer org's agents for support. Access is audited."""
+    org = await session.get(Organization, uuid.UUID(org_id))
+    if not org:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Org not found")
+    rows = (await session.scalars(
+        select(Agent).where(Agent.organization_id == org.id).order_by(Agent.created_at.desc())
+    )).all()
+    # Serialize BEFORE the audit commit — a commit expires ORM attributes.
+    out = [AdminAgentOut(
+        id=str(r.id), slug=r.slug, display_name=r.display_name,
+        description=r.description, mode=r.mode, model=r.model,
+        is_active=r.is_active, daily_action_budget=r.daily_action_budget,
+        last_action_at=r.last_action_at.isoformat() if r.last_action_at else None,
+        created_at=r.created_at.isoformat() if r.created_at else None,
+    ) for r in rows]
+    await _superadmin_support_audit(session, principal, org_id, "superadmin.viewed_agents", len(out))
+    return out
+
+
+@router.get("/orgs/{org_id}/approvals", response_model=list[AdminApprovalOut])
+async def list_org_approvals(
+    org_id: str,
+    status_filter: str | None = None,
+    limit: int = 100,
+    principal: Principal = Depends(require_superadmin),
+    session: AsyncSession = Depends(_session),
+):
+    """Read-only: view a customer org's approval requests for support. Access is audited."""
+    org = await session.get(Organization, uuid.UUID(org_id))
+    if not org:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Org not found")
+    q = select(ApprovalRequest).where(ApprovalRequest.organization_id == org.id)
+    if status_filter and status_filter != "all":
+        q = q.where(ApprovalRequest.status == status_filter)
+    rows = (await session.scalars(
+        q.order_by(ApprovalRequest.created_at.desc()).limit(max(1, min(limit, 500)))
+    )).all()
+    out = [AdminApprovalOut(
+        id=str(r.id), subject_type=r.subject_type, subject_id=r.subject_id,
+        on_behalf_of_user_id=r.on_behalf_of_user_id, action=r.action,
+        resource_type=r.resource_type, resource_id=r.resource_id, status=r.status,
+        matched_policy_id=r.matched_policy_id,
+        reviewed_by_user_id=str(r.reviewed_by_user_id) if r.reviewed_by_user_id else None,
+        reviewed_at=r.reviewed_at.isoformat() if r.reviewed_at else None,
+        expires_at=r.expires_at.isoformat(), created_at=r.created_at.isoformat(),
+    ) for r in rows]
+    await _superadmin_support_audit(session, principal, org_id, "superadmin.viewed_approvals", len(out))
+    return out
