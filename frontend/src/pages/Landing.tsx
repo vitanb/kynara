@@ -30,6 +30,7 @@ const stats = [
 export default function LandingPage() {
   const [contactOpen, setContactOpen] = useState(false);
   const [solutionsOpen, setSolutionsOpen] = useState(false);
+  const [featuresOpen, setFeaturesOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
   const [contactState, setContactState] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
@@ -68,7 +69,38 @@ export default function LandingPage() {
             <span className="font-bold text-ink-50 text-base tracking-tight">Kynara</span>
           </div>
           <div className="hidden md:flex items-center gap-7 text-sm text-ink-300">
-            <a href="#features" className="hover:text-ink-50 transition-colors">Features</a>
+            {/* Features dropdown */}
+            <div className="relative" onMouseEnter={() => setFeaturesOpen(true)} onMouseLeave={() => setFeaturesOpen(false)}>
+              <button className="flex items-center gap-1 hover:text-ink-50 transition-colors">
+                Features <ChevronRight className="w-3.5 h-3.5 rotate-90 transition-transform" style={{ transform: featuresOpen ? "rotate(270deg)" : "rotate(90deg)" }} />
+              </button>
+              {featuresOpen && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
+                  <div className="rounded-xl p-3 w-80" style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,0.12)", boxShadow: "0 16px 48px rgba(0,0,0,0.5)" }}>
+                    {[
+                      { href: "/features/sequence-policies", icon: "🔗", label: "Sequence Policies", desc: "Enforce agent workflow order — verify before refund" },
+                      { href: "/features/approval-fatigue", icon: "🧠", label: "Approval-Fatigue Management", desc: "Risk-scored approvals, rubber-stamp detection" },
+                      { href: "/features/compliance-evidence", icon: "📋", label: "Compliance Evidence", desc: "OWASP · MITRE ATLAS · ISO 42001 · EU AI Act mapping" },
+                    ].map((item) => (
+                      <a key={item.href} href={item.href}
+                        className="flex items-start gap-3 px-2 py-2.5 rounded-lg hover:bg-ink-700 transition-colors group"
+                        style={{ textDecoration: "none" }}>
+                        <span className="text-lg flex-shrink-0 mt-0.5">{item.icon}</span>
+                        <div>
+                          <div className="text-sm font-medium text-ink-50 group-hover:text-ink-200 transition-colors">{item.label}</div>
+                          <div className="text-xs text-ink-400 mt-0.5">{item.desc}</div>
+                        </div>
+                      </a>
+                    ))}
+                    <div className="mt-1 pt-2 px-2" style={{ borderTop: "1px solid rgba(148,163,184,0.1)" }}>
+                      <a href="#features" className="text-xs text-ink-400 hover:text-ink-200 transition-colors" style={{ textDecoration: "none" }}>
+                        All platform features ↓
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
             <a href="/design-partners" className="hover:text-ink-50 transition-colors">Design partners</a>
             {/* Solutions dropdown */}
             <div className="relative" onMouseEnter={() => setSolutionsOpen(true)} onMouseLeave={() => setSolutionsOpen(false)}>
@@ -405,7 +437,9 @@ export default function LandingPage() {
               <span>© {new Date().getFullYear()}. All rights reserved.</span>
             </div>
             <div className="flex items-center gap-6">
-              <a href="#features" className="hover:text-ink-300 transition-colors">Features</a>
+              <a href="/features/sequence-policies" className="hover:text-ink-300 transition-colors">Sequence Policies</a>
+              <a href="/features/approval-fatigue" className="hover:text-ink-300 transition-colors">Approval Fatigue</a>
+              <a href="/features/compliance-evidence" className="hover:text-ink-300 transition-colors">Compliance Evidence</a>
               <a href="/design-partners" className="hover:text-ink-300 transition-colors">Design partners</a>
               <Link to="/docs" className="hover:text-ink-300 transition-colors">Docs</Link>
               <a href="/security" className="hover:text-ink-300 transition-colors">Security</a>
