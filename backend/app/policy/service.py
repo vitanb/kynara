@@ -43,8 +43,57 @@ async def _r() -> redis_async.Redis:
     return _redis
 
 
-def _cache_key(org_id: str, subject_id: str, action: str, resource_id: str) -> str:
-    return f"dec:{org_id}:{subject_id}:{action}:{resource_id}"
+def _cache_key(
+    org_id: str, subject_id: str, action: str, resource_id: str, session_id: str = ""
+) -> str:
+    # session_id is part of the key so session-scoped decisions (sequence
+    # policies) can never leak across sessions.
+    return f"dec:{org_id}:{subject_id}:{action}:{resource_id}:{session_id}"
+
+
+def _uses_sequence_conditions(policies: list[_PolicyRow]) -> bool:
+    """True if any bound policy condition contains a `preceded_by` op."""
+    for p in policies:
+        try:
+            if "preceded_by" in json.dumps(p.condition):
+                return True
+        except (TypeError, ValueError):
+            continue
+    return False
+
+
+async def _load_session_history(
+    session: AsyncSession,
+    org_id: str,
+    actor: str,
+    session_id: str,
+    limit: int = 200,
+) -> list[dict[str, str]]:
+    """Prior *allowed* actions by this actor in this session, oldest first.
+
+    Powers the `preceded_by` sequence op (OWASP #OVERSIGHT flow checks).
+    Reads the org's audit chain — the same tamper-evident record auditors see.
+    """
+    from app.models import AuditEvent
+
+    rows = (
+        await session.execute(
+            select(AuditEvent.ts, AuditEvent.payload)
+            .where(
+                AuditEvent.organization_id == uuid.UUID(org_id),
+                AuditEvent.actor == actor,
+                AuditEvent.event_type == "policy.decision",
+                AuditEvent.outcome == "allow",
+                AuditEvent.payload["session_id"].astext == session_id,
+            )
+            .order_by(AuditEvent.sequence.asc())
+            .limit(limit)
+        )
+    ).all()
+    return [
+        {"action": (r.payload or {}).get("action", ""), "ts": r.ts.isoformat()}
+        for r in rows
+    ]
 
 
 async def decide(
@@ -61,7 +110,10 @@ async def decide(
     settings = get_settings()
     t0 = time.perf_counter()
 
-    ck = _cache_key(org_id, subject_id, action, resource.get("id", ""))
+    ck = _cache_key(
+        org_id, subject_id, action, resource.get("id", ""),
+        str(context.get("session_id") or ""),
+    )
     try:
         cache = await _r()
         cached = await cache.get(ck)
@@ -73,6 +125,7 @@ async def decide(
         log.warning("policy.cache_unavailable", err=str(_cache_err))
         cache = None
 
+    uses_sequences = False
     with tracer.start_as_current_span("policy.decide") as span:
         span.set_attribute("kynara.action", action)
         span.set_attribute("kynara.subject.type", subject_type)
@@ -112,6 +165,21 @@ async def decide(
 
             policies = await _load_bound_policies(session, org_id, selectors)
 
+            # --- Sequence policies: inject session history -----------------
+            # Only pay the audit-log query when a bound policy actually uses
+            # `preceded_by` and the caller supplied a session_id (fail-closed
+            # otherwise: the op evaluates False without history).
+            uses_sequences = _uses_sequence_conditions(policies)
+            if uses_sequences and context.get("session_id"):
+                context = {
+                    **context,
+                    "_session_history": await _load_session_history(
+                        session, org_id,
+                        actor=f"{subject_type}:{subject_id}",
+                        session_id=str(context["session_id"]),
+                    ),
+                }
+
             ctx = DecisionContext(
                 subject={
                     "id": subject_id,
@@ -138,7 +206,9 @@ async def decide(
             )
 
     # Cache only *non-approval* decisions — approvals must always re-check.
-    if decision.effect != "require_approval" and cache is not None:
+    # Sequence-conditioned decisions are never cached either: their outcome
+    # depends on session history, which changes with every allowed action.
+    if decision.effect != "require_approval" and cache is not None and not uses_sequences:
         try:
             await cache.setex(ck, settings.decision_cache_ttl_seconds, json.dumps(asdict(decision)))
         except Exception as _cache_err:
@@ -165,6 +235,7 @@ async def _emit_decision(
         decision=decision,
         request_id=context.get("request_id"),
         ip_address=context.get("ip"),
+        session_id=context.get("session_id"),
     )
 
     # When approval is required, create a persistent approval request record.

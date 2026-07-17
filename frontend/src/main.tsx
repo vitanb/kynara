@@ -38,6 +38,7 @@ import McpGatewayPage from "./pages/McpGateway";
 import IdentityProvidersPage from "./pages/IdentityProviders";
 import PolicyTemplatesPage from "./pages/PolicyTemplates";
 import ApprovalAnalyticsPage from "./pages/ApprovalAnalytics";
+import CompliancePage from "./pages/Compliance";
 import ChangelogPage from "./pages/Changelog";
 import ApiExplorerPage from "./pages/ApiExplorer";
 import SsoCallbackPage from "./pages/SsoCallback";
@@ -98,6 +99,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <Route path="mcp-gateway" element={<McpGatewayPage />} />
               <Route path="identity-providers" element={<IdentityProvidersPage />} />
               <Route path="approvals/analytics" element={<ApprovalAnalyticsPage />} />
+              <Route path="compliance" element={<CompliancePage />} />
               <Route path="changelog" element={<ChangelogPage />} />
               <Route path="api-explorer" element={<ApiExplorerPage />} />
               <Route path="policy-templates" element={<PolicyTemplatesPage />} />

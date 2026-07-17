@@ -26,7 +26,14 @@ interface ApprovalItem {
   review_note: string | null;
   expires_at: string;
   created_at: string;
+  risk?: { level: "low" | "medium" | "high"; score: number; factors: string[] };
 }
+
+const RISK_BADGE: Record<string, { bg: string; color: string }> = {
+  low:    { bg: "rgba(16,185,129,0.12)", color: "#34D399" },
+  medium: { bg: "rgba(245,158,11,0.12)", color: "#FBBF24" },
+  high:   { bg: "rgba(244,63,94,0.15)",  color: "#F87171" },
+};
 
 interface ApprovalListOut {
   items: ApprovalItem[];
@@ -224,6 +231,15 @@ function ApprovalRow({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-medium text-ink-50">{item.action}</span>
+            {item.risk && item.risk.level !== "low" && (
+              <span
+                className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wide"
+                title={item.risk.factors.join(" · ") || `risk score ${item.risk.score}`}
+                style={{ background: RISK_BADGE[item.risk.level].bg, color: RISK_BADGE[item.risk.level].color }}
+              >
+                {item.risk.level} risk
+              </span>
+            )}
             {item.resource_type && (
               <span className="text-xs text-ink-400">
                 on {item.resource_type}

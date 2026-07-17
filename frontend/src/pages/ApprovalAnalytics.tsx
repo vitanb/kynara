@@ -3,6 +3,11 @@ import { api } from "@/lib/api";
 import { Loader2, TrendingUp, Clock, CheckCircle2, XCircle, Timer } from "lucide-react";
 import { useState } from "react";
 
+interface Reviewer {
+  user_id: string; name: string; reviewed: number; approve_rate: number;
+  median_seconds: number; per_week: number; flags: string[];
+}
+
 interface Analytics {
   total: number; approved: number; rejected: number;
   expired: number; pending: number; approval_rate: number;
@@ -11,7 +16,16 @@ interface Analytics {
   top_actions: { action: string; count: number }[];
   daily: { date: string; approved: number; rejected: number; pending: number; expired: number }[];
   days: number;
+  risk_mix?: { low: number; medium: number; high: number };
+  high_risk_approved_fast?: number;
+  reviewers?: Reviewer[];
 }
+
+const FLAG_LABELS: Record<string, { label: string; hint: string }> = {
+  rubber_stamp_risk: { label: "Rubber-stamp risk", hint: "≥95% approval rate at volume — reviews may not be meaningful" },
+  speed_risk:        { label: "Speed risk",        hint: "Median review under 30 seconds" },
+  overloaded:        { label: "Overloaded",        hint: "≥100 reviews/week — consider adding approvers or raising auto-allow thresholds" },
+};
 
 function StatCard({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: string | number; color: string }) {
   return (
@@ -122,6 +136,70 @@ export default function ApprovalAnalyticsPage() {
               </div>
             </div>
           </div>
+
+          {/* Approver load & fatigue */}
+          <div className={card} style={cardStyle}>
+            <div className={sectionTag}>Approver load &amp; fatigue</div>
+            <p className="text-xs text-ink-400 mb-3">
+              Human oversight fails through <em>approval fatigue</em> (OWASP AI Exchange #OVERSIGHT).
+              These signals show when reviews stop being meaningful.
+              {(data.high_risk_approved_fast ?? 0) > 0 && (
+                <span className="ml-1 font-medium" style={{ color: "#F87171" }}>
+                  {data.high_risk_approved_fast} high-risk request{data.high_risk_approved_fast === 1 ? "" : "s"} approved in under 60s.
+                </span>
+              )}
+            </p>
+            {!data.reviewers || data.reviewers.length === 0 ? (
+              <p className="text-sm text-ink-400">No resolved reviews in this window.</p>
+            ) : (
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-ink-500 text-left">
+                    <th className="pb-2 font-medium">Approver</th>
+                    <th className="pb-2 font-medium text-right">Reviewed</th>
+                    <th className="pb-2 font-medium text-right">Approve rate</th>
+                    <th className="pb-2 font-medium text-right">Median time</th>
+                    <th className="pb-2 font-medium text-right">Per week</th>
+                    <th className="pb-2 font-medium pl-4">Signals</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.reviewers.map((rv) => (
+                    <tr key={rv.user_id} style={{ borderTop: "1px solid rgba(148,163,184,.08)" }}>
+                      <td className="py-2 text-ink-200">{rv.name}</td>
+                      <td className="py-2 text-right text-ink-300">{rv.reviewed}</td>
+                      <td className="py-2 text-right" style={{ color: rv.approve_rate >= 95 ? "#FBBF24" : "var(--s0-text,#9CA3AF)" }}>{rv.approve_rate}%</td>
+                      <td className="py-2 text-right text-ink-300">{rv.median_seconds < 60 ? `${rv.median_seconds}s` : `${Math.round(rv.median_seconds / 60)}m`}</td>
+                      <td className="py-2 text-right text-ink-300">{rv.per_week}</td>
+                      <td className="py-2 pl-4">
+                        {rv.flags.length === 0 ? (
+                          <span style={{ color: "#34D399" }}>healthy</span>
+                        ) : rv.flags.map((f) => (
+                          <span key={f} title={FLAG_LABELS[f]?.hint || f}
+                            className="inline-block mr-1 mb-0.5 px-1.5 py-0.5 rounded font-medium"
+                            style={{ background: "rgba(244,63,94,0.12)", color: "#F87171" }}>
+                            {FLAG_LABELS[f]?.label || f}
+                          </span>
+                        ))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Risk mix */}
+          {data.risk_mix && (
+            <div className={card} style={cardStyle}>
+              <div className={sectionTag}>Requests by risk level</div>
+              <div className="flex gap-6 text-sm">
+                <span style={{ color: "#34D399" }}>low: <strong>{data.risk_mix.low}</strong></span>
+                <span style={{ color: "#FBBF24" }}>medium: <strong>{data.risk_mix.medium}</strong></span>
+                <span style={{ color: "#F87171" }}>high: <strong>{data.risk_mix.high}</strong></span>
+              </div>
+            </div>
+          )}
 
           {/* Top agents + actions */}
           <div className="grid grid-cols-2 gap-4">

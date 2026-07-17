@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sequence Policies — Enforce AI Agent Workflow Order | Kynara</title>
+<meta name="description" content="Kynara sequence policies enforce action ordering for AI agents: require a verification step before a refund, a safety check before egress. Deterministic defense against application flow perturbation and prompt injection — per OWASP AI Exchange #OVERSIGHT." />
+<meta name="keywords" content="AI agent workflow enforcement, sequence policy, application flow perturbation, agent action ordering, preceded_by, AI agent authorization, prompt injection defense, OWASP AI Exchange oversight, agent step verification" />
+<link rel="canonical" href="https://kynaraai.com/features/sequence-policies" />
+<meta property="og:type" content="website" /><meta property="og:title" content="Sequence Policies — Enforce AI Agent Workflow Order" />
+<meta property="og:description" content="Policy-enforced action ordering for AI agents: no refund without verification, no egress without a safety check. Deterministic, session-scoped, audit-logged." />
+<meta property="og:url" content="https://kynaraai.com/features/sequence-policies" />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" /><meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"What is a sequence policy for AI agents?","acceptedAnswer":{"@type":"Answer","text":"A sequence policy makes an agent action conditional on a prior action having been allowed earlier in the same session — for example, a refund is only permitted if the agent verified the customer record first. Kynara enforces this with the preceded_by condition, evaluated deterministically outside the model."}},
+{"@type":"Question","name":"What is application flow perturbation?","acceptedAnswer":{"@type":"Answer","text":"Application flow perturbation is when a manipulated AI agent skips or reorders workflow steps — e.g. jumping straight to a payout without running verification. The OWASP AI Exchange recommends rule-based sanity checks during steps; Kynara sequence policies implement that control at the authorization layer."}},
+{"@type":"Question","name":"Can prompt injection bypass a sequence policy?","acceptedAnswer":{"@type":"Answer","text":"No. The ordering check runs in Kynara's policy engine against the org's tamper-evident audit chain, outside the LLM. A prompt injection can change what the model wants to do, but it cannot fabricate a prior allowed action in the session history."}}]}
+</script>
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#34D399;--warn:#FBBF24;--font:'Inter',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:22px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:#fff;}
+.btn:hover{background:#2563EB;text-decoration:none;}
+.hero{max-width:960px;margin:0 auto;padding:60px 24px 20px;}
+.bc{font-size:13px;color:var(--muted);margin-bottom:18px;}
+h1{font-size:clamp(28px,4.2vw,42px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.14;margin-bottom:16px;}
+h1 span{background:linear-gradient(135deg,#3B82F6,#93C5FD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sub{font-size:18px;color:var(--muted);max-width:760px;}
+section{max-width:960px;margin:0 auto;padding:18px 24px;}
+h2{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.02em;margin:28px 0 12px;}
+p{margin-bottom:14px;} ul{margin:0 0 16px 20px;} li{margin-bottom:7px;}
+strong{color:var(--strong);}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent2);}
+pre{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;margin:8px 0 18px;}
+pre code{background:none;padding:0;font-size:13px;line-height:1.6;}
+.note{font-size:14px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 18px;margin:6px 0 18px;}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center;margin:24px auto 40px;max-width:960px;}
+.cta-btns{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;}
+.btn-ghost:hover{color:#fff;text-decoration:none;}
+footer{max-width:960px;margin:0 auto;padding:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+</style></head><body>
+<nav><a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+<div class="nav-links"><a href="/quickstart">Quickstart</a><a href="/docs.html">Docs</a><a href="/security">Security</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a><a href="https://kynaraai.com" class="btn">Book a demo</a></div></nav>
+
+<div class="hero">
+  <div class="bc"><a href="/">Home</a> / Features / Sequence policies</div>
+  <h1>Sequence policies: enforce the <span>order</span> your AI agents act in</h1>
+  <p class="sub">A refund only after the customer record was verified. Egress only after a safety scan ran.
+  Kynara makes workflow order a policy condition — evaluated deterministically, outside the model,
+  against the session's tamper-evident history.</p>
+</div>
+
+<section>
+  <h2>The attack: application flow perturbation</h2>
+  <p>Agents don't just make bad calls — manipulated agents <strong>skip steps</strong>. A prompt-injected
+  support agent jumps straight to <code>payments.refund.issue</code> without ever reading the customer
+  record. Every step looked individually authorized; the <em>sequence</em> was the exploit. The
+  <a href="https://owaspai.org/go/oversight/" rel="noopener" target="_blank">OWASP AI Exchange #OVERSIGHT control</a>
+  names this and prescribes "rule-based sanity checks during steps."</p>
+
+  <h2>The control: <code>preceded_by</code></h2>
+  <p>One condition in a Kynara policy makes ordering enforceable:</p>
+  <pre><code>{
+  "op": "and",
+  "args": [
+    { "op": "preceded_by", "args": ["crm.contacts.read", 30] },
+    { "op": "lte", "args": ["ctx.resource.attrs.amount_cents", 10000] }
+  ]
+}</code></pre>
+  <p>This allows a refund only if the same agent was <strong>allowed</strong> a
+  <code>crm.contacts.read</code> within the last 30 minutes of the same session
+  (<code>context.session_id</code>). Patterns support globs (<code>kyc.check.*</code>).
+  No session, no history — <strong>fail-closed</strong>.</p>
+
+  <div class="note">The ordering check reads Kynara's hash-chained audit log — the same record your
+  auditors see. A compromised agent can't fabricate a prior step, because the decision happens outside
+  the LLM. Prompt injection can change what the model <em>wants</em>; it can't rewrite what was
+  <em>allowed</em>.</div>
+
+  <h2>What teams enforce with it</h2>
+  <ul>
+    <li><strong>Verify-before-pay</strong> — refunds, transfers and credits require a completed identity or record lookup first.</li>
+    <li><strong>Scan-before-send</strong> — email/Slack/HTTP egress requires a DLP or safety-check action earlier in the session.</li>
+    <li><strong>Review-before-deploy</strong> — infra changes require a plan/dry-run action before apply.</li>
+    <li><strong>Escalation ladders</strong> — combined with <code>require_approval</code>, out-of-order attempts pause for a human instead of failing silently.</li>
+  </ul>
+
+  <h2>Why not do this in the agent framework?</h2>
+  <p>You can hard-code step order into one agent's graph. But the rule then lives in that agent's code,
+  invisible to security, different in the next agent, and gone after a refactor. As a Kynara policy it's
+  centralized, versioned, applies to every framework (LangChain, CrewAI, MCP, raw SDK), and every
+  violation lands in the audit chain.</p>
+</section>
+
+<div class="cta">
+  <h2 style="margin-top:0">Make step-skipping a policy violation</h2>
+  <p class="sub" style="margin:0 auto">Free plan: 3 seats, 10k decisions/month. One decorator or one MCP gateway URL to integrate.</p>
+  <div class="cta-btns"><a class="btn" href="/quickstart">Get started free</a><a class="btn-ghost" href="/compliance/owasp-ai-exchange">OWASP controls coverage</a><a class="btn-ghost" href="/features/approval-fatigue">Approval-fatigue management →</a></div>
+</div>
+
+<footer><span>Kynara © 2026</span><span><a href="/">Home</a> · <a href="/features/sequence-policies">Sequence policies</a> · <a href="/features/approval-fatigue">Approval fatigue</a> · <a href="/features/compliance-evidence">Compliance evidence</a> · <a href="/security">Security</a></span></footer>
+</body></html>

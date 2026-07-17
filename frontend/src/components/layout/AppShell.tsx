@@ -55,6 +55,7 @@ const allNav: NavEntry[] = [
     items: [
       { to: "audit",               label: "Audit Log",          icon: ScrollText, roles: ALL },
       { to: "approvals/analytics", label: "Approval Analytics", icon: BarChart2,  roles: ["owner","admin","auditor"] },
+      { to: "compliance",          label: "Compliance Evidence", icon: ShieldAlert, roles: ["owner","admin","auditor"] },
     ],
   },
 

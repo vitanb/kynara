@@ -28,7 +28,23 @@ the evaluation context as ``ctx.<path>``.
 
 Supported ops: ``and``, ``or``, ``not``, ``eq``, ``neq``, ``gt``, ``gte``, ``lt``,
 ``lte``, ``in``, ``contains``, ``starts_with``, ``ends_with``, ``time_between``,
-``has_scope``, ``is_tainted``.
+``has_scope``, ``is_tainted``, ``preceded_by``.
+
+## Sequence policies (workflow-order enforcement)
+
+``preceded_by`` is true only if the same subject was *allowed* to perform a prior
+action matching the given pattern earlier in the current session (``context.session_id``).
+This defends against *application flow perturbation* — a manipulated agent skipping
+verification steps — per OWASP AI Exchange #OVERSIGHT ("rule-based sanity checks
+during steps") and MITRE ATLAS AML.M0029/M0030::
+
+    {"op": "preceded_by", "args": ["crm.contacts.read"]}        # verified earlier this session
+    {"op": "preceded_by", "args": ["kyc.check.*", 30]}          # glob + within last 30 minutes
+
+The service layer injects the session's prior allowed actions into
+``context._session_history`` (list of ``{"action", "ts"}``) before evaluation; the
+op never touches the database itself. Without a ``session_id`` on the request there
+is no session history, so ``preceded_by`` evaluates false — fail-closed.
 
 ## Dynamic downgrade on untrusted input
 
@@ -170,6 +186,39 @@ def _evaluate(node: Any, ctx: DecisionContext) -> bool:
         wanted = resolved[0]
         wanted_set = set(wanted) if isinstance(wanted, (list, tuple, set)) else {wanted}
         return bool(markers & {str(w) for w in wanted_set})
+    if op == "preceded_by":
+        # args: [action_pattern, window_minutes?] — pattern supports globs.
+        # Reads context._session_history (injected by the service layer):
+        # a list of {"action": str, "ts": iso8601} of prior ALLOWED actions in
+        # this session. Fail-closed: no history (e.g. no session_id) -> False.
+        if not args:
+            raise ValueError("preceded_by requires an action pattern argument")
+        pattern = str(args[0])
+        window_min = args[1] if len(args) > 1 else None
+        history = (ctx.context or {}).get("_session_history") or []
+        if not isinstance(history, list):
+            return False
+        cutoff = None
+        if window_min is not None:
+            cutoff = dt.datetime.now(tz=dt.timezone.utc) - dt.timedelta(
+                minutes=float(window_min)
+            )
+        for entry in history:
+            act = (entry or {}).get("action")
+            if not act or not _scope_matches([pattern], str(act)):
+                continue
+            if cutoff is not None:
+                ts_raw = (entry or {}).get("ts")
+                try:
+                    ts = dt.datetime.fromisoformat(str(ts_raw).replace("Z", "+00:00"))
+                except (TypeError, ValueError):
+                    continue  # unparseable timestamp can't prove recency — skip
+                if ts.tzinfo is None:
+                    ts = ts.replace(tzinfo=dt.timezone.utc)
+                if ts < cutoff:
+                    continue
+            return True
+        return False
 
     raise ValueError(f"unsupported op: {op}")
 

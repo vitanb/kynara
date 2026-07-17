@@ -117,7 +117,13 @@ async def record_decision(
     decision: Decision,
     request_id: str | None,
     ip_address: str | None,
+    session_id: str | None = None,
 ) -> AuditEvent:
+    payload = {"action": action, **decision.to_audit_payload()}
+    if session_id:
+        # Persisted so sequence policies (`preceded_by`) can reconstruct the
+        # session's prior allowed actions with a single indexed JSONB query.
+        payload["session_id"] = session_id
     return await _append(
         session,
         org_id=org_id,
@@ -127,7 +133,7 @@ async def record_decision(
         resource_type=resource_type,
         resource_id=resource_id,
         outcome=decision.effect,
-        payload={"action": action, **decision.to_audit_payload()},
+        payload=payload,
         request_id=request_id,
         ip_address=ip_address,
     )

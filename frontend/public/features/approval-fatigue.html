@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Approval Fatigue Management — Keep Human-in-the-Loop Meaningful | Kynara</title>
+<meta name="description" content="Human oversight of AI agents fails through approval fatigue: rubber-stamping, 10-second reviews, overloaded approvers. Kynara scores every approval by risk and flags fatigue signals per reviewer — implementing OWASP AI Exchange #OVERSIGHT." />
+<meta name="keywords" content="approval fatigue, human in the loop AI, AI agent approval workflow, rubber stamping approvals, AI oversight monitoring, risk scored approvals, human oversight AI agents, HITL fatigue, EU AI Act human oversight" />
+<link rel="canonical" href="https://kynaraai.com/features/approval-fatigue" />
+<meta property="og:type" content="website" /><meta property="og:title" content="Approval Fatigue Management — Keep Human-in-the-Loop Meaningful" />
+<meta property="og:description" content="Risk-scored approvals and per-reviewer fatigue signals (rubber-stamp, speed, overload) so human oversight of AI agents stays real." />
+<meta property="og:url" content="https://kynaraai.com/features/approval-fatigue" />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" /><meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"What is approval fatigue in AI agent oversight?","acceptedAnswer":{"@type":"Answer","text":"Approval fatigue is the failure mode of human-in-the-loop review: when most requests are fine, reviewers start approving everything quickly — including the one request that wasn't fine. The OWASP AI Exchange lists it as a core limitation of human oversight."}},
+{"@type":"Question","name":"How does Kynara detect rubber-stamping?","acceptedAnswer":{"@type":"Answer","text":"Kynara tracks per-approver volume, approval rate and median review time, and raises signals: rubber-stamp risk (≥95% approvals at volume), speed risk (median review under 30 seconds), and overload (≥100 reviews/week). It also counts high-risk requests approved in under a minute."}},
+{"@type":"Question","name":"How are approvals risk-scored?","acceptedAnswer":{"@type":"Answer","text":"Deterministically: monetary size of the action, tainted (untrusted-input) context, high-risk namespaces like payments or infra, and bulk markers. Same request, same score — explainable to an auditor line by line."}}]}
+</script>
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#34D399;--warn:#FBBF24;--font:'Inter',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:22px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:#fff;}
+.btn:hover{background:#2563EB;text-decoration:none;}
+.hero{max-width:960px;margin:0 auto;padding:60px 24px 20px;}
+.bc{font-size:13px;color:var(--muted);margin-bottom:18px;}
+h1{font-size:clamp(28px,4.2vw,42px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.14;margin-bottom:16px;}
+h1 span{background:linear-gradient(135deg,#3B82F6,#93C5FD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sub{font-size:18px;color:var(--muted);max-width:760px;}
+section{max-width:960px;margin:0 auto;padding:18px 24px;}
+h2{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.02em;margin:28px 0 12px;}
+p{margin-bottom:14px;} ul{margin:0 0 16px 20px;} li{margin-bottom:7px;}
+strong{color:var(--strong);}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent2);}
+.note{font-size:14px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 18px;margin:6px 0 18px;}
+table{width:100%;border-collapse:collapse;margin:8px 0 20px;font-size:14px;}
+th{background:var(--surface2);color:#fff;text-align:left;padding:10px 12px;font-size:12.5px;font-weight:700;border:1px solid var(--border);}
+td{border:1px solid var(--border);padding:10px 12px;color:var(--text);vertical-align:top;}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}
+.pill.warn{background:rgba(251,191,36,0.12);color:var(--warn);}
+.pill.bad{background:rgba(244,63,94,0.12);color:#F87171;}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center;margin:24px auto 40px;max-width:960px;}
+.cta-btns{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;}
+.btn-ghost:hover{color:#fff;text-decoration:none;}
+footer{max-width:960px;margin:0 auto;padding:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+</style></head><body>
+<nav><a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+<div class="nav-links"><a href="/quickstart">Quickstart</a><a href="/docs.html">Docs</a><a href="/security">Security</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a><a href="https://kynaraai.com" class="btn">Book a demo</a></div></nav>
+
+<div class="hero">
+  <div class="bc"><a href="/">Home</a> / Features / Approval-fatigue management</div>
+  <h1>Human-in-the-loop fails through <span>approval fatigue</span>. Measure it.</h1>
+  <p class="sub">If your approvers say yes 97% of the time in under 20 seconds, you don't have human
+  oversight — you have a ritual. Kynara risk-scores every approval and flags the reviewers who've
+  stopped reviewing.</p>
+</div>
+
+<section>
+  <h2>The failure mode nobody instruments</h2>
+  <p>Every agent platform can pause for a human. Almost none asks whether the human is still paying
+  attention. The <a href="https://owaspai.org/go/oversight/" rel="noopener" target="_blank">OWASP AI
+  Exchange #OVERSIGHT control</a> lists <em>approval fatigue</em> — "humans overwhelmed by approval
+  requests, especially if the large majority are okay" — as a principal limitation of human oversight.
+  The EU AI Act (Art. 14) requires oversight to be <em>effective</em>, not just present.</p>
+
+  <h2>What Kynara measures</h2>
+  <table>
+    <tr><th>Signal</th><th>Trigger</th><th>What it means</th></tr>
+    <tr><td><span class="pill bad">Rubber-stamp risk</span></td><td>≥95% approval rate at ≥20 reviews</td><td>Reviews are likely not meaningful; tighten auto-allow policies so fewer, riskier requests reach humans.</td></tr>
+    <tr><td><span class="pill warn">Speed risk</span></td><td>Median review under 30 seconds</td><td>Decisions faster than the request can be read.</td></tr>
+    <tr><td><span class="pill warn">Overloaded</span></td><td>≥100 reviews/week per approver</td><td>Unsustainable volume — add approvers or raise thresholds.</td></tr>
+    <tr><td><span class="pill bad">High-risk fast-approved</span></td><td>High-risk request approved &lt; 60s</td><td>The exact case oversight exists for, waved through.</td></tr>
+  </table>
+
+  <h2>Risk-scored triage, not FIFO</h2>
+  <p>Every approval request carries a deterministic risk score — monetary size, tainted
+  (untrusted-input) context, high-risk namespaces like <code>payments</code> or <code>infra</code>,
+  bulk markers — so reviewers see <strong>high-risk requests first</strong> and low-risk noise can be
+  eliminated at the policy layer, where it belongs. Same request, same score: explainable to an auditor
+  line by line, because no LLM is involved in scoring.</p>
+
+  <div class="note">The fix for fatigue isn't more approvals — it's <strong>fewer, better ones</strong>.
+  Kynara's loop: auto-allow the provably safe (e.g. refunds ≤ $100), require approval only above risk
+  thresholds, then watch the fatigue dashboard to verify the remaining reviews are real.</div>
+
+  <h2>Where it lives</h2>
+  <ul>
+    <li><strong>Approvals queue</strong> — risk badges on every pending request.</li>
+    <li><strong>Approval Analytics</strong> — per-approver volume, approve-rate, median time, fatigue flags.</li>
+    <li><strong>Compliance Evidence</strong> — oversight-effectiveness monitoring exported as a named control.</li>
+  </ul>
+</section>
+
+<div class="cta">
+  <h2 style="margin-top:0">Make your human oversight provably real</h2>
+  <p class="sub" style="margin:0 auto">Free plan: 3 seats, 10k decisions/month.</p>
+  <div class="cta-btns"><a class="btn" href="/quickstart">Get started free</a><a class="btn-ghost" href="/features/sequence-policies">Sequence policies</a><a class="btn-ghost" href="/features/compliance-evidence">Compliance evidence →</a></div>
+</div>
+
+<footer><span>Kynara © 2026</span><span><a href="/">Home</a> · <a href="/features/sequence-policies">Sequence policies</a> · <a href="/features/approval-fatigue">Approval fatigue</a> · <a href="/features/compliance-evidence">Compliance evidence</a> · <a href="/security">Security</a></span></footer>
+</body></html>

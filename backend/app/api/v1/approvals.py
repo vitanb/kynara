@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.dependencies import Principal, get_principal
 from app.db.session import SessionLocal
 from app.models import ApprovalRequest
+from app.policy.risk import score_approval
 
 # Lazy import to avoid circular dependency — resolved at call time.
 _auto_fulfill_jit: Any = None
@@ -56,10 +57,14 @@ class ApprovalOut(BaseModel):
     review_note: str | None
     expires_at: str
     created_at: str
+    # Deterministic risk assessment (see app.policy.risk) so reviewers can
+    # triage by risk instead of arrival order: {"level","score","factors"}
+    risk: dict
 
     @classmethod
     def from_orm(cls, r: ApprovalRequest) -> "ApprovalOut":
         return cls(
+            risk=score_approval(r.action, r.resource_attrs, r.context),
             id=str(r.id),
             organization_id=str(r.organization_id),
             subject_type=r.subject_type,

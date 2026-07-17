@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Agent Compliance Evidence — OWASP, MITRE ATLAS, ISO 42001, EU AI Act | Kynara</title>
+<meta name="description" content="One-click compliance evidence for AI agents: Kynara maps your live policies, roles, approvals and audit chain to OWASP AI Exchange controls, MITRE ATLAS mitigations, ISO/IEC 42001 and EU AI Act articles — computed from real configuration, not checkboxes." />
+<meta name="keywords" content="AI compliance evidence, EU AI Act compliance AI agents, ISO 42001 AI agents, MITRE ATLAS mitigations, OWASP AI Exchange controls, AI audit trail, SOC 2 AI agents, AI governance evidence, agent authorization audit" />
+<link rel="canonical" href="https://kynaraai.com/features/compliance-evidence" />
+<meta property="og:type" content="website" /><meta property="og:title" content="AI Agent Compliance Evidence — OWASP, MITRE ATLAS, ISO 42001, EU AI Act" />
+<meta property="og:description" content="Live mapping from your agent governance configuration to named controls — exportable for auditors." />
+<meta property="og:url" content="https://kynaraai.com/features/compliance-evidence" />
+<meta property="og:image" content="https://kynaraai.com/logo-192.png" /><meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"How does Kynara generate AI compliance evidence?","acceptedAnswer":{"@type":"Answer","text":"Kynara scans your organization's live configuration — policies, roles, agent assignments, approvals, budgets, and the hash-chained audit log — and maps each element to named controls in OWASP AI Exchange, MITRE ATLAS, ISO/IEC 42001/27002, SOC 2 and the EU AI Act. Statuses are computed at request time, so the export reflects what is actually enforced."}},
+{"@type":"Question","name":"Which frameworks does Kynara map to?","acceptedAnswer":{"@type":"Answer","text":"OWASP AI Exchange (#LEAST MODEL PRIVILEGE, #OVERSIGHT), MITRE ATLAS mitigations AML.M0026–M0030, ISO/IEC 42001 human-oversight and record-keeping controls, ISO/IEC 27002 8.2, SOC 2 monitoring criteria, and EU AI Act articles 12 and 14."}},
+{"@type":"Question","name":"Is the audit trail tamper-evident?","acceptedAnswer":{"@type":"Answer","text":"Yes. Every authorization decision is appended to a per-organization SHA-256 hash chain. Any retroactive edit breaks the chain and is detectable by independent re-computation — the chain can be verified via API at any time."}}]}
+</script>
+<style>
+:root{--bg:#0B0E14;--surface:#0F131B;--surface2:#151A24;--border:rgba(148,163,184,0.12);--accent:#3B82F6;--accent2:#93C5FD;--text:#CBD5E1;--muted:#64748B;--strong:#F1F5F9;--ok:#34D399;--warn:#FBBF24;--font:'Inter',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+a{color:var(--accent2);text-decoration:none;} a:hover{text-decoration:underline;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);background:rgba(11,14,20,0.9);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;}
+.gem{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+.nav-links{display:flex;align-items:center;gap:22px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:#fff;text-decoration:none;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:#fff;}
+.btn:hover{background:#2563EB;text-decoration:none;}
+.hero{max-width:960px;margin:0 auto;padding:60px 24px 20px;}
+.bc{font-size:13px;color:var(--muted);margin-bottom:18px;}
+h1{font-size:clamp(28px,4.2vw,42px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.14;margin-bottom:16px;}
+h1 span{background:linear-gradient(135deg,#3B82F6,#93C5FD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sub{font-size:18px;color:var(--muted);max-width:760px;}
+section{max-width:960px;margin:0 auto;padding:18px 24px;}
+h2{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.02em;margin:28px 0 12px;}
+p{margin-bottom:14px;} ul{margin:0 0 16px 20px;} li{margin-bottom:7px;}
+strong{color:var(--strong);}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent2);}
+.note{font-size:14px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 18px;margin:6px 0 18px;}
+table{width:100%;border-collapse:collapse;margin:8px 0 20px;font-size:14px;}
+th{background:var(--surface2);color:#fff;text-align:left;padding:10px 12px;font-size:12.5px;font-weight:700;border:1px solid var(--border);}
+td{border:1px solid var(--border);padding:10px 12px;color:var(--text);vertical-align:top;}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center;margin:24px auto 40px;max-width:960px;}
+.cta-btns{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;}
+.btn-ghost:hover{color:#fff;text-decoration:none;}
+footer{max-width:960px;margin:0 auto;padding:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer a{color:var(--muted);} footer a:hover{color:#fff;}
+</style></head><body>
+<nav><a class="logo" href="/"><span class="gem">K</span> Kynara</a>
+<div class="nav-links"><a href="/quickstart">Quickstart</a><a href="/docs.html">Docs</a><a href="/security">Security</a><a href="/compare/">Compare</a><a href="/blog/">Blog</a><a href="https://kynaraai.com" class="btn">Book a demo</a></div></nav>
+
+<div class="hero">
+  <div class="bc"><a href="/">Home</a> / Features / Compliance evidence</div>
+  <h1>Compliance evidence for AI agents — <span>computed, not claimed</span></h1>
+  <p class="sub">Auditors don't want your intentions; they want evidence. Kynara maps your live
+  configuration — policies, roles, approvals, budgets, audit chain — to named controls in OWASP AI
+  Exchange, MITRE ATLAS, ISO/IEC 42001 and the EU AI Act, and exports it in one click.</p>
+</div>
+
+<section>
+  <h2>Evidence, not checkbox theatre</h2>
+  <p>Most compliance pages are static claims. Kynara's <strong>Compliance Evidence</strong> report is
+  generated from what is actually enforced in your org at request time. If nothing uses taint tracking,
+  the control shows <em>not configured</em> — and tells you how to fix it. When your auditor asks "show
+  me your human-oversight control," the answer is an export with the implementing policies listed by ID.</p>
+
+  <h2>The control mapping</h2>
+  <table>
+    <tr><th>Kynara mechanism</th><th>OWASP AI Exchange</th><th>MITRE ATLAS</th><th>ISO / EU AI Act</th></tr>
+    <tr><td>Role-scoped agent permissions (RBAC gate)</td><td>#LEAST MODEL PRIVILEGE</td><td>AML.M0028</td><td>ISO 27002 8.2</td></tr>
+    <tr><td><code>require_approval</code> policies + review queue</td><td>#OVERSIGHT</td><td>AML.M0029</td><td>ISO 42001 B.9.3 · EU AI Act Art. 14</td></tr>
+    <tr><td>Taint tracking (<code>is_tainted</code> downgrade)</td><td>#LEAST MODEL PRIVILEGE (risk elevation)</td><td>AML.M0030</td><td>—</td></tr>
+    <tr><td>Sequence policies (<code>preceded_by</code>)</td><td>#OVERSIGHT (step sanity checks)</td><td>AML.M0029/M0030</td><td>—</td></tr>
+    <tr><td>Delegation non-escalation (scope intersection)</td><td>#LEAST MODEL PRIVILEGE (honor the served)</td><td>AML.M0027</td><td>—</td></tr>
+    <tr><td>Daily action budgets</td><td>Exhaustion controls</td><td>AML.M0026</td><td>—</td></tr>
+    <tr><td>Hash-chained audit log + verification</td><td>—</td><td>—</td><td>ISO 42001 records · EU AI Act Art. 12 · SOC 2 CC7.2</td></tr>
+    <tr><td>Agent kill switch</td><td>#OVERSIGHT (halt)</td><td>—</td><td>EU AI Act Art. 14(4)(e)</td></tr>
+    <tr><td>Approval-fatigue monitoring</td><td>#OVERSIGHT (limitations)</td><td>—</td><td>Art. 14 effectiveness</td></tr>
+  </table>
+
+  <div class="note">The OWASP AI Exchange feeds directly into EU AI Act harmonized standards and ISO
+  work — implementing its named controls is the shortest defensible path to "we follow recognized
+  practice." Kynara cites the control IDs in the export so your auditor can verify the mapping.</div>
+
+  <h2>How it works</h2>
+  <ul>
+    <li><strong>In the console</strong> — Monitoring → Compliance Evidence: live status per control (implemented / partial / not configured), with the implementing policy IDs as evidence.</li>
+    <li><strong>Export</strong> — JSON download or print-to-PDF, timestamped, suitable for SOC 2 / ISO audit packets.</li>
+    <li><strong>API</strong> — <code>GET /api/v1/compliance/evidence</code> for continuous-compliance pipelines and GRC tools.</li>
+  </ul>
+</section>
+
+<div class="cta">
+  <h2 style="margin-top:0">Walk into your next audit with evidence</h2>
+  <p class="sub" style="margin:0 auto">Free plan: 3 seats, 10k decisions/month.</p>
+  <div class="cta-btns"><a class="btn" href="/quickstart">Get started free</a><a class="btn-ghost" href="/compliance/owasp-ai-exchange">OWASP coverage detail</a><a class="btn-ghost" href="/features/sequence-policies">Sequence policies →</a></div>
+</div>
+
+<footer><span>Kynara © 2026</span><span><a href="/">Home</a> · <a href="/features/sequence-policies">Sequence policies</a> · <a href="/features/approval-fatigue">Approval fatigue</a> · <a href="/features/compliance-evidence">Compliance evidence</a> · <a href="/security">Security</a></span></footer>
+</body></html>

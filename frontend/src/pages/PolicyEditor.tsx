@@ -92,7 +92,7 @@ export default function PolicyEditorPage() {
     if (Object.keys(node).length === 0) return ""; // empty = match-all, valid
     if (!("op" in node))
       return `Missing "op" key. The condition must be a node like {"op":"and","args":[…]}, not a plain object like ${JSON.stringify(node).slice(0,60)}.`;
-    const validOps = ["and","or","not","eq","neq","gt","gte","lt","lte","in","contains","starts_with","ends_with","time_between","has_scope"];
+    const validOps = ["and","or","not","eq","neq","gt","gte","lt","lte","in","contains","starts_with","ends_with","time_between","has_scope","is_tainted","preceded_by"];
     if (!validOps.includes(node.op))
       return `Unknown op "${node.op}". Valid ops: ${validOps.join(", ")}.`;
     return "";
@@ -318,6 +318,13 @@ export default function PolicyEditorPage() {
             <p className="text-[10px] text-ink-500 mt-1">
               Use <span className="font-mono">{"{ }"}</span> (empty object) to match all requests.
               Needs <span className="font-mono">"op"</span> + <span className="font-mono">"args"</span> for conditions.
+            </p>
+            <p className="text-[10px] text-ink-500 mt-1">
+              <span className="font-medium text-ink-400">Sequence policies:</span>{" "}
+              <span className="font-mono">{'{"op":"preceded_by","args":["crm.contacts.read", 30]}'}</span>{" "}
+              matches only if this subject was <em>allowed</em> a matching action earlier in the same
+              session (<span className="font-mono">context.session_id</span>), optionally within the last
+              N minutes. Enforces workflow order — e.g. verify before refund. Fail-closed without a session.
             </p>
           </Field>
 
