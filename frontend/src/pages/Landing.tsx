@@ -31,6 +31,7 @@ export default function LandingPage() {
   const [contactOpen, setContactOpen] = useState(false);
   const [solutionsOpen, setSolutionsOpen] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
+  const [resourcesOpen, setResourcesOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
   const [contactState, setContactState] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
@@ -101,7 +102,6 @@ export default function LandingPage() {
                 </div>
               )}
             </div>
-            <a href="/design-partners" className="hover:text-ink-50 transition-colors">Design partners</a>
             {/* Solutions dropdown */}
             <div className="relative" onMouseEnter={() => setSolutionsOpen(true)} onMouseLeave={() => setSolutionsOpen(false)}>
               <button className="flex items-center gap-1 hover:text-ink-50 transition-colors">
@@ -132,12 +132,33 @@ export default function LandingPage() {
                 </div>
               )}
             </div>
-            <a href="/quickstart" className="hover:text-ink-50 transition-colors">Quickstart</a>
             <Link to="/docs" className="hover:text-ink-50 transition-colors">Docs</Link>
-            <a href="/security" className="hover:text-ink-50 transition-colors">Security</a>
-            <a href="/compare/" className="hover:text-ink-50 transition-colors">Compare</a>
-            <a href="/blog/" className="hover:text-ink-50 transition-colors">Blog</a>
-            <button onClick={openContact} className="hover:text-ink-50 transition-colors">Contact</button>
+            <a href="/quickstart" className="hover:text-ink-50 transition-colors">Quickstart</a>
+            {/* Resources dropdown */}
+            <div className="relative" onMouseEnter={() => setResourcesOpen(true)} onMouseLeave={() => setResourcesOpen(false)}>
+              <button className="flex items-center gap-1 hover:text-ink-50 transition-colors">
+                Resources <ChevronRight className="w-3.5 h-3.5 rotate-90 transition-transform" style={{ transform: resourcesOpen ? "rotate(270deg)" : "rotate(90deg)" }} />
+              </button>
+              {resourcesOpen && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
+                  <div className="rounded-xl p-2 w-56" style={{ background: "var(--s0-card-elevated)", border: "1px solid rgba(148,163,184,0.12)", boxShadow: "0 16px 48px rgba(0,0,0,0.5)" }}>
+                    {[
+                      { href: "/blog/", label: "Blog" },
+                      { href: "/compare/", label: "Compare" },
+                      { href: "/security", label: "Security" },
+                      { href: "/sandbox.html", label: "Policy Sandbox" },
+                      { href: "/design-partners", label: "Design partners" },
+                    ].map((item) => (
+                      <a key={item.href} href={item.href}
+                        className="block px-3 py-2 rounded-lg text-sm text-ink-200 hover:bg-ink-700 hover:text-ink-50 transition-colors"
+                        style={{ textDecoration: "none" }}>
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Link to="/login" className="text-sm text-ink-300 hover:text-ink-50 transition-colors hidden sm:block">Sign in</Link>
